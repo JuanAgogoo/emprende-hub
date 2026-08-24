@@ -201,6 +201,9 @@ por eso ya no devuelve la misma forma que la tarjeta:
 Solo salen las fotos **aprobadas**. La tarjeta del listado lleva `fotoPrincipal`
 —una sola imagen— en lugar de la galería entera.
 
+**Pedir el perfil anota una visita** (H1). Es el único sitio donde se cuentan; el
+detalle está en [Métricas de visitas](#métricas-de-visitas--negociosmiometricas).
+
 ## Estadísticas · `/estadisticas`
 
 | Método | Ruta | Acceso | Devuelve |
@@ -429,6 +432,79 @@ lectura: dejarla puesta diría que se abrió y se ignoró.
 buzón de entrada, y la limitación es deliberada: montar mensajería de ida y
 vuelta sin correos habría exigido que las dos partes entraran a mirar.
 
+## Métricas de visitas · `/negocios/mio/metricas`
+
+| Método | Ruta | Acceso | Devuelve |
+|---|---|---|---|
+| `GET` | `/negocios/mio/metricas/visitas` | Dueño | Semana, mes, variación y serie diaria |
+
+```json
+{
+  "totalHistorico": 1034,
+  "semana": { "actual": 248, "anterior": 221, "variacionPorcentual": 12.2 },
+  "mes":    { "actual": 1034, "anterior": 957, "variacionPorcentual": 8.0 },
+  "serie":  [ { "fecha": "2026-07-28", "visitas": 31 }, … ]
+}
+```
+
+**No hay endpoint para registrar una visita.** Se anota sola al pedir
+`GET /directorio/{id}`, y solo ahí: uno aparte dejaría inflar el contador con un
+bucle de curl.
+
+Las reglas del conteo (H1):
+
+| Regla | Qué significa |
+|---|---|
+| **Una por perfil, sesión y día** | Recargar la página no suma |
+| **El dueño no cuenta** | Solo se le descarta si tiene sesión iniciada |
+| **Un perfil que no se ve no cuenta** | Un negocio pendiente responde `404` y no registra nada |
+
+Con sesión, la visita se agrupa por la cuenta: la misma persona cuenta una vez al
+día aunque mire desde el móvil y desde el portátil. Sin sesión se resume la
+petición —dirección y navegador— en un hash que no identifica a nadie y solo
+sirve para decir «esto ya lo conté hoy». Tiene un límite conocido: varias
+personas tras la misma salida a internet cuentan como una. Sin cookies ni sesión
+de servidor no hay forma mejor.
+
+El día se corta en **America/Bogota**, no en UTC: con UTC un negocio de Medellín
+cambiaría de día a las siete de la tarde.
+
+**La variación es nula cuando el periodo anterior fue cero.** Pasar de ninguna
+visita a cinco no es un aumento del quinientos por ciento ni del infinito: es que
+antes no había con qué comparar.
+
+**La serie trae los días vacíos en cero.** Si se saltaran, la gráfica uniría el
+lunes con el jueves y aparentaría una caída que no existió.
+
+## Notificaciones · `/notificaciones`
+
+| Método | Ruta | Acceso | Hace |
+|---|---|---|---|
+| `GET` | `/notificaciones` | Sesión | Los avisos propios, los más recientes primero |
+| `PATCH` | `/notificaciones/{id}/lectura?leida=true` | Sesión | Marca uno, o lo devuelve a pendiente |
+| `PATCH` | `/notificaciones/leer-todas` | Sesión | Marca todo lo pendiente y responde cuántos eran |
+
+Cuelgan de la **persona**, no del negocio. Cada una nace de un hecho (H2), y son
+solo cuatro:
+
+| Tipo | Cuándo |
+|---|---|
+| `OPINION_NUEVA` | Alguien opinó sobre su negocio |
+| `CONSULTA_NUEVA` | Alguien le escribió al buzón |
+| `NEGOCIO_APROBADO` | El administrador lo publicó |
+| `NEGOCIO_RECHAZADO` | El administrador pidió cambios, con el motivo |
+
+**Fuera los hitos de visitas** que enseñaba el prototipo («superaste las 1.000
+este mes»): no son un hecho del que haya que enterarse, y H2 los descarta.
+
+Sin correos (I1) esto no es decoración: es el único canal por el que un
+emprendedor se entera de que le rechazaron el negocio.
+
+`?leida=false` devuelve las pendientes, y el `totalElements` de esa página es el
+número de la campana. El texto **se escribe cuando ocurre el hecho y se guarda
+tal cual**: si después se borra la opinión que lo provocó, el aviso sigue
+diciendo lo que pasó en su momento.
+
 ## Gestión de cursos · `/admin/cursos`
 
 Solo **ADMIN** (E3). A diferencia del catálogo público, aquí se ven los borradores.
@@ -570,15 +646,23 @@ curl -X POST $A/negocios/1/consultas -H "Authorization: Bearer $TC2" \
 curl -H "Authorization: Bearer $TC" "$A/negocios/mio/consultas?leida=false"
 curl -X PATCH "$A/negocios/mio/consultas/1/lectura?leida=true" -H "Authorization: Bearer $TC"
 
+# 9-quinquies. Cada visita al perfil cuenta una vez al día (H1)
+curl $A/directorio/1; curl $A/directorio/1     # recargar no suma
+curl -H "Authorization: Bearer $TC" $A/negocios/mio/metricas/visitas
+
+# 9-sexies. Y el panel avisa de lo que fue pasando (H2, H3)
+curl -H "Authorization: Bearer $TC" "$A/notificaciones?leida=false"
+curl -X PATCH $A/notificaciones/leer-todas -H "Authorization: Bearer $TC"
+
 # 10. Todo quedó registrado
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 ```
 
 ## Lo que todavía no existe
 
-Llega en los PR 13 y 14, según [plan-de-entrega.md](plan-de-entrega.md):
+Llega en el PR 14, según [plan-de-entrega.md](plan-de-entrega.md):
 
-- Visitas y notificaciones (PR 13)
+- Datos sembrados de la demostración y colección de Postman
 
 **Al añadir endpoints, actualizar este documento en el mismo PR.** Un contrato
 que va por detrás del código es peor que no tenerlo.
