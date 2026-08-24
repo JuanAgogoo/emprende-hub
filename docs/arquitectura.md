@@ -93,6 +93,17 @@ version 1.32 is too old»* contra Docker 29.
 repositorio: sin él, Spring sustituye la base de datos por una en memoria, que es
 justo lo que el enunciado prohíbe.
 
+**El contenedor se arranca a mano, no con `@Container`.** Esa anotación detiene el
+contenedor al terminar cada clase de prueba, así que la segunda clase que herede
+de `PostgresTestBase` lo encontraría parado. Se usa el patrón de contenedor único:
+un bloque `static` que llama a `start()` una vez para toda la ejecución.
+
+**Los parámetros de texto opcionales necesitan `CAST` en las consultas.** Cuando un
+parámetro llega nulo, PostgreSQL lo infiere como `bytea` y revienta con
+*function lower(bytea) does not exist*. Hay que escribir
+`LOWER(CONCAT('%', CAST(:texto AS string), '%'))`. Los parámetros de tipo enum no
+tienen este problema.
+
 Sobre el nivel unitario, la teoría del curso es tajante: **no debe tocar ninguna
 base de datos, ni siquiera H2**. Los argumentos que da son velocidad (milisegundos,
 no minutos), aislamiento (si falla, el fallo está en el servicio y en ningún otro
@@ -202,6 +213,10 @@ Es exactamente lo que la semana 4 prueba con Mockito, así que la definición no
 nuestra: es la del curso. Se mide con **JaCoCo**, que el material no cubre — el
 taller solo mira `build/reports/tests/test/index.html`. Es una adición nuestra y
 conviene saberlo al sustentar.
+
+El umbral está **activo desde el PR 4** y colgado de la tarea `check`: un
+`./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
+la prueba en su incremento que recuperar cobertura al final.
 
 ## Decisiones técnicas
 
