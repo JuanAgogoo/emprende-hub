@@ -6,6 +6,7 @@ import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Consulta;
 import com.emprendehub.model.Negocio;
+import com.emprendehub.model.TipoNotificacion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.ConsultaRepository;
 import com.emprendehub.repository.NegocioRepository;
@@ -37,11 +38,14 @@ public class ConsultaService {
 
     private final ConsultaRepository consultaRepository;
     private final NegocioRepository negocioRepository;
+    private final NotificacionService notificacionService;
 
     public ConsultaService(ConsultaRepository consultaRepository,
-                           NegocioRepository negocioRepository) {
+                           NegocioRepository negocioRepository,
+                           NotificacionService notificacionService) {
         this.consultaRepository = consultaRepository;
         this.negocioRepository = negocioRepository;
+        this.notificacionService = notificacionService;
     }
 
     /**
@@ -64,6 +68,12 @@ public class ConsultaService {
 
         Consulta consulta = consultaRepository.save(new Consulta(
                 negocio, cliente, peticion.asunto().trim(), peticion.mensaje().trim()));
+
+        // El buzón no avisa por sí solo: la notificación es lo que hace que el
+        // dueño mire (H2).
+        notificacionService.avisar(negocio.getUsuario(), TipoNotificacion.CONSULTA_NUEVA,
+                "Nueva consulta de %s: %s".formatted(
+                        cliente.getNombre(), consulta.getAsunto()));
 
         return aRespuesta(consulta);
     }
