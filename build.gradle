@@ -29,6 +29,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	// PostgreSQL real para los @DataJpaTest: el enunciado prohíbe bases de
+	// datos en memoria, así que nada de H2 ni siquiera en pruebas.
+	// Testcontainers 2.x renombró sus módulos con el prefijo "testcontainers-";
+	// la versión la gestiona Spring Boot, no se fija aquí.
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+	testImplementation 'org.testcontainers:testcontainers-postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
