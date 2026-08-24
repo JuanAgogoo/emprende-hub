@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -55,6 +56,11 @@ public class CargaInicialCatalogos {
             "Itagüí", List.of(),
             "Bello", List.of());
 
+    /**
+     * @implNote Los catálogos van primero: los negocios de la demostración se cuelgan de
+     * sus categorías y ciudades.
+     */
+    @Order(1)
     @Bean
     @Transactional
     public CommandLineRunner cargarCatalogos(CategoriaNegocioRepository categoriaRepository,
