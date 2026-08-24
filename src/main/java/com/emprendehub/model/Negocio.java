@@ -79,6 +79,19 @@ public class Negocio {
     @Column(length = 1000)
     private String motivoRechazo;
 
+    /**
+     * Perfil de Instagram, opcional (B8).
+     *
+     * <p>El prototipo enseñaba los iconos de redes en el perfil pero no pedía
+     * las direcciones en ningún formulario, así que nunca podían llenarse.
+     */
+    @Column(length = 200)
+    private String instagram;
+
+    /** Perfil de LinkedIn, opcional (B8). */
+    @Column(length = 200)
+    private String linkedin;
+
     /** Sin ninguna opinión se queda a null, no a cero (C5). */
     @Column(precision = 3, scale = 2)
     private java.math.BigDecimal calificacionPromedio;

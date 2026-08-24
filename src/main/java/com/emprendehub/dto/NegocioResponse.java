@@ -23,5 +23,7 @@ public record NegocioResponse(
         String estado,
         String motivoRechazo,
         BigDecimal calificacionPromedio,
-        int numeroOpiniones) {
+        int numeroOpiniones,
+        String instagram,
+        String linkedin) {
 }

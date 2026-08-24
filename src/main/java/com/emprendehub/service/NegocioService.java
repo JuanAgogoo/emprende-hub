@@ -2,6 +2,7 @@ package com.emprendehub.service;
 
 import com.emprendehub.dto.EditarContactoRequest;
 import com.emprendehub.dto.EditarNegocioPublicoRequest;
+import com.emprendehub.dto.EditarRedesRequest;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistrarNegocioRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
@@ -177,6 +178,27 @@ public class NegocioService {
         negocio.setEstado(EstadoNegocio.PENDIENTE);
         negocio.setMotivoRechazo(null);
         return aRespuesta(negocioRepository.save(negocio));
+    }
+
+    /**
+     * Actualiza los enlaces a redes sociales (B8).
+     *
+     * <p>Se aplican al instante, como el teléfono: son datos de contacto, no
+     * contenido que el administrador tenga que revisar. El formato ya lo
+     * comprobó Bean Validation; aquí solo se decide que una cadena vacía
+     * significa «no tengo», que es lo que manda el formulario al borrar el campo.
+     */
+    @Transactional
+    public NegocioResponse actualizarRedes(Usuario solicitante, EditarRedesRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        negocio.setInstagram(normalizar(peticion.instagram()));
+        negocio.setLinkedin(normalizar(peticion.linkedin()));
+        return aRespuesta(negocioRepository.save(negocio));
+    }
+
+    /** Un enlace en blanco es lo mismo que no tenerlo: los dos son opcionales. */
+    private String normalizar(String enlace) {
+        return (enlace == null || enlace.isBlank()) ? null : enlace.trim();
     }
 
     private Negocio buscarElMio(Usuario solicitante) {
