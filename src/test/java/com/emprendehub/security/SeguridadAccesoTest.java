@@ -196,6 +196,24 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("Escribir una consulta a un negocio exige sesión")
+    void enviarConsulta_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(post("/api/v1/negocios/1/consultas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"asunto\":\"Hola\",\"mensaje\":\"¿Abren hoy?\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("El buzón propio no se lee sin sesión")
+    void buzonPropio_sinToken_devuelve401() throws Exception {
+        // Lleva el correo del cliente (D2): es lo más sensible que devuelve la
+        // API y no puede quedar detrás de una ruta abierta por descuido.
+        mockMvc.perform(get("/api/v1/negocios/mio/consultas"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("El registro es público")
     void registro_sinToken_noDevuelve401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")
