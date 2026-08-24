@@ -1,0 +1,7 @@
+plugins {
+    // Permite que Gradle descargue automaticamente el JDK 25 que exige el
+    // toolchain, sin obligar a instalarlo a mano en cada maquina.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'emprendehub'
