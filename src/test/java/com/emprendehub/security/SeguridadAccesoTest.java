@@ -98,6 +98,45 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("Las imágenes de los perfiles se descargan sin sesión")
+    void fotos_sinToken_noDevuelve401() throws Exception {
+        // Van en una etiqueta <img> del navegador, que no manda cabecera de
+        // token. Un 404 aquí es correcto —no existe ese fichero—; un 401 no.
+        mockMvc.perform(get("/fotos/inexistente.jpg"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("La galería propia no se toca sin sesión")
+    void galeriaPropia_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/v1/negocios/mio/fotos"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("El escaparate propio no se toca sin sesión")
+    void escaparatePropio_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/v1/negocios/mio/productos"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("La cola de propuestas de cambio es solo del administrador")
+    void cambiosPendientes_conTokenDeCliente_devuelve403() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/cambios-pendientes")
+                        .header("Authorization", "Bearer " + tokenCliente))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("La cola de propuestas sí la ve el administrador")
+    void cambiosPendientes_conTokenDeAdmin_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/cambios-pendientes")
+                        .header("Authorization", "Bearer " + tokenAdmin))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("El registro es público")
     void registro_sinToken_noDevuelve401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")

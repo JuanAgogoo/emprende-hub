@@ -17,6 +17,7 @@ import com.emprendehub.model.CambioPendiente;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
 import com.emprendehub.model.DecisionModeracion;
+import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.EstadoNegocio;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
@@ -25,9 +26,11 @@ import com.emprendehub.model.Rol;
 import com.emprendehub.model.TipoEventoModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.CambioPendienteRepository;
+import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.RegistroModeracionRepository;
 import com.emprendehub.repository.UsuarioRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,14 @@ class ModeracionServiceTest {
     @Mock private CambioPendienteRepository cambioRepository;
     @Mock private RegistroModeracionRepository logRepository;
     @Mock private UsuarioRepository usuarioRepository;
+
+    @Mock private FotoRepository fotoRepository;
+
+    /**
+     * La moderación delega en el servicio de fotos: aprobar un negocio o una
+     * propuesta publica también las imágenes que esperaban revisión (B2).
+     */
+    @Mock private FotoService fotoService;
 
     @InjectMocks private ModeracionService service;
 
@@ -196,6 +207,92 @@ class ModeracionServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> service.resolverCambio(7L, new DecisionModeracion.Aprobar(), admin()));
+    }
+
+    // ---------- Fotos que esperan revisión (B2, B9) ----------
+
+    @Test
+    @DisplayName("Aprobar el negocio publica también las fotos que subió al registrarse")
+    void aprobarNegocio_publicaSusFotos() {
+        Negocio negocio = negocioPendiente();
+        when(negocioRepository.findWithDetalleById(7L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.resolverNegocio(7L, new DecisionModeracion.Aprobar(), admin());
+
+        // Nadie las revisó por separado: el negocio entero estaba sin revisar.
+        verify(fotoService).aprobarPendientes(7L);
+    }
+
+    @Test
+    @DisplayName("Rechazar el negocio no toca sus fotos: seguirá corrigiendo y reenviando")
+    void rechazarNegocio_noTocaLasFotos() {
+        Negocio negocio = negocioPendiente();
+        when(negocioRepository.findWithDetalleById(7L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.resolverNegocio(7L, new DecisionModeracion.Rechazar("Faltan datos"), admin());
+
+        verify(fotoService, never()).aprobarPendientes(any());
+        verify(fotoService, never()).descartarPendientes(any());
+    }
+
+    @Test
+    @DisplayName("Aprobar la propuesta publica las fotos nuevas (B2-bis)")
+    void aprobarCambio_publicaLasFotos() {
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(
+                Optional.of(new CambioPendiente(negocio, "Panadería Renovada", DESCRIPCION)));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.resolverCambio(7L, new DecisionModeracion.Aprobar(), admin());
+
+        verify(fotoService).aprobarPendientes(7L);
+    }
+
+    @Test
+    @DisplayName("Rechazar la propuesta descarta las fotos que no se aceptaron")
+    void rechazarCambio_descartaLasFotos() {
+        // Si se quedaran pendientes, la siguiente propuesta del dueño las
+        // publicaría de rebote, que es justo lo que el administrador impidió.
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(
+                Optional.of(new CambioPendiente(negocio, "Panadería Renovada", DESCRIPCION)));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.resolverCambio(7L, new DecisionModeracion.Rechazar("No se ve el local"), admin());
+
+        verify(fotoService).descartarPendientes(7L);
+        verify(fotoService, never()).aprobarPendientes(any());
+    }
+
+    // ---------- La cola de propuestas ----------
+
+    @Test
+    @DisplayName("La cola enseña el valor actual junto al propuesto y cuántas fotos esperan")
+    void cambiosPendientes_comparaActualYPropuesto() {
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        when(cambioRepository.findAllByOrderByFechaSolicitudAsc()).thenReturn(
+                List.of(new CambioPendiente(negocio, "Panadería Renovada", DESCRIPCION)));
+        when(fotoRepository.countByNegocioIdAndEstado(7L, EstadoFoto.PENDIENTE)).thenReturn(2);
+
+        var cola = service.cambiosPendientes();
+
+        assertEquals(1, cola.size());
+        assertEquals("Panadería La Tradicional", cola.getFirst().nombreActual());
+        assertEquals("Panadería Renovada", cola.getFirst().nombrePropuesto());
+        assertEquals(2, cola.getFirst().fotosPendientes());
+    }
+
+    @Test
+    @DisplayName("Sin propuestas vivas la cola llega vacía")
+    void cambiosPendientes_sinNada_devuelveVacio() {
+        when(cambioRepository.findAllByOrderByFechaSolicitudAsc()).thenReturn(List.of());
+
+        assertTrue(service.cambiosPendientes().isEmpty());
     }
 
     // ---------- Cuentas ----------
