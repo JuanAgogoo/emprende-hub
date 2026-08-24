@@ -658,11 +658,17 @@ curl -X PATCH $A/notificaciones/leer-todas -H "Authorization: Bearer $TC"
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 ```
 
-## Lo que todavía no existe
+## Datos de la demostración
 
-Llega en el PR 14, según [plan-de-entrega.md](plan-de-entrega.md):
+La aplicación arranca con datos sembrados: 12 negocios, 8 cursos, 20 cuentas,
+opiniones, consultas y dos meses de histórico de visitas. Están descritos en el
+[README](../README.md#cuentas-sembradas), junto a las credenciales.
 
-- Datos sembrados de la demostración y colección de Postman
+La colección de Postman `postman/EmprendeHub.postman_collection.json` cubre los
+**59 endpoints** en 64 peticiones, agrupadas por quién las usa. El login guarda
+el token en una variable y el resto lo hereda.
+
+---
 
 **Al añadir endpoints, actualizar este documento en el mismo PR.** Un contrato
 que va por detrás del código es peor que no tenerlo.

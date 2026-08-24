@@ -22,8 +22,35 @@ docker compose down           # conserva los datos
 docker compose down -v        # los borra
 ```
 
-Al arrancar por primera vez se cargan los catálogos y la cuenta de administrador.
-La carga es idempotente: reiniciar no duplica nada.
+Al arrancar por primera vez se siembran los datos de la demostración: los
+catálogos, la cuenta de administrador, los 8 cursos y los 12 negocios del
+prototipo con sus opiniones, su escaparate, su buzón y **dos meses de histórico
+de visitas**. Sin ellos el directorio sale vacío y la gráfica del panel, plana.
+
+**La carga es idempotente**: si ya hay datos no toca nada, así que reiniciar no
+duplica. Para empezar de cero, `docker compose down -v`.
+
+### Cuentas sembradas
+
+| Cuenta | Correo | Contraseña | Para qué sirve |
+|---|---|---|---|
+| Administrador | `admin@emprendehub.co` | `admin12345` | Moderación y cursos |
+| Emprendedora | `napolitana@emprendehub.co` | `contrasena123` | Panel con visitas, buzón y avisos |
+| Emprendedora | `handmade@emprendehub.co` | `contrasena123` | Negocio **rechazado**: lee su motivo |
+| Emprendedora | `yogaintegral@emprendehub.co` | `contrasena123` | Negocio **pendiente** de revisión |
+| Clienta | `maria.garcia@gmail.com` | `contrasena123` | Opina, denuncia y escribe al buzón |
+
+Los otros nueve emprendedores siguen el mismo patrón (`<negocio>@emprendehub.co`)
+y los otros siete clientes son `nombre.apellido@gmail.com`. Todos con
+`contrasena123`.
+
+### Qué queda listo para enseñar
+
+- **10 negocios publicados**, uno pendiente y uno rechazado con su motivo.
+- **Destacados** con cuatro negocios: los que pasan de cinco opiniones (C7).
+- Dos negocios **sin ninguna opinión**, que salen como «Nuevo» y sin calificación (C5).
+- **Dos meses de visitas** por negocio, con la variación semanal y mensual en positivo.
+- Consultas sin leer y avisos pendientes en los primeros buzones.
 
 ## Probar la API
 
@@ -65,6 +92,27 @@ descargan de `/fotos/{archivo}`, sin token.
 **El contrato completo, con los 59 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
+## Colección de Postman
+
+`postman/EmprendeHub.postman_collection.json`, con **64 peticiones que cubren los
+59 endpoints**.
+
+1. Importarla en Postman (*Import → File*).
+2. Ejecutar las tres primeras peticiones de **1 · Acceso**. Cada una guarda su
+   token en una variable de la colección.
+3. El resto de carpetas ya heredan el token que les toca: no hay que copiar nada
+   a mano.
+
+| Carpeta | Qué contiene |
+|---|---|
+| 1 · Acceso | Los tres logins que dejan los tokens listos |
+| 2 · Público | Todo lo que se explora sin registrarse |
+| 3 · Cliente | Opinar, denunciar y escribir al buzón |
+| 4 · Panel del emprendedor | Negocio, galería, escaparate, buzón, visitas y avisos |
+| 5 · Administración | Moderación, denuncias y cursos |
+
+La variable `base` apunta a `http://localhost:8080/api/v1`.
+
 ## Pruebas
 
 ```bash
@@ -73,6 +121,18 @@ punta a punta, está en [docs/api.md](docs/api.md).**
 
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
+
+**427 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
+
+| Nivel | Herramienta | Qué prueba |
+|---|---|---|
+| Unitario | Mockito | Los 15 servicios, con el repositorio simulado |
+| Repositorio | `@DataJpaTest` + Testcontainers | Las consultas contra PostgreSQL real |
+| Controlador | `@WebMvcTest` + MockMvc | Rutas, códigos y forma del JSON |
+
+Además, `SeguridadAccesoTest` y `SeguridadHttpRealTest` verifican la matriz de
+acceso completa, esta última con el servidor levantado.
 
 - Informe de pruebas: `build/reports/tests/test/index.html`
 - Informe de cobertura: `build/reports/jacoco/test/html/index.html`

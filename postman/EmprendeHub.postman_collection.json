@@ -1,0 +1,1574 @@
+{
+  "info": {
+    "name": "EmprendeHub API",
+    "description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedora**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nTodas las cuentas sembradas usan la contraseña `contrasena123`; el administrador usa `admin12345`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenEmprendedora",
+      "value": ""
+    },
+    {
+      "key": "tokenCliente",
+      "value": ""
+    },
+    {
+      "key": "negocioId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "1 · Acceso",
+      "description": "Empieza por aquí: cada login guarda su token.",
+      "item": [
+        {
+          "name": "Entrar como administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Guarda el token en {{tokenAdmin}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@emprendehub.co\",\n  \"contrasena\": \"admin12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guarda el token para que el resto de peticiones lo hereden.",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('tokenAdmin', pm.response.json().token);",
+                  "    pm.test('Token de tokenAdmin guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar como emprendedora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Dueña de la Pizzería Napolitana. Guarda {{tokenEmprendedora}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"napolitana@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guarda el token para que el resto de peticiones lo hereden.",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('tokenEmprendedora', pm.response.json().token);",
+                  "    pm.test('Token de tokenEmprendedora guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar como cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Guarda {{tokenCliente}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"maria.garcia@gmail.com\",\n  \"contrasena\": \"contrasena123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guarda el token para que el resto de peticiones lo hereden.",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('tokenCliente', pm.response.json().token);",
+                  "    pm.test('Token de tokenCliente guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar un cliente nuevo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/registro",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Nueva Clienta\",\n  \"correo\": \"nueva@gmail.com\",\n  \"contrasena\": \"contrasena123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guarda el token para que el resto de peticiones lo hereden.",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('tokenCliente', pm.response.json().token);",
+                  "    pm.test('Token de tokenCliente guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 · Público (sin token)",
+      "description": "Todo lo que se explora sin registrarse.",
+      "item": [
+        {
+          "name": "Portada · cifras calculadas (H4)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/estadisticas/portada",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "estadisticas",
+                "portada"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Directorio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/directorio?size=12",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "directorio"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "12"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Directorio · buscar y filtrar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/directorio?texto=caf%C3%A9&ciudadId=2&orden=CALIFICACION",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "directorio"
+              ],
+              "query": [
+                {
+                  "key": "texto",
+                  "value": "caf%C3%A9"
+                },
+                {
+                  "key": "ciudadId",
+                  "value": "2"
+                },
+                {
+                  "key": "orden",
+                  "value": "CALIFICACION"
+                }
+              ]
+            },
+            "description": "El texto busca en nombre y descripción, sin distinguir mayúsculas (G6). La eñe y los acentos van percent-encoded para que la URL sirva también copiada a un terminal."
+          }
+        },
+        {
+          "name": "Directorio · más recientes (G7)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/directorio?orden=RECIENTES",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "directorio"
+              ],
+              "query": [
+                {
+                  "key": "orden",
+                  "value": "RECIENTES"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Destacados · mínimo 5 opiniones (C7)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/directorio/destacados",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "directorio",
+                "destacados"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Perfil público · anota una visita (H1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/directorio/{{negocioId}}",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "directorio",
+                "{{negocioId}}"
+              ]
+            },
+            "description": "Pedirlo cuenta una visita, una por sesión y día."
+          }
+        },
+        {
+          "name": "Opiniones de un negocio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/opiniones",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "opiniones"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Catálogos · categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalogos/categorias-negocio",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalogos",
+                "categorias-negocio"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Catálogos · ciudades y barrios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalogos/ciudades",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalogos",
+                "ciudades"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Catálogos · motivos de denuncia (C6)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalogos/motivos-denuncia",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalogos",
+                "motivos-denuncia"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Catálogos · categorías de curso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalogos/categorias-curso",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalogos",
+                "categorias-curso"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Catálogos · niveles de curso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/catalogos/niveles-curso",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "catalogos",
+                "niveles-curso"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cursos publicados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/cursos?size=10",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "cursos"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Un curso publicado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/cursos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "cursos",
+                "1"
+              ]
+            },
+            "description": "Un borrador responde 404: no se filtra lo que está sin publicar (E4)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Cliente con sesión",
+      "description": "Opinar, denunciar y escribir al buzón. Usa {{tokenCliente}}.",
+      "item": [
+        {
+          "name": "Publicar una opinión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/opiniones",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "opiniones"
+              ]
+            },
+            "description": "Una por persona y negocio (C2), nunca sobre el propio (A4).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calificacion\": 5,\n  \"comentario\": \"La mejor pizza de Medellín, sin duda.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Ver mi opinión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/opiniones/mia",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "opiniones",
+                "mia"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Editar mi opinión",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/opiniones/mia",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "opiniones",
+                "mia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calificacion\": 4,\n  \"comentario\": \"Sigue muy buena, aunque subió de precio.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Borrar mi opinión",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/opiniones/mia",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "opiniones",
+                "mia"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Denunciar una opinión (C3)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/opiniones/1/denuncias",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "opiniones",
+                "1",
+                "denuncias"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"LENGUAJE_INAPROPIADO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Escribir al buzón del negocio (D1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/{{negocioId}}/consultas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "{{negocioId}}",
+                "consultas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asunto\": \"Reserva para 4 personas\",\n  \"mensaje\": \"¿Tienen mesa el sábado a las 8 de la noche?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mis notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/notificaciones",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "notificaciones"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenCliente}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "4 · Panel del emprendedor",
+      "description": "Su negocio, galería, escaparate, buzón y métricas. Usa {{tokenEmprendedora}}.",
+      "item": [
+        {
+          "name": "Mi negocio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar un negocio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios"
+              ]
+            },
+            "description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Panadería La Tradicional\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\",\n  \"telefono\": \"3001234567\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 2,\n  \"barrioId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Proponer cambio · espera revisión (B2-bis)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pizzería Napolitana Renovada\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cambiar el teléfono · al instante",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio/contacto",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "contacto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"6044440000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cambiar redes sociales (B8)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio/redes",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "redes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instagram\": \"https://instagram.com/napolitana\",\n  \"linkedin\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Corregir y reenviar un rechazado (B1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio/reenviar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "reenviar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Accesorios Handmade\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Mi galería",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/fotos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "fotos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Subir una foto (B9)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/fotos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "fotos"
+              ]
+            },
+            "description": "multipart. JPG o PNG, 5 MB, seis como mucho. Elige un fichero.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar una foto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/fotos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "fotos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mi escaparate (F1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/productos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "productos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Añadir un producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio/productos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "productos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pizza Margherita\",\n  \"precio\": 28000,\n  \"descripcion\": \"Tomate, mozzarella y albahaca fresca.\",\n  \"disponible\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Editar un producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/negocios/mio/productos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "productos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pizza Margherita\",\n  \"precio\": 30000,\n  \"descripcion\": \"Tomate, mozzarella y albahaca fresca.\",\n  \"disponible\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Cambiar disponibilidad (F3)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/productos/1/disponibilidad?disponible=false",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "productos",
+                "1",
+                "disponibilidad"
+              ],
+              "query": [
+                {
+                  "key": "disponible",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Borrar un producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/productos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "productos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mi buzón · sin leer (D3)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/consultas?leida=false",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "consultas"
+              ],
+              "query": [
+                {
+                  "key": "leida",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Enseña el correo del cliente para responder por fuera (D2)."
+          }
+        },
+        {
+          "name": "Marcar una consulta como leída",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/consultas/1/lectura?leida=true",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "consultas",
+                "1",
+                "lectura"
+              ],
+              "query": [
+                {
+                  "key": "leida",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Panel de visitas (H1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio/metricas/visitas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio",
+                "metricas",
+                "visitas"
+              ]
+            },
+            "description": "Semana, mes, variación porcentual y serie diaria."
+          }
+        },
+        {
+          "name": "Mis notificaciones sin leer (H2, H3)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/notificaciones?leida=false",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "notificaciones"
+              ],
+              "query": [
+                {
+                  "key": "leida",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Marcar un aviso como leído (H3)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/notificaciones/1/lectura?leida=true",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "notificaciones",
+                "1",
+                "lectura"
+              ],
+              "query": [
+                {
+                  "key": "leida",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Marcar todas como leídas",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/notificaciones/leer-todas",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "notificaciones",
+                "leer-todas"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenEmprendedora}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "5 · Administración",
+      "description": "Moderación y cursos. Usa {{tokenAdmin}}.",
+      "item": [
+        {
+          "name": "Negocios pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios-pendientes",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios-pendientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Aprobar un negocio",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios/11/aprobar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios",
+                "11",
+                "aprobar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rechazar un negocio · motivo obligatorio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios/11/rechazar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios",
+                "11",
+                "rechazar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"La descripción no explica qué vendes.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Propuestas de cambio pendientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/cambios-pendientes",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "cambios-pendientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Aprobar un cambio",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios/1/cambio/aprobar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios",
+                "1",
+                "cambio",
+                "aprobar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rechazar un cambio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios/1/cambio/rechazar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios",
+                "1",
+                "cambio",
+                "rechazar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"La foto no muestra el local.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Opiniones denunciadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/denuncias",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "denuncias"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar la opinión denunciada",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/denuncias/1/eliminar-opinion",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "denuncias",
+                "1",
+                "eliminar-opinion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Insultos al personal.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Desestimar la denuncia",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/denuncias/1/desestimar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "denuncias",
+                "1",
+                "desestimar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Suspender una cuenta (B4)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/usuarios/2/suspender",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "usuarios",
+                "2",
+                "suspender"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reactivar una cuenta",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/usuarios/2/reactivar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "usuarios",
+                "2",
+                "reactivar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Log de moderación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/log?size=20",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cursos · todos, borradores incluidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/cursos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Un curso concreto, borrador incluido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/cursos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear un curso · nace en borrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/admin/cursos",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Marketing Digital Básico\",\n  \"descripcion\": \"Fundamentos del marketing en redes sociales.\",\n  \"duracion\": \"4 horas\",\n  \"categoria\": \"MARKETING\",\n  \"nivel\": \"BASICO\",\n  \"gratuito\": true,\n  \"precio\": null,\n  \"urlRecurso\": \"https://emprendehub.co/cursos/marketing\",\n  \"emoji\": \"📱\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Editar un curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/admin/cursos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Marketing Digital Básico\",\n  \"descripcion\": \"Fundamentos del marketing en redes sociales, ampliado.\",\n  \"duracion\": \"5 horas\",\n  \"categoria\": \"MARKETING\",\n  \"nivel\": \"BASICO\",\n  \"gratuito\": true,\n  \"precio\": null,\n  \"urlRecurso\": \"https://emprendehub.co/cursos/marketing\",\n  \"emoji\": \"📱\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Publicar un curso (E4)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/cursos/1/publicar",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos",
+                "1",
+                "publicar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retirar a borrador",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/cursos/1/borrador",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos",
+                "1",
+                "borrador"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar un curso",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/cursos/1",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "cursos",
+                "1"
+              ]
+            }
+          }
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenAdmin}}",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ],
+  "auth": {
+    "type": "noauth"
+  }
+}
