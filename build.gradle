@@ -48,10 +48,13 @@ tasks.named('test') {
 
 // La rúbrica exige 80% de cobertura "en la lógica de negocio". Nuestra
 // definición, documentada en docs/arquitectura.md, es el paquete service.
-// Aquí solo se genera el informe; el umbral se activa en el PR 4, cuando
-// haya servicios que medir.
 jacoco {
 	toolVersion = '0.8.13'
+}
+
+// Filtro común: solo se mide la lógica de negocio, no controladores ni entidades.
+def clasesDeNegocio = { fc ->
+	files(fc.files.collect { fileTree(dir: it, includes: ['com/emprendehub/service/**']) })
 }
 
 tasks.named('jacocoTestReport') {
@@ -60,9 +63,26 @@ tasks.named('jacocoTestReport') {
 		xml.required = true
 		html.required = true
 	}
-	classDirectories.setFrom(
-		files(classDirectories.files.collect {
-			fileTree(dir: it, includes: ['com/emprendehub/service/**'])
-		})
-	)
+	classDirectories.setFrom(clasesDeNegocio(classDirectories))
+	finalizedBy tasks.jacocoTestCoverageVerification
+}
+
+// El umbral que exige la rúbrica. Un PR que lo baje no compila, que es más
+// barato que recuperar cobertura al final con doce incrementos encima.
+tasks.named('jacocoTestCoverageVerification') {
+	violationRules {
+		rule {
+			element = 'BUNDLE'
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80
+			}
+		}
+	}
+	classDirectories.setFrom(clasesDeNegocio(classDirectories))
+}
+
+tasks.named('check') {
+	dependsOn tasks.jacocoTestCoverageVerification
 }
