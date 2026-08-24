@@ -100,10 +100,14 @@ Sin `@semantic-release/changelog` ni `@semantic-release/git`: no se escribe fich
 de changelog ni se commitea nada de vuelta al repositorio. Las notas de la versión
 se publican en la release de GitHub, generadas desde los mensajes de commit.
 
-**La versión del `pom.xml` se queda fija.** `semantic-release` no sabe actualizarla
-y hacerlo requeriría `@semantic-release/exec` llamando a `mvn versions:set`, más
-piezas de las que este proyecto necesita. El versionado vive en los tags de Git,
-que es lo que se ve desde GitHub.
+**La versión del `build.gradle` se queda fija** en `0.0.1-SNAPSHOT`.
+`semantic-release` no sabe actualizarla y hacerlo requeriría
+`@semantic-release/exec`, más piezas de las que este proyecto necesita. El
+versionado vive en los tags de Git, que es lo que se ve desde GitHub.
+
+Los tipos `chore`, `ci`, `docs`, `test` y `refactor` no generan versión: los PR 1
+y 2 no producen ningún tag. **El primer tag será `v1.0.0`, con el primer `feat:`**,
+que según el plan es el PR 3.
 
 ## Workflow de CI
 
@@ -111,6 +115,24 @@ que es lo que se ve desde GitHub.
 (`name`, `on.push.branches`, trabajos encadenados con `needs`), adaptado a Gradle
 y JDK 25 en lugar de Maven y JDK 17. Dos trabajos:
 
-- **build**: en cada PR y en `main`. Compila, ejecuta pruebas unitarias y de
-  integración (Testcontainers levanta PostgreSQL) y publica el informe de JaCoCo.
-- **release**: solo en `main` y solo si build pasó. Ejecuta `semantic-release`.
+- **build**: en cada PR y en `main`. Compila, ejecuta las pruebas y publica como
+  artefactos los informes de JaCoCo y de pruebas.
+
+  Levanta PostgreSQL con un *service container* de GitHub Actions, publicado en
+  el 5433 para que coincida con `application.yml` y no haga falta ninguna variable
+  de entorno. Es distinto de Testcontainers, que se usa dentro de las pruebas de
+  `@DataJpaTest`: aquí la base de datos la aporta el runner.
+
+- **release**: solo al integrar en `main`, nunca en un PR, y solo si build pasó.
+  Ejecuta `semantic-release` con los permisos mínimos (`contents`, `issues`,
+  `pull-requests`) y `fetch-depth: 0`, que necesita para leer el historial.
+
+**Cobertura**: JaCoCo genera el informe acotado a `service/**` desde este PR. El
+umbral del 80% se activa en el PR 4, cuando exista lógica de negocio que medir.
+
+## Plantilla de Pull Request
+
+`.github/pull_request_template.md` se rellena solo al abrir un PR. Pide qué hace,
+**qué decisiones del dominio implementa** (los códigos de
+[decisiones-dominio.md](decisiones-dominio.md)), cómo probarlo y qué queda fuera.
+Esa segunda pregunta es la que hace el trabajo trazable contra lo acordado.

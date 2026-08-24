@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -35,4 +36,26 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy tasks.jacocoTestReport
+}
+
+// La rúbrica exige 80% de cobertura "en la lógica de negocio". Nuestra
+// definición, documentada en docs/arquitectura.md, es el paquete service.
+// Aquí solo se genera el informe; el umbral se activa en el PR 4, cuando
+// haya servicios que medir.
+jacoco {
+	toolVersion = '0.8.13'
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn tasks.test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+	classDirectories.setFrom(
+		files(classDirectories.files.collect {
+			fileTree(dir: it, includes: ['com/emprendehub/service/**'])
+		})
+	)
 }
