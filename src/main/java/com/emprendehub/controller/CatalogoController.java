@@ -40,6 +40,12 @@ public class CatalogoController {
         return catalogoService.obtenerCategoriasCurso();
     }
 
+    /** Los motivos de denuncia de una opinión, lista cerrada (C6). */
+    @GetMapping("/motivos-denuncia")
+    public List<OpcionResponse> motivosDenuncia() {
+        return catalogoService.obtenerMotivosDenuncia();
+    }
+
     @GetMapping("/niveles-curso")
     public List<OpcionResponse> nivelesCurso() {
         return catalogoService.obtenerNivelesCurso();

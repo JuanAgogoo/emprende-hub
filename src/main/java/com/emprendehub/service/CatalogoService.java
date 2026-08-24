@@ -7,6 +7,7 @@ import com.emprendehub.dto.OpcionResponse;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
+import com.emprendehub.model.MotivoDenuncia;
 import com.emprendehub.model.NivelCurso;
 import com.emprendehub.repository.CategoriaNegocioRepository;
 import com.emprendehub.repository.CiudadRepository;
@@ -59,6 +60,18 @@ public class CatalogoService {
     public List<OpcionResponse> obtenerNivelesCurso() {
         return Arrays.stream(NivelCurso.values())
                 .map(n -> new OpcionResponse(n.name(), n.getNombre()))
+                .toList();
+    }
+
+    /**
+     * Los motivos por los que se puede denunciar una opinión (C6).
+     *
+     * <p>Se sirven como catálogo para que el formulario los pinte sin tenerlos
+     * escritos a mano: si mañana se añade uno, aparece solo.
+     */
+    public List<OpcionResponse> obtenerMotivosDenuncia() {
+        return Arrays.stream(MotivoDenuncia.values())
+                .map(m -> new OpcionResponse(m.name(), m.getNombre()))
                 .toList();
     }
 
