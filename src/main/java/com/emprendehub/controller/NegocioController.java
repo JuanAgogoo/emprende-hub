@@ -1,5 +1,7 @@
 package com.emprendehub.controller;
 
+import com.emprendehub.dto.EditarContactoRequest;
+import com.emprendehub.dto.EditarNegocioPublicoRequest;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistrarNegocioRequest;
 import com.emprendehub.model.Usuario;
@@ -9,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,5 +47,29 @@ public class NegocioController {
     @GetMapping("/mio")
     public NegocioResponse obtenerElMio(@AuthenticationPrincipal Usuario usuario) {
         return negocioService.obtenerElMio(usuario);
+    }
+
+    /** Propone cambiar nombre o descripción: espera revisión (B2-bis). */
+    @PutMapping("/mio")
+    public NegocioResponse proponerCambio(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody EditarNegocioPublicoRequest peticion) {
+        return negocioService.proponerCambioPublico(usuario, peticion);
+    }
+
+    /** Cambia el teléfono, que se aplica al instante. */
+    @PatchMapping("/mio/contacto")
+    public NegocioResponse actualizarContacto(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody EditarContactoRequest peticion) {
+        return negocioService.actualizarContacto(usuario, peticion);
+    }
+
+    /** Corrige un negocio rechazado y lo vuelve a enviar (B1). */
+    @PostMapping("/mio/reenviar")
+    public NegocioResponse corregirYReenviar(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody EditarNegocioPublicoRequest peticion) {
+        return negocioService.corregirYReenviar(usuario, peticion);
     }
 }

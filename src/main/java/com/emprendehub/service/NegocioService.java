@@ -1,16 +1,21 @@
 package com.emprendehub.service;
 
+import com.emprendehub.dto.EditarContactoRequest;
+import com.emprendehub.dto.EditarNegocioPublicoRequest;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistrarNegocioRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Barrio;
+import com.emprendehub.model.CambioPendiente;
+import com.emprendehub.model.EstadoNegocio;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.BarrioRepository;
+import com.emprendehub.repository.CambioPendienteRepository;
 import com.emprendehub.repository.CategoriaNegocioRepository;
 import com.emprendehub.repository.CiudadRepository;
 import com.emprendehub.repository.NegocioRepository;
@@ -40,12 +45,15 @@ public class NegocioService {
     private final CategoriaNegocioRepository categoriaRepository;
     private final CiudadRepository ciudadRepository;
     private final BarrioRepository barrioRepository;
+    private final CambioPendienteRepository cambioRepository;
 
     public NegocioService(NegocioRepository negocioRepository,
                           UsuarioRepository usuarioRepository,
                           CategoriaNegocioRepository categoriaRepository,
                           CiudadRepository ciudadRepository,
-                          BarrioRepository barrioRepository) {
+                          BarrioRepository barrioRepository,
+                          CambioPendienteRepository cambioRepository) {
+        this.cambioRepository = cambioRepository;
         this.negocioRepository = negocioRepository;
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
@@ -111,14 +119,73 @@ public class NegocioService {
         return barrio;
     }
 
+    // ---------- Edición por el dueño ----------
+
+    /**
+     * Propone un cambio de los campos públicos (B2 y B2-bis).
+     *
+     * <p>No toca el negocio: guarda la propuesta aparte. El público sigue viendo
+     * la versión aprobada mientras el administrador decide, así que corregir una
+     * errata nunca saca al negocio del directorio.
+     *
+     * <p>Solo hay una propuesta viva por negocio: una nueva sustituye a la
+     * anterior.
+     */
+    @Transactional
+    public NegocioResponse proponerCambioPublico(Usuario solicitante,
+                                                 EditarNegocioPublicoRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        if (negocio.getEstado() != EstadoNegocio.APROBADO) {
+            throw new ReglaDeNegocioException(
+                    "Solo un negocio aprobado propone cambios; corrige y vuelve a enviar");
+        }
+
+        CambioPendiente cambio = cambioRepository.findByNegocioId(negocio.getId())
+                .orElseGet(() -> new CambioPendiente(negocio, peticion.nombre().trim(),
+                        peticion.descripcion().trim()));
+        cambio.setNombrePropuesto(peticion.nombre().trim());
+        cambio.setDescripcionPropuesta(peticion.descripcion().trim());
+        cambioRepository.save(cambio);
+
+        return aRespuesta(negocio);
+    }
+
+    /** El teléfono se actualiza al instante: no pasa por revisión (B2). */
+    @Transactional
+    public NegocioResponse actualizarContacto(Usuario solicitante,
+                                              EditarContactoRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        negocio.setTelefono(peticion.telefono().trim());
+        return aRespuesta(negocioRepository.save(negocio));
+    }
+
+    /**
+     * Corrige y vuelve a enviar un negocio rechazado (B1).
+     *
+     * <p>Sin límite de intentos. El motivo del rechazo anterior se borra al
+     * reenviar: ya no describe el estado actual.
+     */
+    @Transactional
+    public NegocioResponse corregirYReenviar(Usuario solicitante,
+                                             EditarNegocioPublicoRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        if (negocio.getEstado() != EstadoNegocio.RECHAZADO) {
+            throw new ReglaDeNegocioException("Solo se reenvía un negocio rechazado");
+        }
+        negocio.setNombre(peticion.nombre().trim());
+        negocio.setDescripcion(peticion.descripcion().trim());
+        negocio.setEstado(EstadoNegocio.PENDIENTE);
+        negocio.setMotivoRechazo(null);
+        return aRespuesta(negocioRepository.save(negocio));
+    }
+
+    private Negocio buscarElMio(Usuario solicitante) {
+        return negocioRepository.findByUsuarioId(solicitante.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Negocio del usuario", solicitante.getId()));
+    }
+
     private NegocioResponse aRespuesta(Negocio negocio) {
-        return new NegocioResponse(
-                negocio.getId(), negocio.getNombre(), negocio.getDescripcion(),
-                negocio.getTelefono(), negocio.getCategoria().getNombre(),
-                negocio.getCiudad().getNombre(),
-                negocio.getBarrio() == null ? null : negocio.getBarrio().getNombre(),
-                negocio.getNivelPrecio().name(), negocio.getEstado().name(),
-                negocio.getMotivoRechazo(), negocio.getCalificacionPromedio(),
-                negocio.getNumeroOpiniones());
+        return NegocioMapper.aRespuesta(negocio);
     }
 }
