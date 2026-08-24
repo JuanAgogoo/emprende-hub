@@ -48,6 +48,10 @@ class ConsultaServiceTest {
     @Mock
     private NegocioRepository negocioRepository;
 
+    /** Una consulta nueva deja aviso en el panel del dueño (H2). */
+    @Mock
+    private NotificacionService notificacionService;
+
     @InjectMocks
     private ConsultaService service;
 

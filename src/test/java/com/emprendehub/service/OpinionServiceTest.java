@@ -50,6 +50,10 @@ class OpinionServiceTest {
     @Mock
     private DenunciaRepository denunciaRepository;
 
+    /** Publicar una opinión avisa a su dueño (H2). */
+    @Mock
+    private NotificacionService notificacionService;
+
     @InjectMocks
     private OpinionService service;
 

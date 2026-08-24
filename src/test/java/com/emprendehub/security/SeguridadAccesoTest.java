@@ -214,6 +214,29 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("El panel de visitas no se consulta sin sesión")
+    void metricas_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/v1/negocios/mio/metricas/visitas"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Las notificaciones no se consultan sin sesión")
+    void notificaciones_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/v1/notificaciones"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Un cliente con sesión sí ve sus notificaciones, aunque no tenga negocio")
+    void notificaciones_conTokenDeCliente_devuelve200() throws Exception {
+        // Cuelgan de la persona, no del negocio: cualquier cuenta tiene las suyas.
+        mockMvc.perform(get("/api/v1/notificaciones")
+                        .header("Authorization", "Bearer " + tokenCliente))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("El registro es público")
     void registro_sinToken_noDevuelve401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")
