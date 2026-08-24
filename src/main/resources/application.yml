@@ -26,6 +26,15 @@ spring:
   jackson:
     time-zone: America/Bogota
 
+  servlet:
+    multipart:
+      # B9 permite 5 MB por imagen y la regla vive en FotoService, que es donde
+      # se prueba. El tope de aquí se deja un poco por encima a propósito: si
+      # coincidiera, sería Tomcat quien cortara la petición y el dueño recibiría
+      # un error de infraestructura en vez del mensaje del dominio.
+      max-file-size: 6MB
+      max-request-size: 6MB
+
 jwt:
   # Clave de 256 bits como mínimo, que es lo que exige HS256 y lo que advierte
   # el taller. En un despliegue real llegaría por variable de entorno; aquí el
@@ -33,6 +42,12 @@ jwt:
   secret-key: ${JWT_SECRET:ZW1wcmVuZGVodWItY2xhdmUtZGUtZGVzYXJyb2xsby1zb2xvLTI1Ni1iaXRz}
   # Una hora, el plazo corto que recomienda el taller.
   expiration: ${JWT_EXPIRATION:3600000}
+
+emprendehub:
+  fotos:
+    # Las imágenes se guardan en disco y en la base de datos solo queda el
+    # nombre del fichero. El directorio se publica en /fotos/**.
+    directorio: ${FOTOS_DIR:./uploads}
 
 server:
   port: ${PORT:8080}

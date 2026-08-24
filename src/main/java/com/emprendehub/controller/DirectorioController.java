@@ -2,6 +2,7 @@ package com.emprendehub.controller;
 
 import com.emprendehub.dto.BusquedaDirectorioRequest;
 import com.emprendehub.dto.NegocioPublicoResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.service.DirectorioService;
@@ -60,9 +61,12 @@ public class DirectorioController {
         return directorioService.destacados(limite);
     }
 
-    /** Perfil público. Uno no publicado responde 404, nunca 403 (B6). */
+    /**
+     * Perfil público, con la galería y el escaparate. Uno no publicado responde
+     * 404, nunca 403 (B6).
+     */
     @GetMapping("/{id}")
-    public NegocioPublicoResponse obtenerPerfil(@PathVariable Long id) {
+    public PerfilNegocioResponse obtenerPerfil(@PathVariable Long id) {
         return directorioService.obtenerPerfilPublico(id);
     }
 }

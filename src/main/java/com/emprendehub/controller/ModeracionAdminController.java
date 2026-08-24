@@ -1,5 +1,6 @@
 package com.emprendehub.controller;
 
+import com.emprendehub.dto.CambioPendienteResponse;
 import com.emprendehub.dto.DecisionRequest;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
@@ -8,6 +9,7 @@ import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ModeracionService;
 import jakarta.validation.Valid;
 import java.time.Instant;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -60,6 +62,17 @@ public class ModeracionAdminController {
     }
 
     // ---------- Cambios propuestos ----------
+
+    /**
+     * La cola de propuestas de cambio (B2-bis).
+     *
+     * <p>Sin ella, una foto que espera revisión no aparece en ninguna pantalla y
+     * el administrador no tiene forma de saber que hay algo que aprobar.
+     */
+    @GetMapping("/cambios-pendientes")
+    public List<CambioPendienteResponse> cambiosPendientes() {
+        return moderacionService.cambiosPendientes();
+    }
 
     @PatchMapping("/negocios/{id}/cambio/aprobar")
     public NegocioResponse aprobarCambio(@PathVariable Long id,

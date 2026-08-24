@@ -11,7 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.emprendehub.dto.BusquedaDirectorioRequest;
+import com.emprendehub.dto.FotoResponse;
 import com.emprendehub.dto.NegocioPublicoResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
+import com.emprendehub.dto.ProductoResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
@@ -42,7 +45,19 @@ class DirectorioControllerTest extends ControllerTestBase {
         return new NegocioPublicoResponse(7L, "Panadería La Tradicional",
                 "Pan de masa madre horneado cada mañana en horno de leña.", "3001234567",
                 "Gastronomía", "Medellín", "El Poblado", "MEDIO",
-                new BigDecimal("4.80"), 12, Instant.parse("2026-08-01T10:00:00Z"));
+                new BigDecimal("4.80"), 12, Instant.parse("2026-08-01T10:00:00Z"),
+                "/fotos/portada.jpg");
+    }
+
+    private PerfilNegocioResponse perfilDePrueba() {
+        return new PerfilNegocioResponse(7L, "Panadería La Tradicional",
+                "Pan de masa madre horneado cada mañana en horno de leña.", "3001234567",
+                "Gastronomía", "Medellín", "El Poblado", "MEDIO",
+                new BigDecimal("4.80"), 12, Instant.parse("2026-08-01T10:00:00Z"),
+                "https://instagram.com/panaderia", null,
+                List.of(new FotoResponse(1L, "/fotos/portada.jpg", 0, true, "APROBADA")),
+                List.of(new ProductoResponse(1L, "Pan de masa madre",
+                        new BigDecimal("12000"), "Fermentado 24 horas", true)));
     }
 
     @Test
@@ -173,13 +188,18 @@ class DirectorioControllerTest extends ControllerTestBase {
     }
 
     @Test
-    @DisplayName("GET /api/v1/directorio/{id} devuelve 200 con el perfil público")
+    @DisplayName("GET /api/v1/directorio/{id} devuelve el perfil con galería y escaparate")
     void perfil_visible_devuelve200() throws Exception {
-        when(directorioService.obtenerPerfilPublico(7L)).thenReturn(negocioDePrueba());
+        when(directorioService.obtenerPerfilPublico(7L)).thenReturn(perfilDePrueba());
 
         mockMvc.perform(get("/api/v1/directorio/7"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.telefono").value("3001234567"))
+                .andExpect(jsonPath("$.instagram").value("https://instagram.com/panaderia"))
+                .andExpect(jsonPath("$.fotos[0].url").value("/fotos/portada.jpg"))
+                .andExpect(jsonPath("$.fotos[0].principal").value(true))
+                .andExpect(jsonPath("$.productos[0].nombre").value("Pan de masa madre"))
+                .andExpect(jsonPath("$.productos[0].disponible").value(true))
                 .andExpect(jsonPath("$.estado").doesNotExist());
     }
 

@@ -2,11 +2,18 @@ package com.emprendehub.service;
 
 import com.emprendehub.dto.BusquedaDirectorioRequest;
 import com.emprendehub.dto.NegocioPublicoResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
+import com.emprendehub.model.EstadoFoto;
+import com.emprendehub.model.Foto;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.OrdenDirectorio;
+import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.ProductoRepository;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,9 +55,15 @@ public class DirectorioService {
     private static final int DESTACADOS_MAXIMO = 12;
 
     private final NegocioRepository repositorio;
+    private final FotoRepository fotoRepository;
+    private final ProductoRepository productoRepository;
 
-    public DirectorioService(NegocioRepository repositorio) {
+    public DirectorioService(NegocioRepository repositorio,
+                             FotoRepository fotoRepository,
+                             ProductoRepository productoRepository) {
         this.repositorio = repositorio;
+        this.fotoRepository = fotoRepository;
+        this.productoRepository = productoRepository;
     }
 
     /**
@@ -65,11 +78,12 @@ public class DirectorioService {
         Pageable pagina = PageRequest.of(
                 pageable.getPageNumber(), pageable.getPageSize(), aOrdenacion(orden));
 
-        return repositorio.buscarEnDirectorio(
-                        normalizar(filtros.texto()), filtros.categoriaId(), filtros.ciudadId(),
-                        filtros.barrioId(), filtros.calificacionMinima(), filtros.nivelPrecio(),
-                        pagina)
-                .map(NegocioMapper::aRespuestaPublica);
+        Page<Negocio> encontrados = repositorio.buscarEnDirectorio(
+                normalizar(filtros.texto()), filtros.categoriaId(), filtros.ciudadId(),
+                filtros.barrioId(), filtros.calificacionMinima(), filtros.nivelPrecio(), pagina);
+
+        Map<Long, String> portadas = portadasDe(encontrados.getContent());
+        return encontrados.map(n -> NegocioMapper.aRespuestaPublica(n, portadas.get(n.getId())));
     }
 
     /**
@@ -79,8 +93,12 @@ public class DirectorioService {
     public List<NegocioPublicoResponse> destacados(Integer limite) {
         Pageable cuantos = PageRequest.of(0, acotarLimite(limite));
 
-        return repositorio.buscarDestacados(MINIMO_OPINIONES_DESTACADO, cuantos).stream()
-                .map(NegocioMapper::aRespuestaPublica)
+        List<Negocio> encontrados =
+                repositorio.buscarDestacados(MINIMO_OPINIONES_DESTACADO, cuantos);
+
+        Map<Long, String> portadas = portadasDe(encontrados);
+        return encontrados.stream()
+                .map(n -> NegocioMapper.aRespuestaPublica(n, portadas.get(n.getId())))
                 .toList();
     }
 
@@ -90,10 +108,13 @@ public class DirectorioService {
      * <p>Uno pendiente, rechazado o de una cuenta suspendida responde 404 y no
      * 403: no se filtra información sobre lo que existe sin publicar (B6).
      */
-    public NegocioPublicoResponse obtenerPerfilPublico(Long id) {
-        return repositorio.buscarVisibleEnDirectorio(id)
-                .map(NegocioMapper::aRespuestaPublica)
+    public PerfilNegocioResponse obtenerPerfilPublico(Long id) {
+        Negocio negocio = repositorio.buscarVisibleEnDirectorio(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Negocio", id));
+
+        return NegocioMapper.aPerfil(negocio,
+                fotoRepository.findByNegocioIdAndEstadoOrderByOrdenAsc(id, EstadoFoto.APROBADA),
+                productoRepository.findByNegocioIdOrderByNombreAsc(id));
     }
 
     // ---------- Apoyo ----------
@@ -125,6 +146,28 @@ public class DirectorioService {
             case NOMBRE -> Sort.by(Sort.Order.asc("nombre"));
             case RECIENTES -> Sort.by(Sort.Order.desc("fechaAprobacion").nullsLast());
         };
+    }
+
+    /**
+     * La portada de cada negocio de la página, en una sola consulta.
+     *
+     * <p>Pedirla negocio a negocio serían doce consultas por página. Se traen
+     * todas las fotos aprobadas de los negocios encontrados —seis por negocio
+     * como mucho (B9)— y se queda la primera de cada uno, que es la principal.
+     */
+    private Map<Long, String> portadasDe(List<Negocio> negocios) {
+        if (negocios.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> ids = negocios.stream().map(Negocio::getId).toList();
+        Map<Long, String> portadas = new LinkedHashMap<>();
+        for (Foto foto : fotoRepository.findByNegocioIdInAndEstadoOrderByNegocioIdAscOrdenAsc(
+                ids, EstadoFoto.APROBADA)) {
+            portadas.putIfAbsent(foto.getNegocio().getId(), NegocioMapper.urlDe(
+                    foto.getNombreArchivo()));
+        }
+        return portadas;
     }
 
     /** Un texto en blanco no filtra nada, así que se trata como ausente. */

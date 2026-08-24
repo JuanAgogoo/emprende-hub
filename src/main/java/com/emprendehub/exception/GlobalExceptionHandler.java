@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
  * Único punto del sistema que decide códigos HTTP.
@@ -72,6 +73,21 @@ public class GlobalExceptionHandler {
         // Una clave por parámetro inválido, igual que en la validación de campos.
         respuesta.put(ex.getName(), detalle);
         return ResponseEntity.badRequest().body(respuesta);
+    }
+
+    /**
+     * Una imagen que ni siquiera cabe en la petición.
+     *
+     * <p>El límite de {@code spring.servlet.multipart} está por encima del que
+     * impone B9, así que lo normal es que el mensaje lo dé {@code FotoService}.
+     * Esto cubre lo que ni llega a entrar: sin manejador sería un 500, y quedarse
+     * corto de espacio es un problema de quien envía, no del servidor.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> archivoDemasiadoGrande(
+            MaxUploadSizeExceededException ex) {
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST,
+                "Cada imagen puede pesar 5 MB como mucho"));
     }
 
     /**

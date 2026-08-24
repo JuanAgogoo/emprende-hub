@@ -60,6 +60,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/cursos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/directorio/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/estadisticas/**").permitAll()
+                        // Las imágenes de los perfiles son parte del directorio
+                        // público: se sirven como recurso estático, fuera de
+                        // /api, y no llevan token en la etiqueta <img>.
+                        .requestMatchers(HttpMethod.GET, "/fotos/**").permitAll()
                         // Toda la gestión cuelga de /admin y es solo del ADMIN.
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

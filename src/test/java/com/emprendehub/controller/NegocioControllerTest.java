@@ -2,6 +2,7 @@ package com.emprendehub.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,7 +54,8 @@ class NegocioControllerTest extends ControllerTestBase {
 
     private NegocioResponse respuesta() {
         return new NegocioResponse(1L, "Panadería La Tradicional", DESCRIPCION, "3001234567",
-                "Gastronomía", "Medellín", "El Poblado", "MEDIO", "PENDIENTE", null, null, 0);
+                "Gastronomía", "Medellín", "El Poblado", "MEDIO", "PENDIENTE", null, null, 0,
+                null, null);
     }
 
     @Test
@@ -110,5 +112,44 @@ class NegocioControllerTest extends ControllerTestBase {
                         .content(cuerpo("3001234567", DESCRIPCION)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Esta cuenta ya tiene un negocio registrado"));
+    }
+
+    @Test
+    @DisplayName("PATCH /mio/redes acepta enlaces de Instagram y LinkedIn (B8)")
+    void actualizarRedes_valido_devuelve200() throws Exception {
+        when(negocioService.actualizarRedes(any(), any())).thenReturn(respuesta());
+
+        mvc.perform(patch("/api/v1/negocios/mio/redes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "instagram": "https://instagram.com/panaderia",
+                                  "linkedin": "https://linkedin.com/in/maria" }
+                                """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("PATCH /mio/redes rechaza un enlace que no es de la red que dice")
+    void actualizarRedes_enlaceDeOtroSitio_devuelve400() throws Exception {
+        // Sin esta validación, el botón «Instagram» del perfil público podría
+        // llevar a cualquier parte.
+        mvc.perform(patch("/api/v1/negocios/mio/redes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "instagram": "https://ejemplo.co/lo-que-sea" }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.instagram").exists());
+    }
+
+    @Test
+    @DisplayName("PATCH /mio/redes admite dejar las dos vacías: son opcionales")
+    void actualizarRedes_vacias_devuelve200() throws Exception {
+        when(negocioService.actualizarRedes(any(), any())).thenReturn(respuesta());
+
+        mvc.perform(patch("/api/v1/negocios/mio/redes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"instagram\": \"\", \"linkedin\": \"\" }"))
+                .andExpect(status().isOk());
     }
 }

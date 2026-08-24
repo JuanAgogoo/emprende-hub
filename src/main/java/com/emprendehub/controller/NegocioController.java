@@ -2,6 +2,7 @@ package com.emprendehub.controller;
 
 import com.emprendehub.dto.EditarContactoRequest;
 import com.emprendehub.dto.EditarNegocioPublicoRequest;
+import com.emprendehub.dto.EditarRedesRequest;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistrarNegocioRequest;
 import com.emprendehub.model.Usuario;
@@ -63,6 +64,14 @@ public class NegocioController {
             @AuthenticationPrincipal Usuario usuario,
             @Valid @RequestBody EditarContactoRequest peticion) {
         return negocioService.actualizarContacto(usuario, peticion);
+    }
+
+    /** Cambia los enlaces a redes sociales, al instante (B8). */
+    @PatchMapping("/mio/redes")
+    public NegocioResponse actualizarRedes(
+            @AuthenticationPrincipal Usuario usuario,
+            @Valid @RequestBody EditarRedesRequest peticion) {
+        return negocioService.actualizarRedes(usuario, peticion);
     }
 
     /** Corrige un negocio rechazado y lo vuelve a enviar (B1). */
