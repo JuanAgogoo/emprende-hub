@@ -81,6 +81,15 @@ El umbral está **activo desde el PR 4** y colgado de la tarea `check`: un
 `./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
 la prueba en su incremento que recuperar cobertura al final.
 
+## Lo que depende del reloj se inyecta
+
+`LocalDate.now()` escrito dentro de un servicio hace que su prueba dependa del
+día en que se ejecute. La agregación de visitas del PR 13 compara «los últimos
+siete días con los siete anteriores», así que el reloj es un `Clock` inyectado
+—`ConfiguracionReloj` lo publica en la zona `America/Bogota`— y las pruebas le
+pasan un `Clock.fixed`. La zona no es decorativa: con UTC, el corte de «un día»
+de un negocio de Medellín caería a las siete de la tarde.
+
 ## Trampas de la cadena de seguridad
 
 Tres cosas que costaron tiempo y que conviene no repetir en los PR siguientes.

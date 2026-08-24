@@ -7,6 +7,7 @@ import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Opinion;
+import com.emprendehub.model.TipoNotificacion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.DenunciaRepository;
 import com.emprendehub.repository.NegocioRepository;
@@ -45,13 +46,16 @@ public class OpinionService {
     private final OpinionRepository opinionRepository;
     private final NegocioRepository negocioRepository;
     private final DenunciaRepository denunciaRepository;
+    private final NotificacionService notificacionService;
 
     public OpinionService(OpinionRepository opinionRepository,
                           NegocioRepository negocioRepository,
-                          DenunciaRepository denunciaRepository) {
+                          DenunciaRepository denunciaRepository,
+                          NotificacionService notificacionService) {
         this.opinionRepository = opinionRepository;
         this.negocioRepository = negocioRepository;
         this.denunciaRepository = denunciaRepository;
+        this.notificacionService = notificacionService;
     }
 
     // ---------- Lectura ----------
@@ -94,6 +98,11 @@ public class OpinionService {
         Opinion opinion = opinionRepository.save(new Opinion(
                 negocio, autor, peticion.calificacion(), normalizar(peticion.comentario())));
         recalcular(negocio);
+
+        // El dueño se entera por el panel: sin correos (I1) es el único canal.
+        notificacionService.avisar(negocio.getUsuario(), TipoNotificacion.OPINION_NUEVA,
+                "%s opinó sobre tu negocio: %d estrellas"
+                        .formatted(autor.getNombre(), opinion.getCalificacion()));
 
         return aRespuesta(opinion);
     }

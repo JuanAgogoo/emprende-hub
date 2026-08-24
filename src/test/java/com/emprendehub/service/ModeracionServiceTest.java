@@ -76,6 +76,9 @@ class ModeracionServiceTest {
      */
     @Mock private OpinionService opinionService;
 
+    /** Aprobar o rechazar un negocio avisa a su dueño (H2). */
+    @Mock private NotificacionService notificacionService;
+
     @InjectMocks private ModeracionService service;
 
     private Usuario admin() {

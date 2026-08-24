@@ -15,6 +15,7 @@ import com.emprendehub.model.EstadoNegocio;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Opinion;
 import com.emprendehub.model.RegistroModeracion;
+import com.emprendehub.model.TipoNotificacion;
 import com.emprendehub.model.TipoEventoModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.CambioPendienteRepository;
@@ -48,6 +49,7 @@ public class ModeracionService {
     private final FotoService fotoService;
     private final DenunciaRepository denunciaRepository;
     private final OpinionService opinionService;
+    private final NotificacionService notificacionService;
 
     public ModeracionService(NegocioRepository negocioRepository,
                              CambioPendienteRepository cambioRepository,
@@ -56,7 +58,8 @@ public class ModeracionService {
                              FotoRepository fotoRepository,
                              FotoService fotoService,
                              DenunciaRepository denunciaRepository,
-                             OpinionService opinionService) {
+                             OpinionService opinionService,
+                             NotificacionService notificacionService) {
         this.negocioRepository = negocioRepository;
         this.cambioRepository = cambioRepository;
         this.logRepository = logRepository;
@@ -65,6 +68,7 @@ public class ModeracionService {
         this.fotoService = fotoService;
         this.denunciaRepository = denunciaRepository;
         this.opinionService = opinionService;
+        this.notificacionService = notificacionService;
     }
 
     // ---------- Cola de revisión ----------
@@ -102,6 +106,10 @@ public class ModeracionService {
                 // las revisó por separado porque el negocio entero estaba sin
                 // revisar.
                 fotoService.aprobarPendientes(negocio.getId());
+                notificacionService.avisar(negocio.getUsuario(),
+                        TipoNotificacion.NEGOCIO_APROBADO,
+                        "Tu negocio «%s» ya está publicado en el directorio"
+                                .formatted(negocio.getNombre()));
                 registrar(TipoEventoModeracion.NEGOCIO_APROBADO, negocio.getNombre(), null, admin);
             }
             case DecisionModeracion.Rechazar rechazo -> {
@@ -109,6 +117,10 @@ public class ModeracionService {
                 // Sin correos (I1), este texto es el único sitio donde el dueño
                 // se entera de por qué le rechazaron.
                 negocio.setMotivoRechazo(rechazo.motivo());
+                notificacionService.avisar(negocio.getUsuario(),
+                        TipoNotificacion.NEGOCIO_RECHAZADO,
+                        "Tu negocio «%s» necesita cambios: %s"
+                                .formatted(negocio.getNombre(), rechazo.motivo()));
                 registrar(TipoEventoModeracion.NEGOCIO_RECHAZADO, negocio.getNombre(),
                         rechazo.motivo(), admin);
             }

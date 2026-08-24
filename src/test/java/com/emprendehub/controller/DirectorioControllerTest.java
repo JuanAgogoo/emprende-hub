@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,9 +17,11 @@ import com.emprendehub.dto.NegocioPublicoResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.ProductoResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
+import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.service.DirectorioService;
+import com.emprendehub.service.VisitaService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -40,6 +43,10 @@ class DirectorioControllerTest extends ControllerTestBase {
 
     @MockitoBean
     private DirectorioService directorioService;
+
+    /** Mirar un perfil anota una visita (H1), así que el slice lo necesita. */
+    @MockitoBean
+    private VisitaService visitaService;
 
     private NegocioPublicoResponse negocioDePrueba() {
         return new NegocioPublicoResponse(7L, "Panadería La Tradicional",
@@ -188,8 +195,33 @@ class DirectorioControllerTest extends ControllerTestBase {
     }
 
     @Test
+    @DisplayName("Mirar un perfil anota una visita (H1)")
+    void perfil_visible_anotaLaVisita() throws Exception {
+        Negocio negocio = new Negocio();
+        when(directorioService.buscarPerfilVisible(7L)).thenReturn(negocio);
+        when(directorioService.obtenerPerfilPublico(7L)).thenReturn(perfilDePrueba());
+
+        mockMvc.perform(get("/api/v1/directorio/7")).andExpect(status().isOk());
+
+        // La huella sale de la petición: sin sesión, dirección y navegador.
+        verify(visitaService).registrar(eq(negocio), eq(null), any());
+    }
+
+    @Test
+    @DisplayName("Un perfil que no se ve no cuenta como visita (H1, B6)")
+    void perfil_noVisible_noAnotaVisita() throws Exception {
+        when(directorioService.buscarPerfilVisible(99L))
+                .thenThrow(new ResourceNotFoundException("Negocio", 99L));
+
+        mockMvc.perform(get("/api/v1/directorio/99")).andExpect(status().isNotFound());
+
+        verify(visitaService, never()).registrar(any(), any(), any());
+    }
+
+    @Test
     @DisplayName("GET /api/v1/directorio/{id} devuelve el perfil con galería y escaparate")
     void perfil_visible_devuelve200() throws Exception {
+        when(directorioService.buscarPerfilVisible(7L)).thenReturn(new Negocio());
         when(directorioService.obtenerPerfilPublico(7L)).thenReturn(perfilDePrueba());
 
         mockMvc.perform(get("/api/v1/directorio/7"))
@@ -206,7 +238,7 @@ class DirectorioControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("Un negocio no publicado devuelve 404, nunca 403 (B6)")
     void perfil_noVisible_devuelve404() throws Exception {
-        when(directorioService.obtenerPerfilPublico(99L))
+        when(directorioService.buscarPerfilVisible(99L))
                 .thenThrow(new ResourceNotFoundException("Negocio", 99L));
 
         mockMvc.perform(get("/api/v1/directorio/99"))

@@ -109,12 +109,21 @@ public class DirectorioService {
      * 403: no se filtra información sobre lo que existe sin publicar (B6).
      */
     public PerfilNegocioResponse obtenerPerfilPublico(Long id) {
-        Negocio negocio = repositorio.buscarVisibleEnDirectorio(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Negocio", id));
-
-        return NegocioMapper.aPerfil(negocio,
+        return NegocioMapper.aPerfil(buscarPerfilVisible(id),
                 fotoRepository.findByNegocioIdAndEstadoOrderByOrdenAsc(id, EstadoFoto.APROBADA),
                 productoRepository.findByNegocioIdOrderByNombreAsc(id));
+    }
+
+    /**
+     * El negocio del perfil, para quien además necesita la entidad.
+     *
+     * <p>Lo usa el controlador para anotar la visita (H1) sin repetir la
+     * comprobación de visibilidad: una visita a un perfil que no se ve no es
+     * una visita.
+     */
+    public Negocio buscarPerfilVisible(Long id) {
+        return repositorio.buscarVisibleEnDirectorio(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Negocio", id));
     }
 
     // ---------- Apoyo ----------
