@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: emprendehub-db
+    environment:
+      POSTGRES_DB: emprendehub
+      POSTGRES_USER: emprendehub
+      POSTGRES_PASSWORD: emprendehub
+      TZ: America/Bogota
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - emprendehub-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emprendehub -d emprendehub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  emprendehub-data:
