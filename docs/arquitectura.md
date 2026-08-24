@@ -69,6 +69,30 @@ Los tres niveles del taller de la semana 4, con sus mismas convenciones: patrón
 | Slice de repositorio | `@DataJpaTest` con Testcontainers | Que el mapeo JPA y las consultas funcionan |
 | Slice de controlador | `@WebMvcTest`, `MockMvc`, `@MockitoBean` | Rutas, códigos HTTP y forma del JSON |
 
+### Diferencias con el material del curso al escribir pruebas
+
+El material está escrito para Spring Boot 3 y estas tres cosas cambiaron en la 4.
+Copiar los imports del taller tal cual **no compila**:
+
+| Anotación | Paquete en el curso (Boot 3) | Paquete real (Boot 4) |
+|---|---|---|
+| `@WebMvcTest` | `...test.autoconfigure.web.servlet` | `org.springframework.boot.webmvc.test.autoconfigure` |
+| `@DataJpaTest` | `...test.autoconfigure.orm.jpa` | `org.springframework.boot.data.jpa.test.autoconfigure` |
+| `TestEntityManager` | `...test.autoconfigure.orm.jpa` | `org.springframework.boot.jpa.test.autoconfigure` |
+| `@AutoConfigureTestDatabase` | `...test.autoconfigure.jdbc` | `org.springframework.boot.jdbc.test.autoconfigure` |
+
+`MockMvc` y `@MockitoBean` no se movieron: siguen en `spring-test`.
+
+**Testcontainers 2.x renombró todos sus módulos** con el prefijo
+`testcontainers-`: `org.testcontainers:testcontainers-postgresql`, no
+`org.testcontainers:postgresql`. La versión la gestiona Spring Boot; fijar el BOM
+de Testcontainers a mano lo degrada a la rama 1.x y provoca el error *«client
+version 1.32 is too old»* contra Docker 29.
+
+**`@AutoConfigureTestDatabase(replace = NONE)` es obligatorio** en las pruebas de
+repositorio: sin él, Spring sustituye la base de datos por una en memoria, que es
+justo lo que el enunciado prohíbe.
+
 Sobre el nivel unitario, la teoría del curso es tajante: **no debe tocar ninguna
 base de datos, ni siquiera H2**. Los argumentos que da son velocidad (milisegundos,
 no minutos), aislamiento (si falla, el fallo está en el servicio y en ningún otro
