@@ -12,6 +12,7 @@ import com.emprendehub.dto.OpcionResponse;
 import com.emprendehub.model.Barrio;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
+import com.emprendehub.model.MotivoDenuncia;
 import com.emprendehub.repository.CategoriaNegocioRepository;
 import com.emprendehub.repository.CiudadRepository;
 import java.util.List;
@@ -122,5 +123,16 @@ class CatalogoServiceTest {
         assertEquals("BASICO", resultado.get(0).codigo());
         assertEquals("INTERMEDIO", resultado.get(1).codigo());
         assertEquals("AVANZADO", resultado.get(2).codigo());
+    }
+
+    @Test
+    @DisplayName("Los motivos de denuncia llegan con su código y su texto (C6)")
+    void motivosDenuncia_devuelveLaListaCerrada() {
+        var motivos = service.obtenerMotivosDenuncia();
+
+        assertEquals(MotivoDenuncia.values().length, motivos.size());
+        assertTrue(motivos.stream().anyMatch(
+                m -> m.codigo().equals("LENGUAJE_INAPROPIADO")
+                        && m.nombre().equals("Lenguaje inapropiado")));
     }
 }

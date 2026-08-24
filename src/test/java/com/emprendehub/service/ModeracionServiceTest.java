@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,15 +18,20 @@ import com.emprendehub.model.CambioPendiente;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
 import com.emprendehub.model.DecisionModeracion;
+import com.emprendehub.model.Denuncia;
+import com.emprendehub.model.EstadoDenuncia;
 import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.EstadoNegocio;
+import com.emprendehub.model.MotivoDenuncia;
 import com.emprendehub.model.Negocio;
+import com.emprendehub.model.Opinion;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.RegistroModeracion;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.TipoEventoModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.CambioPendienteRepository;
+import com.emprendehub.repository.DenunciaRepository;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.RegistroModeracionRepository;
@@ -39,6 +45,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class ModeracionServiceTest {
@@ -59,6 +67,14 @@ class ModeracionServiceTest {
      * propuesta publica también las imágenes que esperaban revisión (B2).
      */
     @Mock private FotoService fotoService;
+
+    @Mock private DenunciaRepository denunciaRepository;
+
+    /**
+     * Borrar una opinión se delega en su servicio: arrastra las demás denuncias
+     * y obliga a recalcular el promedio del negocio.
+     */
+    @Mock private OpinionService opinionService;
 
     @InjectMocks private ModeracionService service;
 
@@ -293,6 +309,109 @@ class ModeracionServiceTest {
         when(cambioRepository.findAllByOrderByFechaSolicitudAsc()).thenReturn(List.of());
 
         assertTrue(service.cambiosPendientes().isEmpty());
+    }
+
+    // ---------- Opiniones denunciadas (C3, C4) ----------
+
+    private Opinion opinionDenunciada() {
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        Usuario autor = new Usuario("Carlos Rueda", "carlos@test.co", "hash", Rol.CLIENTE);
+        autor.setId(3L);
+        Opinion opinion = new Opinion(negocio, autor, 1, "Texto denunciable");
+        opinion.setId(11L);
+        return opinion;
+    }
+
+    private Denuncia denuncia(Opinion opinion) {
+        Usuario denunciante = new Usuario("Sofía", "sofia@test.co", "hash", Rol.CLIENTE);
+        denunciante.setId(5L);
+        Denuncia denuncia = new Denuncia(opinion, denunciante,
+                MotivoDenuncia.LENGUAJE_INAPROPIADO);
+        denuncia.setId(21L);
+        return denuncia;
+    }
+
+    @Test
+    @DisplayName("La cola trae el texto denunciado, de quién es y sobre qué negocio")
+    void denunciasPendientes_traeLoNecesarioParaDecidir() {
+        Denuncia denuncia = denuncia(opinionDenunciada());
+        when(denunciaRepository.findByEstadoOrderByFechaAsc(
+                eq(EstadoDenuncia.PENDIENTE), any()))
+                .thenReturn(new PageImpl<>(List.of(denuncia)));
+
+        var cola = service.denunciasPendientes(Pageable.ofSize(20));
+
+        var primera = cola.getContent().getFirst();
+        assertEquals("Texto denunciable", primera.comentario());
+        assertEquals("Carlos Rueda", primera.autorOpinion());
+        assertEquals("Panadería La Tradicional", primera.negocio());
+        assertEquals("Lenguaje inapropiado", primera.motivoDescripcion());
+    }
+
+    @Test
+    @DisplayName("Eliminar la opinión denunciada la borra y lo deja en el log con su motivo")
+    void eliminarOpinion_borraYRegistra() {
+        Opinion opinion = opinionDenunciada();
+        when(denunciaRepository.findWithDetalleById(21L))
+                .thenReturn(Optional.of(denuncia(opinion)));
+
+        service.eliminarOpinionDenunciada(21L, "Insultos al personal", admin());
+
+        // El borrado se delega: arrastra denuncias y recalcula el promedio.
+        verify(opinionService).eliminarPorModeracion(opinion);
+        ArgumentCaptor<RegistroModeracion> captor =
+                ArgumentCaptor.forClass(RegistroModeracion.class);
+        verify(logRepository).save(captor.capture());
+        assertEquals(TipoEventoModeracion.OPINION_ELIMINADA, captor.getValue().getTipo());
+        assertEquals("Insultos al personal", captor.getValue().getDetalle());
+    }
+
+    @Test
+    @DisplayName("Borrar una opinión sin motivo no se permite")
+    void eliminarOpinion_sinMotivo_lanza() {
+        // Es la acción menos reversible del panel: sin una razón escrita no
+        // habría forma de explicar después por qué se hizo.
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.eliminarOpinionDenunciada(21L, "   ", admin()));
+
+        verify(opinionService, never()).eliminarPorModeracion(any());
+    }
+
+    @Test
+    @DisplayName("Desestimar deja la opinión publicada y la denuncia como revisada")
+    void desestimar_cambiaElEstadoYRegistra() {
+        Denuncia denuncia = denuncia(opinionDenunciada());
+        when(denunciaRepository.findWithDetalleById(21L)).thenReturn(Optional.of(denuncia));
+
+        service.desestimarDenuncia(21L, admin());
+
+        assertEquals(EstadoDenuncia.DESESTIMADA, denuncia.getEstado());
+        verify(opinionService, never()).eliminarPorModeracion(any());
+        ArgumentCaptor<RegistroModeracion> captor =
+                ArgumentCaptor.forClass(RegistroModeracion.class);
+        verify(logRepository).save(captor.capture());
+        assertEquals(TipoEventoModeracion.DENUNCIA_DESESTIMADA, captor.getValue().getTipo());
+    }
+
+    @Test
+    @DisplayName("Una denuncia ya resuelta no se vuelve a desestimar")
+    void desestimar_yaResuelta_lanza() {
+        Denuncia denuncia = denuncia(opinionDenunciada());
+        denuncia.setEstado(EstadoDenuncia.DESESTIMADA);
+        when(denunciaRepository.findWithDetalleById(21L)).thenReturn(Optional.of(denuncia));
+
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.desestimarDenuncia(21L, admin()));
+    }
+
+    @Test
+    @DisplayName("Una denuncia que no existe devuelve no encontrado")
+    void resolver_denunciaInexistente_lanzaNoEncontrado() {
+        when(denunciaRepository.findWithDetalleById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.desestimarDenuncia(99L, admin()));
     }
 
     // ---------- Cuentas ----------
