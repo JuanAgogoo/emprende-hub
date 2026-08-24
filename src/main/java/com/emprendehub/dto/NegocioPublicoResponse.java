@@ -14,11 +14,14 @@ import java.time.Instant;
  * <p>El teléfono sí es público —es el canal de contacto que anuncia el perfil—;
  * el correo no aparece nunca, porque es el identificador de acceso a la cuenta.
  *
- * <p>La misma forma sirve para la tarjeta del directorio y para el perfil: hoy
- * no hay nada que enseñar en uno y ocultar en el otro.
+ * <p>Es la <strong>tarjeta</strong> del directorio. El perfil completo, con la
+ * galería y el escaparate, es {@link PerfilNegocioResponse}: la tarjeta necesita
+ * una sola imagen y cargar productos que nadie va a mirar en un listado de doce
+ * resultados sería trabajo tirado.
  *
  * @param calificacionPromedio nulo mientras no haya ninguna opinión, no cero (C5)
  * @param fechaAprobacion cuándo entró en el directorio; ordena «Más recientes» (G7)
+ * @param fotoPrincipal la primera foto aprobada (B9), o nulo si todavía no tiene
  */
 public record NegocioPublicoResponse(
         Long id,
@@ -31,5 +34,6 @@ public record NegocioPublicoResponse(
         String nivelPrecio,
         BigDecimal calificacionPromedio,
         int numeroOpiniones,
-        Instant fechaAprobacion) {
+        Instant fechaAprobacion,
+        String fotoPrincipal) {
 }
