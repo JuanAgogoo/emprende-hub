@@ -1,6 +1,6 @@
 # Plan de entrega
 
-Trece incrementos, cada uno una rama y un Pull Request. El orden es de dependencia:
+Catorce incrementos, cada uno una rama y un Pull Request. El orden es de dependencia:
 cada rama sale de `main` con el anterior ya fusionado.
 
 Cada incremento indica el mensaje de commit exacto, para pegarlo sin redactarlo.
@@ -76,7 +76,7 @@ feat(auth): añadir registro, autenticación con JWT y control de roles
 
 ---
 
-## Fase 3 — Negocios (PR 6–9)
+## Fase 3 — Negocios (PR 6–7)
 
 ### PR 6 · `feat/negocios`
 Modelo de Negocio y su registro en una sola transacción. Validaciones de nombre,
@@ -97,7 +97,29 @@ log de moderación. Implementa B1–B7 y la sección L.
 feat(moderacion): añadir aprobación de negocios, cambios pendientes y log
 ```
 
-### PR 8 · `feat/directorio`
+---
+
+## Paréntesis — Documentación (PR 8)
+
+No añade código. Se hace aquí, con siete incrementos entregados, porque es el
+punto en que la documentación había acumulado suficiente deriva como para
+estorbar en vez de ayudar.
+
+### PR 8 · `docs/consolidacion`
+Contrato de la API con los 27 endpoints existentes, que hasta ahora no estaban
+listados en ningún sitio. Se corrige una contradicción interna de
+`arquitectura.md` y se parte en dos, separando el diseño de cómo se prueba. El
+README pasa a explicar cómo llamar a la API, no solo cómo arrancarla.
+
+```
+docs: añadir el contrato de la API y reorganizar la documentación
+```
+
+---
+
+## Fase 4 — Directorio y contenido del negocio (PR 9–10)
+
+### PR 9 · `feat/directorio`
 Búsqueda por nombre y descripción, filtros por categoría, ciudad, barrio,
 calificación y precio. Ordenación y paginación. Destacados con mínimo cinco
 opiniones. Estadísticas de portada calculadas. Implementa C7, G6, G7, H4.
@@ -106,7 +128,7 @@ opiniones. Estadísticas de portada calculadas. Implementa C7, G6, G7, H4.
 feat(directorio): implementar búsqueda, filtros y paginación del directorio
 ```
 
-### PR 9 · `feat/fotos-productos`
+### PR 10 · `feat/fotos-productos`
 Subida de imágenes con validación de tipo, tamaño y máximo, la primera como
 principal. Productos con disponibilidad. Enlaces a redes sociales.
 Implementa B8, B9, F1, F2, F3.
@@ -117,9 +139,9 @@ feat(negocios): añadir gestión de fotos, productos y redes sociales
 
 ---
 
-## Fase 4 — Interacción y cierre (PR 10–13)
+## Fase 5 — Interacción y cierre (PR 11–14)
 
-### PR 10 · `feat/opiniones`
+### PR 11 · `feat/opiniones`
 Alta, edición y borrado con una opinión por persona y negocio, nunca sobre el
 propio. Promedio recalculado en cada cambio, incluida la moderación. Denuncias con
 motivos de lista cerrada. Implementa A4, C1–C6.
@@ -128,7 +150,7 @@ motivos de lista cerrada. Implementa A4, C1–C6.
 feat(opiniones): implementar opiniones, calificaciones y denuncias
 ```
 
-### PR 11 · `feat/consultas`
+### PR 12 · `feat/consultas`
 Buzón de consultas con marcado de leídas y el correo del cliente visible para el
 dueño. Implementa D1, D2, D3.
 
@@ -136,7 +158,7 @@ dueño. Implementa D1, D2, D3.
 feat(consultas): añadir buzón de consultas para los negocios
 ```
 
-### PR 12 · `feat/metricas`
+### PR 13 · `feat/metricas`
 Registro de visitas con una por perfil, sesión y día, excluyendo al dueño.
 Agregación semanal y mensual con variación porcentual. Notificaciones derivadas de
 hechos, con marcado de leídas. Implementa H1, H2, H3.
@@ -145,7 +167,7 @@ hechos, con marcado de leídas. Implementa H1, H2, H3.
 feat(metricas): implementar registro de visitas y notificaciones del panel
 ```
 
-### PR 13 · `chore/seed-postman`
+### PR 14 · `chore/seed-postman`
 Datos sembrados por `CommandLineRunner`: admin, clientes, los 12 negocios y 8
 cursos del prototipo, opiniones e histórico de visitas. Las contraseñas pasan por
 el `PasswordEncoder`, nunca en texto plano. La carga se salta si ya hay datos. Colección de Postman en la que el
