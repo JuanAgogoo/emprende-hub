@@ -114,6 +114,7 @@ Fijos, de solo lectura y públicos (G5).
 | `GET` | `/catalogos/ciudades` | Ciudades **con sus barrios anidados** (G2, G3) |
 | `GET` | `/catalogos/categorias-curso` | Las 5 categorías de formación |
 | `GET` | `/catalogos/niveles-curso` | Básico, Intermedio, Avanzado |
+| `GET` | `/catalogos/motivos-denuncia` | Los motivos para denunciar una opinión (C6) |
 
 Las ciudades traen sus barrios en la misma respuesta: el selector de localización
 necesita los dos niveles a la vez. Solo Medellín tiene barrios.
@@ -312,6 +313,68 @@ haría del interruptor un borrado con otro nombre.
 El producto de otro negocio responde `404`, no `403`: la consulta busca por
 producto **y** negocio a la vez, así que el ajeno sencillamente no aparece.
 
+## Opiniones · `/negocios/{id}/opiniones`
+
+**Leerlas es público; escribirlas exige sesión** (C1). Es la única ruta del
+proyecto donde el mismo prefijo mezcla las dos cosas.
+
+| Método | Ruta | Acceso | Hace |
+|---|---|---|---|
+| `GET` | `/negocios/{id}/opiniones` | Público | Página de opiniones, las últimas primero |
+| `POST` | `/negocios/{id}/opiniones` | Sesión | Publica la suya (`201`) |
+| `GET` | `/negocios/{id}/opiniones/mia` | Sesión | La propia, o `404` si no ha opinado |
+| `PUT` | `/negocios/{id}/opiniones/mia` | Autor | La edita |
+| `DELETE` | `/negocios/{id}/opiniones/mia` | Autor | La borra (`204`) |
+
+Las rutas de escritura **no llevan identificador de opinión**: cada persona
+tiene como mucho una por negocio (C2), así que `/mia` la identifica sin
+ambigüedad y sin dar pie a probar con el número de otra.
+
+| Campo | Regla |
+|---|---|
+| `calificacion` | Obligatoria, **de 1 a 5** |
+| `comentario` | **Opcional**, 300 caracteres como mucho |
+
+Las reglas que devuelven `400` o `404`:
+
+- **Una por persona y negocio** (C2). La segunda responde `400` y remite a
+  editar la primera. La restricción está también en el esquema, así que dos
+  peticiones a la vez tampoco se cuelan.
+- **Nunca sobre el negocio propio** (A4).
+- **Solo sobre negocios publicados** (B6). Uno pendiente responde `404`, igual
+  que su perfil.
+- Se publican **al instante** (C4): no hay revisión previa.
+
+**Cada cambio recalcula el promedio del negocio**, incluido el borrado que hace
+el administrador. Sin ninguna opinión el promedio vuelve a **nulo, no a cero**
+(C5): el negocio se enseña como «Nuevo», sale del filtro de estrellas y se
+ordena al final en «Mejor calificados».
+
+Una opinión editada viaja con `editada: true`, para que quien la lea sepa que el
+texto no es el original. Del autor sale **su nombre y nada más**.
+
+## Denunciar una opinión · `/opiniones/{id}/denuncias`
+
+| Método | Ruta | Acceso | Hace |
+|---|---|---|---|
+| `POST` | `/opiniones/{id}/denuncias` | Sesión | Denuncia la opinión (`204`) |
+
+```json
+{ "motivo": "LENGUAJE_INAPROPIADO" }
+```
+
+El motivo sale de una **lista cerrada** (C6), que se consulta en
+`GET /catalogos/motivos-denuncia`: `LENGUAJE_INAPROPIADO`, `INFORMACION_FALSA`,
+`SPAM`, `NO_ES_SOBRE_EL_NEGOCIO` y `DATOS_PERSONALES`. Uno inventado devuelve
+`400` con los admitidos.
+
+Denuncia **cualquier usuario con sesión**, incluido el dueño del negocio
+afectado (C3). No se puede denunciar la propia —para eso está borrarla— ni dos
+veces la misma.
+
+**Denunciar no oculta la opinión**: sigue publicada mientras el administrador
+decide. Esconderla al primer aviso convertiría el botón en uno de censurar.
+
 ## Gestión de cursos · `/admin/cursos`
 
 Solo **ADMIN** (E3). A diferencia del catálogo público, aquí se ven los borradores.
@@ -342,6 +405,9 @@ Solo **ADMIN**.
 | `GET` | `/cambios-pendientes` | Cola de propuestas, las más antiguas primero |
 | `PATCH` | `/negocios/{id}/cambio/aprobar` | Publica los valores propuestos **y sus fotos** |
 | `PATCH` | `/negocios/{id}/cambio/rechazar` | Descarta la propuesta |
+| `GET` | `/denuncias` | Cola de opiniones denunciadas, las más antiguas primero |
+| `PATCH` | `/denuncias/{id}/eliminar-opinion` | Borra la opinión. **Motivo obligatorio** (`204`) |
+| `PATCH` | `/denuncias/{id}/desestimar` | La deja publicada (`204`) |
 | `PATCH` | `/usuarios/{id}/suspender` | Suspende la cuenta (`204`) |
 | `PATCH` | `/usuarios/{id}/reactivar` | La reactiva (`204`) |
 | `GET` | `/log` | Historial, filtrable por fechas |
@@ -358,6 +424,12 @@ siguiente propuesta del dueño las publicara de rebote.
 ```
 GET /admin/moderacion/log?desde=2026-08-23T00:00:00Z&hasta=2026-08-25T00:00:00Z
 ```
+
+La cola de denuncias trae **el texto denunciado, de quién es y sobre qué
+negocio**: decidir si una opinión se borra exige leerla. Las dos salidas quedan
+en el log —`OPINION_ELIMINADA` con su motivo y `DENUNCIA_DESESTIMADA`—, y
+borrar una opinión **recalcula el promedio del negocio**, que es el momento que
+más fácil se olvida porque no lo dispara su autor.
 
 El log es de solo escritura: nunca se edita ni se borra.
 
@@ -425,15 +497,26 @@ curl -X PATCH $A/admin/moderacion/usuarios/2/suspender -H "Authorization: Bearer
 curl $A/directorio            # ya no está
 curl $A/directorio/1          # 404, no 403
 
+# 9-bis. Un cliente opina; el promedio del negocio cambia al instante (C4)
+curl -X POST $A/negocios/1/opiniones -H "Authorization: Bearer $TC2" \
+  -H 'Content-Type: application/json' \
+  -d '{"calificacion":5,"comentario":"La mejor de Medellín"}'
+curl $A/negocios/1/opiniones          # sin sesión
+
+# 9-ter. Alguien la denuncia y el administrador decide
+curl -X POST $A/opiniones/1/denuncias -H "Authorization: Bearer $TC" \
+  -H 'Content-Type: application/json' -d '{"motivo":"INFORMACION_FALSA"}'
+curl -H "Authorization: Bearer $TA" $A/admin/moderacion/denuncias
+curl -X PATCH $A/admin/moderacion/denuncias/1/desestimar -H "Authorization: Bearer $TA"
+
 # 10. Todo quedó registrado
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 ```
 
 ## Lo que todavía no existe
 
-Llega en los PR 11 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
+Llega en los PR 12 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
 
-- Opiniones y denuncias (PR 11)
 - Buzón de consultas (PR 12)
 - Visitas y notificaciones (PR 13)
 

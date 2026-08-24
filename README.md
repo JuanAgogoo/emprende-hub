@@ -48,6 +48,7 @@ curl "$A/cursos?categoria=MARKETING&gratuito=true"
 curl "$A/directorio?texto=pan&ciudadId=2&orden=RECIENTES"
 curl $A/directorio/destacados
 curl $A/directorio/1          # perfil con galería y escaparate
+curl $A/negocios/1/opiniones  # leerlas es público; escribirlas exige sesión
 curl $A/estadisticas/portada
 ```
 
@@ -61,7 +62,7 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 42 endpoints y un recorrido de demostración de
+**El contrato completo, con los 52 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Pruebas
