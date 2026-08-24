@@ -3,14 +3,19 @@ package com.emprendehub.controller;
 import com.emprendehub.dto.BusquedaDirectorioRequest;
 import com.emprendehub.dto.NegocioPublicoResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
+import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
+import com.emprendehub.model.Usuario;
 import com.emprendehub.service.DirectorioService;
+import com.emprendehub.service.VisitaService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,9 +38,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class DirectorioController {
 
     private final DirectorioService directorioService;
+    private final VisitaService visitaService;
 
-    public DirectorioController(DirectorioService directorioService) {
+    public DirectorioController(DirectorioService directorioService,
+                                VisitaService visitaService) {
         this.directorioService = directorioService;
+        this.visitaService = visitaService;
     }
 
     @GetMapping
@@ -64,9 +72,33 @@ public class DirectorioController {
     /**
      * Perfil público, con la galería y el escaparate. Uno no publicado responde
      * 404, nunca 403 (B6).
+     *
+     * <p>Mirar el perfil <strong>anota una visita</strong> (H1). Es el único
+     * sitio donde se cuentan: un endpoint aparte para registrarlas dejaría que
+     * cualquiera inflara el contador con un bucle.
+     *
+     * <p>La ruta es pública, así que el visitante puede llegar sin sesión. Si la
+     * hay, {@code @AuthenticationPrincipal} la trae y sirve para descartar al
+     * dueño; si no, se distingue la sesión por la propia petición.
      */
     @GetMapping("/{id}")
-    public PerfilNegocioResponse obtenerPerfil(@PathVariable Long id) {
+    public PerfilNegocioResponse obtenerPerfil(@PathVariable Long id,
+                                               @AuthenticationPrincipal Usuario visitante,
+                                               HttpServletRequest peticion) {
+        Negocio negocio = directorioService.buscarPerfilVisible(id);
+        visitaService.registrar(negocio, visitante, huellaDe(peticion));
+
         return directorioService.obtenerPerfilPublico(id);
+    }
+
+    /**
+     * Lo poco que distingue una petición anónima de otra.
+     *
+     * <p>Sin cookies ni sesión de servidor no hay más: la dirección de origen y
+     * el navegador. El servicio la resume en un hash y no guarda ninguna de las
+     * dos cosas.
+     */
+    private String huellaDe(HttpServletRequest peticion) {
+        return peticion.getRemoteAddr() + "|" + peticion.getHeader("User-Agent");
     }
 }
