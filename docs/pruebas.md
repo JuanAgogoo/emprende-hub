@@ -99,6 +99,13 @@ existe `SeguridadHttpRealTest`, que levanta el servidor y usa el cliente HTTP de
 JDK. Cualquier comportamiento que dependa del ciclo de error necesita una prueba
 de ese tipo.
 
+**`@WebMvcTest` carga los `WebMvcConfigurer` pero no los `@Component`.** Una
+clase de configuración web que dependa de un componente propio deja sin contexto
+a **todas** las pruebas de controlador del proyecto a la vez, con un
+`NoSuchBeanDefinitionException` que no menciona el slice por ninguna parte. Pasó
+al publicar el directorio de fotos en `/fotos/**`: la solución es que la
+configuración tome la propiedad (`@Value`) en lugar del bean.
+
 **`@WebMvcTest` sí carga `SecurityConfig`**, aunque no cargue el resto de
 configuraciones. Sin sus dependencias el contexto ni siquiera arranca, y con
 ellas la política por defecto de Spring Security haría que hasta los endpoints

@@ -186,6 +186,20 @@ El perfil público **no lleva el estado ni el motivo del rechazo**, que son
 conversación entre el dueño y el administrador. El teléfono sí es público; el
 correo no aparece nunca.
 
+Desde el PR 10 el perfil trae además **la galería, el escaparate y las redes**, y
+por eso ya no devuelve la misma forma que la tarjeta:
+
+```json
+{
+  "nombre": "Floristería Girasol", "instagram": "https://instagram.com/girasol",
+  "fotos":     [ { "url": "/fotos/a1b2.png", "orden": 0, "principal": true } ],
+  "productos": [ { "nombre": "Ramo de girasoles", "precio": 45000, "disponible": true } ]
+}
+```
+
+Solo salen las fotos **aprobadas**. La tarjeta del listado lleva `fotoPrincipal`
+—una sola imagen— en lugar de la galería entera.
+
 ## Estadísticas · `/estadisticas`
 
 | Método | Ruta | Acceso | Devuelve |
@@ -210,6 +224,7 @@ cero** (C5).
 | `GET` | `/negocios/mio` | Dueño | Su negocio, en el estado que esté |
 | `PUT` | `/negocios/mio` | Dueño | **Propone** cambiar nombre o descripción |
 | `PATCH` | `/negocios/mio/contacto` | Dueño | Cambia el teléfono, al instante |
+| `PATCH` | `/negocios/mio/redes` | Dueño | Instagram y LinkedIn, al instante (B8) |
 | `POST` | `/negocios/mio/reenviar` | Dueño | Corrige un rechazado y reenvía (B1) |
 
 El registro llega en **una sola petición**: los cuatro pasos del prototipo son
@@ -225,7 +240,77 @@ una división visual del formulario.
 
 **`PUT /negocios/mio` no cambia el negocio.** Guarda una propuesta que espera
 revisión, y el público sigue viendo la versión aprobada mientras tanto (B2-bis).
-El teléfono es la excepción: se aplica al momento.
+El teléfono y las redes son la excepción: se aplican al momento.
+
+Los dos enlaces de B8 son opcionales y se validan contra su dominio: un
+`instagram` que apunte a otro sitio devuelve `400`. Sin eso, el botón
+«Instagram» de un perfil público podría llevar a cualquier parte. Enviarlos
+vacíos es quitarlos.
+
+## Fotos del negocio · `/negocios/mio/fotos`
+
+Solo el **dueño**, y siempre sobre su propio negocio.
+
+| Método | Ruta | Hace |
+|---|---|---|
+| `GET` | `/negocios/mio/fotos` | Su galería, revisadas y sin revisar |
+| `POST` | `/negocios/mio/fotos` | Sube una imagen (`201`). **`multipart/form-data`** |
+| `DELETE` | `/negocios/mio/fotos/{id}` | La quita al momento (`204`) |
+
+```bash
+curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $T" \
+  -F "archivo=@local.jpg"
+```
+
+Las tres reglas de B9, todas en el servicio y todas con su prueba:
+
+| Regla | Qué pasa si no se cumple |
+|---|---|
+| **JPG o PNG** | `400`. El tipo sale de la cabecera, no del nombre del fichero |
+| **5 MB por imagen** | `400` |
+| **6 por negocio** | `400`. Cuentan también las que esperan revisión |
+
+**La principal es la primera por orden** (B9), sin campo que la marque. Al borrar
+una, las demás se recolocan y la portada pasa a ser la siguiente.
+
+**Una foto nueva nace `PENDIENTE`.** B2 manda a revisión los cambios sobre campos
+públicos y nombra las fotos expresamente, pero B2-bis prohíbe que el negocio
+salga del directorio mientras espera. Con el estado en cada foto se cumplen las
+dos:
+
+- Si el negocio **todavía no está aprobado**, sus fotos se publican con él.
+- Si **ya está publicado**, subir una abre una propuesta de cambio y el público
+  sigue viendo las anteriores hasta que el administrador la aprueba.
+- **Borrar no pasa por revisión**: quitar una imagen no publica nada nuevo, que
+  es el riesgo que B2 controla.
+
+Las imágenes se descargan de **`/fotos/{archivo}`**, que es público y va fuera de
+`/api`: la etiqueta `<img>` de un navegador no manda cabecera de token.
+
+## Productos · `/negocios/mio/productos`
+
+Solo el **dueño**. Es un **escaparate**: no se vende nada (F1).
+
+| Método | Ruta | Hace |
+|---|---|---|
+| `GET` | `/negocios/mio/productos` | Su escaparate |
+| `POST` | `/negocios/mio/productos` | Crea (`201`) |
+| `PUT` | `/negocios/mio/productos/{id}` | Edita |
+| `PATCH` | `/negocios/mio/productos/{id}/disponibilidad?disponible=false` | El interruptor de F3 |
+| `DELETE` | `/negocios/mio/productos/{id}` | Elimina (`204`) |
+
+| Campo | Regla |
+|---|---|
+| `nombre` | 2 a 120 caracteres |
+| `precio` | Obligatorio, no negativo, dos decimales como mucho |
+| `descripcion` | **Opcional** (F2). En blanco se guarda como ausente |
+| `disponible` | El único estado que hay: **no existe inventario** (F3) |
+
+Un producto no disponible **sigue saliendo** en el perfil, marcado. Esconderlo
+haría del interruptor un borrado con otro nombre.
+
+El producto de otro negocio responde `404`, no `403`: la consulta busca por
+producto **y** negocio a la vez, así que el ajeno sencillamente no aparece.
 
 ## Gestión de cursos · `/admin/cursos`
 
@@ -254,7 +339,8 @@ Solo **ADMIN**.
 | `GET` | `/negocios-pendientes` | Cola de revisión, los más antiguos primero |
 | `PATCH` | `/negocios/{id}/aprobar` | Aprueba y sella la fecha |
 | `PATCH` | `/negocios/{id}/rechazar` | Rechaza. **Motivo obligatorio** |
-| `PATCH` | `/negocios/{id}/cambio/aprobar` | Publica los valores propuestos |
+| `GET` | `/cambios-pendientes` | Cola de propuestas, las más antiguas primero |
+| `PATCH` | `/negocios/{id}/cambio/aprobar` | Publica los valores propuestos **y sus fotos** |
 | `PATCH` | `/negocios/{id}/cambio/rechazar` | Descarta la propuesta |
 | `PATCH` | `/usuarios/{id}/suspender` | Suspende la cuenta (`204`) |
 | `PATCH` | `/usuarios/{id}/reactivar` | La reactiva (`204`) |
@@ -262,6 +348,12 @@ Solo **ADMIN**.
 
 El motivo del rechazo lo lee el dueño en `GET /negocios/mio`: sin correos (I1),
 ese campo es el único sitio donde se entera de por qué le rechazaron.
+
+`GET /cambios-pendientes` enseña el valor actual junto al propuesto —revisar es
+comparar— y cuántas fotos espera publicar cada propuesta. Una propuesta puede ser
+**solo de fotos**, y entonces los dos textos coinciden. Aprobar una publica sus
+imágenes; rechazarla **las descarta**, porque dejarlas pendientes haría que la
+siguiente propuesta del dueño las publicara de rebote.
 
 ```
 GET /admin/moderacion/log?desde=2026-08-23T00:00:00Z&hasta=2026-08-25T00:00:00Z
@@ -310,6 +402,19 @@ curl -X PUT $A/negocios/mio -H "Authorization: Bearer $TC" \
 # 7. El administrador aprueba el cambio y ahora sí se publica
 curl -X PATCH $A/admin/moderacion/negocios/1/cambio/aprobar -H "Authorization: Bearer $TA"
 
+# 7-bis. Sube fotos y monta el escaparate
+curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TC" -F "archivo=@local.jpg"
+curl -X POST $A/negocios/mio/productos -H "Authorization: Bearer $TC" \
+  -H 'Content-Type: application/json' \
+  -d '{"nombre":"Pan de masa madre","precio":12000,"disponible":true}'
+curl -X PATCH $A/negocios/mio/redes -H "Authorization: Bearer $TC" \
+  -H 'Content-Type: application/json' \
+  -d '{"instagram":"https://instagram.com/panaderia"}'
+
+# 7-ter. La foto de un negocio ya publicado espera revisión (B2)
+curl -H "Authorization: Bearer $TA" $A/admin/moderacion/cambios-pendientes
+curl -X PATCH $A/admin/moderacion/negocios/1/cambio/aprobar -H "Authorization: Bearer $TA"
+
 # 8. Y ya se busca en el directorio, sin ninguna sesión
 curl "$A/directorio?texto=pan&ciudadId=2&orden=RECIENTES"
 curl $A/directorio/1
@@ -326,9 +431,8 @@ curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 
 ## Lo que todavía no existe
 
-Llega en los PR 10 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
+Llega en los PR 11 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
 
-- Fotos, productos y redes sociales (PR 10)
 - Opiniones y denuncias (PR 11)
 - Buzón de consultas (PR 12)
 - Visitas y notificaciones (PR 13)
