@@ -2,6 +2,7 @@ package com.emprendehub.controller;
 
 import com.emprendehub.dto.CambioPendienteResponse;
 import com.emprendehub.dto.DecisionRequest;
+import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
 import com.emprendehub.model.DecisionModeracion;
@@ -89,6 +90,31 @@ public class ModeracionAdminController {
     }
 
     // ---------- Cuentas ----------
+
+    // ---------- Opiniones denunciadas ----------
+
+    @GetMapping("/denuncias")
+    public Page<DenunciaResponse> denunciasPendientes(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return moderacionService.denunciasPendientes(pageable);
+    }
+
+    /** Borra la opinión denunciada. **El motivo es obligatorio** y va al log. */
+    @PatchMapping("/denuncias/{id}/eliminar-opinion")
+    public ResponseEntity<Void> eliminarOpinion(@PathVariable Long id,
+                                                @Valid @RequestBody DecisionRequest peticion,
+                                                @AuthenticationPrincipal Usuario admin) {
+        moderacionService.eliminarOpinionDenunciada(id, peticion.motivo(), admin);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** Desestima la denuncia: la opinión se queda publicada. */
+    @PatchMapping("/denuncias/{id}/desestimar")
+    public ResponseEntity<Void> desestimarDenuncia(@PathVariable Long id,
+                                                   @AuthenticationPrincipal Usuario admin) {
+        moderacionService.desestimarDenuncia(id, admin);
+        return ResponseEntity.noContent().build();
+    }
 
     @PatchMapping("/usuarios/{id}/suspender")
     public ResponseEntity<Void> suspender(@PathVariable Long id,

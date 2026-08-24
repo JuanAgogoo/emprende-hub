@@ -1,19 +1,24 @@
 package com.emprendehub.service;
 
 import com.emprendehub.dto.CambioPendienteResponse;
+import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CambioPendiente;
 import com.emprendehub.model.DecisionModeracion;
+import com.emprendehub.model.Denuncia;
+import com.emprendehub.model.EstadoDenuncia;
 import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.EstadoNegocio;
 import com.emprendehub.model.Negocio;
+import com.emprendehub.model.Opinion;
 import com.emprendehub.model.RegistroModeracion;
 import com.emprendehub.model.TipoEventoModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.CambioPendienteRepository;
+import com.emprendehub.repository.DenunciaRepository;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.RegistroModeracionRepository;
@@ -41,19 +46,25 @@ public class ModeracionService {
     private final UsuarioRepository usuarioRepository;
     private final FotoRepository fotoRepository;
     private final FotoService fotoService;
+    private final DenunciaRepository denunciaRepository;
+    private final OpinionService opinionService;
 
     public ModeracionService(NegocioRepository negocioRepository,
                              CambioPendienteRepository cambioRepository,
                              RegistroModeracionRepository logRepository,
                              UsuarioRepository usuarioRepository,
                              FotoRepository fotoRepository,
-                             FotoService fotoService) {
+                             FotoService fotoService,
+                             DenunciaRepository denunciaRepository,
+                             OpinionService opinionService) {
         this.negocioRepository = negocioRepository;
         this.cambioRepository = cambioRepository;
         this.logRepository = logRepository;
         this.usuarioRepository = usuarioRepository;
         this.fotoRepository = fotoRepository;
         this.fotoService = fotoService;
+        this.denunciaRepository = denunciaRepository;
+        this.opinionService = opinionService;
     }
 
     // ---------- Cola de revisión ----------
@@ -160,6 +171,75 @@ public class ModeracionService {
 
         cambioRepository.delete(cambio);
         return NegocioMapper.aRespuesta(negocioRepository.save(negocio));
+    }
+
+    // ---------- Opiniones denunciadas (C3, C4) ----------
+
+    /** La cola de denuncias sin resolver, las más antiguas primero. */
+    public Page<DenunciaResponse> denunciasPendientes(Pageable pageable) {
+        return denunciaRepository
+                .findByEstadoOrderByFechaAsc(EstadoDenuncia.PENDIENTE, pageable)
+                .map(this::aRespuesta);
+    }
+
+    /**
+     * Da la razón a la denuncia y borra la opinión.
+     *
+     * <p>El motivo es obligatorio y queda en el log: borrar lo que alguien
+     * escribió es la acción menos reversible del panel, y sin una razón escrita
+     * no habría forma de explicar después por qué se hizo.
+     *
+     * <p>El borrado se delega en {@code OpinionService} porque arrastra dos
+     * efectos que no son de la moderación: se lleva las demás denuncias sobre
+     * esa opinión y <strong>obliga a recalcular el promedio del negocio</strong>.
+     */
+    @Transactional
+    public void eliminarOpinionDenunciada(Long denunciaId, String motivo, Usuario admin) {
+        if (motivo == null || motivo.isBlank()) {
+            throw new ReglaDeNegocioException("Borrar una opinión exige un motivo");
+        }
+
+        Denuncia denuncia = buscarDenuncia(denunciaId);
+        Opinion opinion = denuncia.getOpinion();
+        String afectado = opinion.getAutor().getNombre() + " · " + opinion.getNegocio().getNombre();
+
+        opinionService.eliminarPorModeracion(opinion);
+        registrar(TipoEventoModeracion.OPINION_ELIMINADA, afectado, motivo, admin);
+    }
+
+    /**
+     * Desestima la denuncia: la opinión se queda publicada.
+     *
+     * <p>La denuncia no se borra, cambia de estado. Que quede constancia de que
+     * se miró y se decidió que no había nada es justo lo que hace útil el log.
+     */
+    @Transactional
+    public void desestimarDenuncia(Long denunciaId, Usuario admin) {
+        Denuncia denuncia = buscarDenuncia(denunciaId);
+        if (denuncia.getEstado() != EstadoDenuncia.PENDIENTE) {
+            throw new ReglaDeNegocioException("Esta denuncia ya estaba resuelta");
+        }
+
+        denuncia.setEstado(EstadoDenuncia.DESESTIMADA);
+        denunciaRepository.save(denuncia);
+
+        registrar(TipoEventoModeracion.DENUNCIA_DESESTIMADA,
+                denuncia.getOpinion().getNegocio().getNombre(),
+                denuncia.getMotivo().getNombre(), admin);
+    }
+
+    private Denuncia buscarDenuncia(Long id) {
+        return denunciaRepository.findWithDetalleById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Denuncia", id));
+    }
+
+    private DenunciaResponse aRespuesta(Denuncia denuncia) {
+        Opinion opinion = denuncia.getOpinion();
+        return new DenunciaResponse(denuncia.getId(), opinion.getId(),
+                opinion.getNegocio().getNombre(), opinion.getAutor().getNombre(),
+                opinion.getCalificacion(), opinion.getComentario(),
+                denuncia.getMotivo().name(), denuncia.getMotivo().getNombre(),
+                denuncia.getDenunciante().getNombre(), denuncia.getFecha());
     }
 
     // ---------- Cuentas ----------
