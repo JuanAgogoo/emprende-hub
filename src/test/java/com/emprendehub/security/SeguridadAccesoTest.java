@@ -137,6 +137,65 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("Las opiniones de un negocio se leen sin sesión")
+    void opiniones_sinToken_noDevuelve401() throws Exception {
+        // El negocio 999999 no existe: un 404 es correcto, un 401 diría que la
+        // ruta está cerrada y las opiniones se leen sin registrarse.
+        mockMvc.perform(get("/api/v1/negocios/999999/opiniones"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Publicar una opinión sí exige sesión (C1)")
+    void publicarOpinion_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(post("/api/v1/negocios/1/opiniones")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"calificacion\":5}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("La opinión propia no se consulta sin sesión")
+    void opinionPropia_sinToken_devuelve401() throws Exception {
+        // El patrón que abre la lista lleva un solo asterisco a propósito:
+        // /mia queda fuera y sigue exigiendo token.
+        mockMvc.perform(get("/api/v1/negocios/1/opiniones/mia"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Denunciar una opinión exige sesión (C3)")
+    void denunciar_sinToken_devuelve401() throws Exception {
+        mockMvc.perform(post("/api/v1/opiniones/1/denuncias")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"motivo\":\"SPAM\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("La cola de denuncias es solo del administrador")
+    void denuncias_conTokenDeCliente_devuelve403() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/denuncias")
+                        .header("Authorization", "Bearer " + tokenCliente))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("La cola de denuncias sí la ve el administrador")
+    void denuncias_conTokenDeAdmin_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/denuncias")
+                        .header("Authorization", "Bearer " + tokenAdmin))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Los motivos de denuncia son un catálogo público (C6)")
+    void motivosDenuncia_sinToken_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/catalogos/motivos-denuncia"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("El registro es público")
     void registro_sinToken_noDevuelve401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")
