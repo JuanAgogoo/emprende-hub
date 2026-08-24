@@ -5,10 +5,19 @@ el docente y quien sustente. Va versionada en Git y se entrega con el repositori
 
 ## Índice
 
-- [decisiones-dominio.md](decisiones-dominio.md) — Las 33 decisiones de dominio, con quién las tomó y por qué.
-- [arquitectura.md](arquitectura.md) — Capas, dependencias y dónde va cada cosa.
+**Qué construimos y por qué**
+
+- [decisiones-dominio.md](decisiones-dominio.md) — Todas las reglas de negocio,
+  con su código (`B2-bis`, `G7`, `C7`…). Se citan desde el código y los PRs.
+- [arquitectura.md](arquitectura.md) — Stack, capas, seguridad y decisiones técnicas.
+- [api.md](api.md) — El contrato de los endpoints, con un recorrido de demostración.
+
+**Cómo lo construimos**
+
+- [pruebas.md](pruebas.md) — Los tres niveles, la cobertura y las trampas que ya
+  costaron tiempo.
 - [flujo-de-trabajo.md](flujo-de-trabajo.md) — Ramas, commits, Pull Requests y release.
-- [plan-de-entrega.md](plan-de-entrega.md) — Los 13 incrementos, uno por rama y PR.
+- [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos, uno por rama y PR.
 
 ## Material del curso
 
