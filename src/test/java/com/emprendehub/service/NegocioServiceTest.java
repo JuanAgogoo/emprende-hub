@@ -45,6 +45,7 @@ class NegocioServiceTest {
     @Mock private CategoriaNegocioRepository categoriaRepository;
     @Mock private CiudadRepository ciudadRepository;
     @Mock private BarrioRepository barrioRepository;
+    @Mock private com.emprendehub.repository.CambioPendienteRepository cambioRepository;
 
     @InjectMocks private NegocioService service;
 
@@ -240,5 +241,100 @@ class NegocioServiceTest {
         when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.obtenerElMio(cliente()));
+    }
+
+    // ---------- Edición por el dueño (B1 y B2-bis) ----------
+
+    private Negocio negocioAprobado() {
+        Negocio n = new Negocio(cliente(), "Panadería La Tradicional", DESCRIPCION_VALIDA,
+                "3001234567", gastronomia(), medellin(), null, NivelPrecio.MEDIO);
+        n.setId(7L);
+        n.setEstado(com.emprendehub.model.EstadoNegocio.APROBADO);
+        return n;
+    }
+
+    private com.emprendehub.dto.EditarNegocioPublicoRequest edicion(String nombre) {
+        return new com.emprendehub.dto.EditarNegocioPublicoRequest(nombre, DESCRIPCION_VALIDA);
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: no toca el negocio, guarda la propuesta aparte")
+    void proponerCambio_noTocaElNegocio() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.empty());
+
+        NegocioResponse respuesta = service.proponerCambioPublico(cliente(), edicion("Nombre Nuevo"));
+
+        // El negocio sigue publicado con su nombre anterior: el público no se entera.
+        assertEquals("Panadería La Tradicional", respuesta.nombre());
+        assertEquals("APROBADO", respuesta.estado());
+        verify(cambioRepository).save(any());
+        verify(negocioRepository, never()).save(any(Negocio.class));
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: una propuesta nueva sustituye a la anterior")
+    void proponerCambio_conPropuestaViva_laSustituye() {
+        Negocio negocio = negocioAprobado();
+        var existente = new com.emprendehub.model.CambioPendiente(
+                negocio, "Nombre Viejo", DESCRIPCION_VALIDA);
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.of(existente));
+
+        service.proponerCambioPublico(cliente(), edicion("Nombre Nuevo"));
+
+        assertEquals("Nombre Nuevo", existente.getNombrePropuesto());
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: un negocio pendiente no propone cambios")
+    void proponerCambio_negocioPendiente_lanzaExcepcion() {
+        Negocio negocio = negocioAprobado();
+        negocio.setEstado(com.emprendehub.model.EstadoNegocio.PENDIENTE);
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.proponerCambioPublico(cliente(), edicion("X")));
+    }
+
+    @Test
+    @DisplayName("actualizarContacto: el teléfono se aplica al instante, sin revisión")
+    void actualizarContacto_seAplicaAlInstante() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.actualizarContacto(cliente(),
+                new com.emprendehub.dto.EditarContactoRequest("6044440000"));
+
+        assertEquals("6044440000", respuesta.telefono());
+        assertEquals("APROBADO", respuesta.estado());
+        verify(cambioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("corregirYReenviar: un rechazado vuelve a PENDIENTE y pierde el motivo")
+    void corregirYReenviar_rechazado_vuelveAPendiente() {
+        Negocio negocio = negocioAprobado();
+        negocio.setEstado(com.emprendehub.model.EstadoNegocio.RECHAZADO);
+        negocio.setMotivoRechazo("La descripción es insuficiente");
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.corregirYReenviar(cliente(), edicion("Panadería Corregida"));
+
+        assertEquals("PENDIENTE", respuesta.estado());
+        assertEquals("Panadería Corregida", respuesta.nombre());
+        assertNull(respuesta.motivoRechazo());
+    }
+
+    @Test
+    @DisplayName("corregirYReenviar: solo se reenvía lo rechazado")
+    void corregirYReenviar_aprobado_lanzaExcepcion() {
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocioAprobado()));
+
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.corregirYReenviar(cliente(), edicion("X")));
     }
 }
