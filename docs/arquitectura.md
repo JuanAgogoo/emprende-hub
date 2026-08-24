@@ -316,3 +316,37 @@ autenticación en cada prueba y esconde lo que cada una comprueba.
 **Nota sobre paquetes de Spring Boot 4**: `TestRestTemplate` se movió a
 `org.springframework.boot.resttestclient` y su bean no se autoconfigura, por eso
 las pruebas de HTTP real usan `java.net.http.HttpClient`.
+
+## Corrección sobre los conjuntos cerrados
+
+En la sección de features de Java 25 se dijo que el estado del negocio sería una
+`sealed interface`. **No es viable**: JPA necesita un `@Enumerated` para
+persistir, y una interfaz sellada no lo es. `EstadoNegocio` queda como enum.
+
+Donde la `sealed interface` sí encaja —y donde se usa— es en
+`DecisionModeracion`, que modela la decisión del administrador. Es un conjunto
+cerrado con **datos distintos en cada rama**: aprobar no lleva información y
+rechazar exige un motivo. El `switch` sobre ella es exhaustivo, así que añadir
+una tercera decisión rompería la compilación en todos los sitios que la tratan,
+en vez de fallar en ejecución.
+
+La regla general: `sealed interface` para conjuntos cerrados que **no se
+persisten** y cuyas ramas llevan datos distintos; enum para lo que va a una
+columna.
+
+## Filtros opcionales en PostgreSQL
+
+Ha aparecido dos veces y aparecerá más: **un parámetro que puede llegar a null
+necesita un `CAST` explícito en la consulta.** PostgreSQL no infiere su tipo y
+responde con errores desconcertantes:
+
+| Tipo del parámetro | Error sin `CAST` |
+|---|---|
+| `String` | `function lower(bytea) does not exist` |
+| `Instant` | `could not determine data type of parameter $1` |
+
+Los parámetros de tipo enum no se ven afectados.
+
+**Toda consulta con filtros opcionales necesita su prueba de repositorio.** El
+fallo del log de moderación se coló hasta la API real precisamente porque esa
+prueba no existía; las de servicio, con el repositorio simulado, no pueden verlo.
