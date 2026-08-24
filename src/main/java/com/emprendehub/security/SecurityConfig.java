@@ -53,10 +53,13 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         // Registro e inicio de sesión: público por definición.
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        // El directorio se explora sin registrarse, así que los
-                        // catálogos y el catálogo de cursos son públicos.
+                        // El directorio se explora sin registrarse, así que él,
+                        // los catálogos, el catálogo de cursos y las cifras de la
+                        // portada son públicos.
                         .requestMatchers(HttpMethod.GET, "/api/v1/catalogos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/cursos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/directorio/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/estadisticas/**").permitAll()
                         // Toda la gestión cuelga de /admin y es solo del ADMIN.
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

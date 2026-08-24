@@ -1,8 +1,10 @@
 package com.emprendehub.exception;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * Único punto del sistema que decide códigos HTTP.
@@ -50,6 +53,28 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Un parámetro que no se puede convertir al tipo que espera el controlador:
+     * {@code ?orden=MAS_BARATOS} o {@code /directorio/abc}.
+     *
+     * <p>Sin este manejador la respuesta seguía siendo 400, pero con el cuerpo
+     * por defecto de Spring —con {@code path} y sin {@code message}—, que no es
+     * el formato que documenta {@code docs/api.md}. Era el único 400 del sistema
+     * con otra forma.
+     *
+     * <p>Cuando lo que falla es un enum se enumeran los valores admitidos: son
+     * parte del contrato público y ahorran tener que abrir la documentación.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> tipoIncorrecto(
+            MethodArgumentTypeMismatchException ex) {
+        String detalle = detalleDe(ex);
+        Map<String, Object> respuesta = cuerpo(HttpStatus.BAD_REQUEST, detalle);
+        // Una clave por parámetro inválido, igual que en la validación de campos.
+        respuesta.put(ex.getName(), detalle);
+        return ResponseEntity.badRequest().body(respuesta);
+    }
+
+    /**
      * Credenciales que no cuadran.
      *
      * <p>El mensaje es deliberadamente vago: decir si falla el correo o la
@@ -73,6 +98,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> accesoDenegado(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(cuerpo(HttpStatus.FORBIDDEN, "No tienes permiso para esta operación"));
+    }
+
+    private String detalleDe(MethodArgumentTypeMismatchException ex) {
+        Class<?> esperado = ex.getRequiredType();
+        if (esperado != null && esperado.isEnum()) {
+            String admitidos = Arrays.stream(esperado.getEnumConstants())
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", "));
+            return "«%s» no es un valor válido para %s. Se admiten: %s"
+                    .formatted(ex.getValue(), ex.getName(), admitidos);
+        }
+        return "«%s» no es un valor válido para %s".formatted(ex.getValue(), ex.getName());
     }
 
     private Map<String, Object> cuerpo(HttpStatus estado, String mensaje) {

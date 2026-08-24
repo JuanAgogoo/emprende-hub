@@ -72,6 +72,32 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("El directorio se explora sin registrarse, como promete la portada")
+    void directorio_sinToken_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/directorio")).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Los destacados de la portada también son públicos")
+    void destacados_sinToken_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/directorio/destacados")).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Un perfil que no existe devuelve 404 sin sesión, no 401")
+    void perfilPublico_sinToken_devuelve404() throws Exception {
+        // Importa la distinción: si la ruta no fuera pública, la respuesta sería
+        // 401 y el visitante no sabría si el negocio existe o si le falta entrar.
+        mockMvc.perform(get("/api/v1/directorio/999999")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Las cifras de la portada se leen sin sesión")
+    void estadisticas_sinToken_devuelve200() throws Exception {
+        mockMvc.perform(get("/api/v1/estadisticas/portada")).andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("El registro es público")
     void registro_sinToken_noDevuelve401() throws Exception {
         mockMvc.perform(post("/api/v1/auth/registro")

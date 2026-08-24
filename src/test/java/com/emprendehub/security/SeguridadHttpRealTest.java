@@ -85,4 +85,23 @@ class SeguridadHttpRealTest {
     void catalogos_sinToken_devuelve200() throws Exception {
         assertEquals(200, pedir("/api/v1/catalogos/ciudades", null).statusCode());
     }
+
+    @Test
+    @DisplayName("El directorio se explora sin sesión, también sobre HTTP real")
+    void directorio_sinToken_devuelve200() throws Exception {
+        assertEquals(200, pedir("/api/v1/directorio", null).statusCode());
+    }
+
+    @Test
+    @DisplayName("Un negocio no publicado devuelve 404 sin sesión, y el 404 llega entero")
+    void perfilPublico_inexistente_devuelve404ConCuerpo() throws Exception {
+        // El 404 de una ruta pública también pasa por el reenvío interno a
+        // /error. Si ese reenvío volviera a filtrarse sin token, el visitante
+        // recibiría un 401 y sabría menos, no más, de lo que pasó (B6).
+        HttpResponse<String> respuesta = pedir("/api/v1/directorio/999999", null);
+
+        assertEquals(404, respuesta.statusCode());
+        assertTrue(respuesta.body().contains("404"),
+                "El cuerpo debería seguir hablando de 404: " + respuesta.body());
+    }
 }

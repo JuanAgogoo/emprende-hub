@@ -47,6 +47,16 @@ Los errores de validación añaden **una clave por campo inválido**:
 { "status": 400, "error": "Bad Request", "titulo": "El título es obligatorio" }
 ```
 
+Un parámetro de consulta que no se puede convertir sigue la misma forma, y
+cuando es de lista cerrada **enumera los valores admitidos**:
+
+```json
+{
+  "status": 400, "error": "Bad Request",
+  "orden": "«MAS_BARATOS» no es un valor válido para orden. Se admiten: CALIFICACION, NOMBRE, RECIENTES"
+}
+```
+
 | Código | Cuándo |
 |---|---|
 | `400` | Validación de forma, o una regla de negocio incumplida |
@@ -68,6 +78,10 @@ Todos los listados devuelven una página de Spring Data:
 ```json
 { "content": [ … ], "totalElements": 42, "totalPages": 4, "number": 0 }
 ```
+
+Dos excepciones, las dos del PR 9: el **directorio** ignora `sort` y ordena con
+su propio parámetro `orden`, de lista cerrada; y **destacados** devuelve una
+lista suelta, porque son seis y no se paginan.
 
 ---
 
@@ -120,6 +134,73 @@ Filtros, todos opcionales y combinables:
 ```
 
 El texto busca en título y descripción, sin distinguir mayúsculas.
+
+## Directorio · `/directorio`
+
+Público y sin sesión: la portada promete «explora sin necesidad de registrarte».
+
+| Método | Ruta | Acceso | Devuelve |
+|---|---|---|---|
+| `GET` | `/directorio` | Público | Página filtrable de negocios |
+| `GET` | `/directorio/destacados` | Público | Lista de destacados (C7) |
+| `GET` | `/directorio/{id}` | Público | Perfil público, o `404` |
+
+**Solo salen los negocios aprobados de cuentas activas.** Uno pendiente,
+rechazado o de un dueño suspendido no aparece en el listado y su identificador
+responde `404`, nunca `403` (B6, B4). Mientras un cambio espera revisión, el
+público sigue viendo la versión aprobada (B2-bis).
+
+Filtros, todos opcionales y combinables:
+
+```
+?texto=pan&categoriaId=1&ciudadId=2&barrioId=1&calificacionMinima=4.0&nivelPrecio=MEDIO
+```
+
+| Filtro | Qué hace |
+|---|---|
+| `texto` | Busca en **nombre y descripción**, sin distinguir mayúsculas (G6) |
+| `categoriaId` | Una de las 12 categorías (G1) |
+| `ciudadId` | Ciudad. Incluye a los negocios **sin barrio** |
+| `barrioId` | Afina dentro de la ciudad (G3) |
+| `calificacionMinima` | Deja fuera a quien todavía no tiene calificación (C5) |
+| `nivelPrecio` | `BAJO`, `MEDIO` o `ALTO`. **No hay «Gratis»** (G4) |
+
+La ordenación es un conjunto cerrado, no un nombre de columna:
+
+```
+?orden=CALIFICACION   # por defecto: mejor calificados
+?orden=NOMBRE         # A-Z
+?orden=RECIENTES      # por fecha de APROBACIÓN, no de creación (G7)
+```
+
+Un `orden` o un `nivelPrecio` que no esté en la lista devuelve `400`. Los
+negocios sin calificación van **al final**, no al principio: no tener opiniones
+no es lo mismo que tener malas notas (C5).
+
+`/directorio/destacados` devuelve **una lista, no una página**: son seis por
+defecto, con `?limite=` entre 1 y 12. Solo entran los que tienen **al menos
+cinco opiniones** (C7); sin ese mínimo, una sola opinión de 5★ desplazaría de la
+portada a un negocio con 4,9 y 320 opiniones.
+
+El perfil público **no lleva el estado ni el motivo del rechazo**, que son
+conversación entre el dueño y el administrador. El teléfono sí es público; el
+correo no aparece nunca.
+
+## Estadísticas · `/estadisticas`
+
+| Método | Ruta | Acceso | Devuelve |
+|---|---|---|---|
+| `GET` | `/estadisticas/portada` | Público | Las cuatro cifras de la barra |
+
+```json
+{ "negociosActivos": 12, "categorias": 12, "usuariosRegistrados": 34, "calificacionPromedio": 4.7 }
+```
+
+**Cifras calculadas, no fijas** (H4). Se cuentan con el mismo criterio con el que
+el directorio enseña: un negocio que no se ve tampoco suma. Los usuarios
+registrados excluyen al administrador, que es una cuenta sembrada (A3). Mientras
+no haya ninguna opinión, `calificacionPromedio` viaja como **nulo y no como
+cero** (C5).
 
 ## Negocios · `/negocios`
 
@@ -229,15 +310,24 @@ curl -X PUT $A/negocios/mio -H "Authorization: Bearer $TC" \
 # 7. El administrador aprueba el cambio y ahora sí se publica
 curl -X PATCH $A/admin/moderacion/negocios/1/cambio/aprobar -H "Authorization: Bearer $TA"
 
-# 8. Todo quedó registrado
+# 8. Y ya se busca en el directorio, sin ninguna sesión
+curl "$A/directorio?texto=pan&ciudadId=2&orden=RECIENTES"
+curl $A/directorio/1
+curl $A/estadisticas/portada
+
+# 9. Si el administrador suspende al dueño, el negocio sale del directorio (B4)
+curl -X PATCH $A/admin/moderacion/usuarios/2/suspender -H "Authorization: Bearer $TA"
+curl $A/directorio            # ya no está
+curl $A/directorio/1          # 404, no 403
+
+# 10. Todo quedó registrado
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 ```
 
 ## Lo que todavía no existe
 
-Llega en los PR 9 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
+Llega en los PR 10 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
 
-- Directorio público con búsqueda y filtros, y destacados (PR 9)
 - Fotos, productos y redes sociales (PR 10)
 - Opiniones y denuncias (PR 11)
 - Buzón de consultas (PR 12)

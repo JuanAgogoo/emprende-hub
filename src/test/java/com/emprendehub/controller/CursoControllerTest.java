@@ -58,7 +58,14 @@ class CursoControllerTest extends ControllerTestBase {
     @DisplayName("GET /api/v1/cursos con una categoría inventada devuelve 400")
     void buscar_categoriaInvalida_devuelve400() throws Exception {
         mockMvc.perform(get("/api/v1/cursos").param("categoria", "COCINA"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                // Este 400 salía con el cuerpo por defecto de Spring desde el
+                // PR 4: era el único del sistema con otra forma. Ahora pasa por
+                // el GlobalExceptionHandler como el resto.
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.path").doesNotExist())
+                .andExpect(jsonPath("$.categoria").exists());
     }
 
     @Test
