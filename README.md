@@ -62,7 +62,7 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 52 endpoints y un recorrido de demostración de
+**El contrato completo, con los 55 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Pruebas

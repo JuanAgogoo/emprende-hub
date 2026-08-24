@@ -375,6 +375,60 @@ veces la misma.
 **Denunciar no oculta la opinión**: sigue publicada mientras el administrador
 decide. Esconderla al primer aviso convertiría el botón en uno de censurar.
 
+## Consultas · buzón del negocio
+
+Todo exige sesión. El cliente escribe desde el perfil; el dueño lee en su panel.
+
+| Método | Ruta | Acceso | Hace |
+|---|---|---|---|
+| `POST` | `/negocios/{id}/consultas` | Sesión | Escribe al negocio (`201`) |
+| `GET` | `/negocios/mio/consultas` | Dueño | Su buzón, las más recientes primero |
+| `PATCH` | `/negocios/mio/consultas/{id}/lectura?leida=true` | Dueño | Marca leída o la desmarca |
+
+| Campo | Regla |
+|---|---|
+| `asunto` | Obligatorio, 120 caracteres como mucho |
+| `mensaje` | Obligatorio, **500 caracteres** como mucho |
+
+La petición **no lleva nombre ni correo**: contactar exige sesión, así que salen
+de la cuenta y no de un formulario donde cualquiera podría escribir el correo de
+otra persona.
+
+**Solo se escribe a negocios publicados** (B6), y nadie se escribe a su propio
+buzón.
+
+### El correo del cliente
+
+```json
+{
+  "asunto": "Ramo para un cumpleaños",
+  "mensaje": "¿Entregan a domicilio el sábado?",
+  "nombreCliente": "María García", "correoCliente": "maria@gmail.com",
+  "leida": false, "fechaLectura": null
+}
+```
+
+**Es la única respuesta de la API que enseña el correo de otra persona**, y es a
+propósito (D2). La plataforma no envía correos (I1) ni permite responder desde
+dentro, así que sin esa dirección el buzón sería un montón de preguntas sin forma
+de contestarlas. La excepción está acotada: el correo **no aparece** en el
+directorio, ni en el perfil público, ni en las opiniones, y solo lo recibe el
+dueño del negocio al que va dirigida la consulta.
+
+### Leídas y no leídas
+
+`?leida=false` devuelve las pendientes, y el `totalElements` de esa página es el
+número que el panel enseña como aviso: no hace falta un endpoint de contador.
+
+**Listar el buzón no marca nada como leído.** Abrir la pantalla para echar un
+vistazo no es lo mismo que haber atendido lo que hay dentro, así que el estado lo
+decide el dueño con `PATCH`. Desmarcar una consulta le quita también la fecha de
+lectura: dejarla puesta diría que se abrió y se ignoró.
+
+**No hay respuesta desde la plataforma** (D2) ni hilo de conversación. Es un
+buzón de entrada, y la limitación es deliberada: montar mensajería de ida y
+vuelta sin correos habría exigido que las dos partes entraran a mirar.
+
 ## Gestión de cursos · `/admin/cursos`
 
 Solo **ADMIN** (E3). A diferencia del catálogo público, aquí se ven los borradores.
@@ -509,15 +563,21 @@ curl -X POST $A/opiniones/1/denuncias -H "Authorization: Bearer $TC" \
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/denuncias
 curl -X PATCH $A/admin/moderacion/denuncias/1/desestimar -H "Authorization: Bearer $TA"
 
+# 9-quater. Un cliente pregunta y la dueña lo lee en su buzón (D1, D2, D3)
+curl -X POST $A/negocios/1/consultas -H "Authorization: Bearer $TC2" \
+  -H 'Content-Type: application/json' \
+  -d '{"asunto":"Reserva para 4","mensaje":"¿Tienen mesa el sábado a las 8?"}'
+curl -H "Authorization: Bearer $TC" "$A/negocios/mio/consultas?leida=false"
+curl -X PATCH "$A/negocios/mio/consultas/1/lectura?leida=true" -H "Authorization: Bearer $TC"
+
 # 10. Todo quedó registrado
 curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 ```
 
 ## Lo que todavía no existe
 
-Llega en los PR 12 a 14, según [plan-de-entrega.md](plan-de-entrega.md):
+Llega en los PR 13 y 14, según [plan-de-entrega.md](plan-de-entrega.md):
 
-- Buzón de consultas (PR 12)
 - Visitas y notificaciones (PR 13)
 
 **Al añadir endpoints, actualizar este documento en el mismo PR.** Un contrato
