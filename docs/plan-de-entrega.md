@@ -106,8 +106,8 @@ punto en que la documentación había acumulado suficiente deriva como para
 estorbar en vez de ayudar.
 
 ### PR 8 · `docs/consolidacion`
-Contrato de la API con los 27 endpoints existentes, que hasta ahora no estaban
-listados en ningún sitio. Se corrige una contradicción interna de
+Contrato de la API con los 28 endpoints que existían entonces, que hasta ahora no
+estaban listados en ningún sitio. Se corrige una contradicción interna de
 `arquitectura.md` y se parte en dos, separando el diseño de cómo se prueba. El
 README pasa a explicar cómo llamar a la API, no solo cómo arrancarla.
 
@@ -185,3 +185,18 @@ chore: añadir datos de prueba, colección de Postman y documentación final
 El umbral del 80% sobre `service/**` se verifica en cada PR desde el 4. Un PR que
 lo baje no se fusiona: es más barato escribir la prueba en su incremento que
 recuperar cobertura al final.
+
+## Resultado
+
+Los catorce incrementos se entregaron. El contador de este documento se quedó
+atrás una vez —decía 27 endpoints donde había 28—, así que aquí queda la cifra
+final para no volver a arrastrarla:
+
+| | |
+|---|---|
+| Endpoints | **59**, todos en [api.md](api.md) y en la colección de Postman |
+| Pruebas | **427** en verde, en los tres niveles |
+| Cobertura de `service/**` | **98,4%**, sobre el 80% que exige la rúbrica |
+
+**Al cambiar el código, actualizar estas cifras aquí y en el README.** Un número
+en un documento entregable envejece peor que no ponerlo.

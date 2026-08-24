@@ -201,6 +201,36 @@ Tomadas por el equipo de desarrollo. No requieren validación del cliente.
   del prototipo, el admin, algunos clientes, opiniones e histórico de visitas. Sin
   ellos la demo con Postman no demuestra nada y la gráfica de H1 sale vacía.
 
+### Decisiones tomadas durante la implementación
+
+Las anteriores se tomaron antes de escribir código. Estas cinco salieron de
+construirlo, y son las que más fácil se preguntan en una revisión.
+
+- **El reloj es un bean `Clock`**, publicado en la zona `America/Bogota`. Con
+  `LocalDate.now()` dentro del servicio, probar «los últimos siete días frente a
+  los siete anteriores» dependería del día en que se ejecutara la prueba; con el
+  reloj inyectado se le pasa un `Clock.fixed`. La zona no es cosmética: en UTC, el
+  día de un negocio de Medellín cortaría a las siete de la tarde.
+- **Los cuatro `CommandLineRunner` llevan `@Order`** (catálogos → admin → cursos →
+  demostración). Spring no garantiza el orden entre ellos, y sin esto la siembra
+  arranca antes que los catálogos y falla buscando una categoría que aún no existe.
+- **Unicidad en el esquema para opiniones y denuncias, deliberadamente no para
+  visitas.** Una opinión duplicada rompe C2 y hay que impedirla en la base de
+  datos, porque el servicio no ve dos peticiones simultáneas. Una visita duplicada
+  solo desvía un contador: poner ahí la restricción convertiría una carrera en un
+  **500 en el perfil público**, y ninguna métrica justifica romper la página que
+  la produce. La deduplicación de H1 es una heurística de conteo, no un invariante.
+- **La ordenación del directorio es un conjunto cerrado** (`OrdenDirectorio`), no
+  el `sort` de Spring Data. El cliente elige entre tres criterios y no entre
+  cualquier columna de la tabla; un valor fuera de la lista devuelve 400. La
+  traducción a columnas vive en el servicio, incluido el `NULLS LAST` que exige C5.
+- **Cada notificación la crea el servicio donde ocurre el hecho**, no un proceso
+  aparte que vigile la base de datos: `OpinionService`, `ConsultaService` y
+  `ModeracionService` llaman a `NotificacionService`. Por el mismo motivo, el
+  borrado de una opinión por moderación **se delega en `OpinionService`**: allí el
+  recálculo del promedio es imposible de saltarse, y es el momento que más fácil
+  se olvida porque no lo dispara su autor.
+
 ## Primer vertical
 
 Cursos, por ser la entidad más simple: un CRUD sin relaciones, sin aprobación y
