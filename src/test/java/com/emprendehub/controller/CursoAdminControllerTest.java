@@ -17,17 +17,26 @@ import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.service.CursoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
+/**
+ * Comportamiento del controlador de gestión: códigos HTTP y contrato de errores.
+ *
+ * <p>Se desactiva la cadena de filtros con {@code addFilters = false} para que
+ * la autenticación no enturbie lo que aquí se prueba. Aun así hereda de
+ * {@link ControllerTestBase}, porque {@code @WebMvcTest} carga igualmente
+ * {@code SecurityConfig} y sin sus dependencias el contexto ni siquiera
+ * arranca.
+ *
+ * <p>Que estas rutas exijan rol ADMIN se verifica aparte, en
+ * {@code SeguridadAccesoTest}, que es su sitio.
+ */
 @WebMvcTest(CursoAdminController.class)
-class CursoAdminControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
+@AutoConfigureMockMvc(addFilters = false)
+class CursoAdminControllerTest extends ControllerTestBase {
 
     @MockitoBean
     private CursoService cursoService;
