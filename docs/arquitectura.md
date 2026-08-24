@@ -281,3 +281,38 @@ Además del código, la entrega incluye:
 - **Datos sembrados** por `CommandLineRunner`, condicionado a que la base esté vacía.
 - **`docker-compose.yml`** que levanta PostgreSQL con un solo comando.
 - **README** con los pasos para arrancar y ejecutar las pruebas.
+
+## Lecciones de la seguridad
+
+Tres cosas que costaron tiempo y que conviene no repetir en los PR siguientes.
+
+**`/error` tiene que estar abierto en la cadena de filtros.** Cuando la
+autorización rechaza una petición, Spring hace un reenvío interno a `/error`
+para construir el cuerpo de la respuesta. Ese reenvío vuelve a pasar por la
+cadena, ya sin la cabecera del token, cae en `anyRequest().authenticated()` y el
+401 acaba pisando al 403 que la autorización había decidido. El síntoma es
+desconcertante: los registros dicen «Responding with 403» y el cliente recibe un
+401.
+
+**MockMvc no ejecuta ese reenvío**, así que el fallo anterior pasó desapercibido
+a noventa y tres pruebas y solo apareció llamando a la API con curl. Por eso
+existe `SeguridadHttpRealTest`, que levanta el servidor y usa el cliente HTTP del
+JDK. Cualquier comportamiento que dependa del ciclo de error necesita una prueba
+de ese tipo.
+
+**`@WebMvcTest` sí carga `SecurityConfig`**, aunque no cargue el resto de
+configuraciones. Sin sus dependencias el contexto ni siquiera arranca, y con
+ellas la política por defecto de Spring Security haría que hasta los endpoints
+públicos respondieran 401. De ahí `ControllerTestBase`, que importa la
+configuración real para que cada prueba se ejecute contra las mismas reglas que
+producción.
+
+**Autorización y comportamiento del controlador se prueban por separado.** Las
+clases de controlador desactivan los filtros con `addFilters = false` y se
+centran en códigos de estado y contrato de errores; que cada ruta exija el rol
+correcto se verifica en `SeguridadAccesoTest`. Mezclarlo obliga a repetir la
+autenticación en cada prueba y esconde lo que cada una comprueba.
+
+**Nota sobre paquetes de Spring Boot 4**: `TestRestTemplate` se movió a
+`org.springframework.boot.resttestclient` y su bean no se autoconfigura, por eso
+las pruebas de HTTP real usan `java.net.http.HttpClient`.

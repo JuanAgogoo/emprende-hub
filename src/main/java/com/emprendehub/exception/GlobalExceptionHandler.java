@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,6 +47,32 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors()
                 .forEach(e -> respuesta.put(e.getField(), e.getDefaultMessage()));
         return ResponseEntity.badRequest().body(respuesta);
+    }
+
+    /**
+     * Credenciales que no cuadran.
+     *
+     * <p>El mensaje es deliberadamente vago: decir si falla el correo o la
+     * contraseña le confirmaría a un atacante qué cuentas existen.
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> credencialesInvalidas(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(cuerpo(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas"));
+    }
+
+    /** Cuenta suspendida por el administrador (B4). */
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<Map<String, Object>> cuentaSuspendida(DisabledException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(cuerpo(HttpStatus.FORBIDDEN, "La cuenta está suspendida"));
+    }
+
+    /** Autenticado, pero sin permiso para esta operación. */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> accesoDenegado(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(cuerpo(HttpStatus.FORBIDDEN, "No tienes permiso para esta operación"));
     }
 
     private Map<String, Object> cuerpo(HttpStatus estado, String mensaje) {

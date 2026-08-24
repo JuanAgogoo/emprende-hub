@@ -26,6 +26,14 @@ spring:
   jackson:
     time-zone: America/Bogota
 
+jwt:
+  # Clave de 256 bits como mínimo, que es lo que exige HS256 y lo que advierte
+  # el taller. En un despliegue real llegaría por variable de entorno; aquí el
+  # valor por defecto sirve para desarrollo y para la demostración.
+  secret-key: ${JWT_SECRET:ZW1wcmVuZGVodWItY2xhdmUtZGUtZGVzYXJyb2xsby1zb2xvLTI1Ni1iaXRz}
+  # Una hora, el plazo corto que recomienda el taller.
+  expiration: ${JWT_EXPIRATION:3600000}
+
 server:
   port: ${PORT:8080}
 

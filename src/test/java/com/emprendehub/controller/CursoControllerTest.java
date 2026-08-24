@@ -12,17 +12,12 @@ import com.emprendehub.service.CursoService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(CursoController.class)
-class CursoControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
+class CursoControllerTest extends ControllerTestBase {
 
     @MockitoBean
     private CursoService cursoService;
