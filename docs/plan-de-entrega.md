@@ -21,8 +21,10 @@ chore: crear andamiaje del proyecto con las capas y PostgreSQL
 ```
 
 ### PR 2 · `ci/pipeline`
-Workflow de CI (build, pruebas, JaCoCo), `.releaserc.json`, plantilla de PR y
-protección de `main`. Ver [flujo-de-trabajo.md](flujo-de-trabajo.md).
+Workflow de CI en dos trabajos (`build` con PostgreSQL como *service container*,
+y `release` solo en `main`), JaCoCo acotado a `service/**`, `.releaserc.json` sin
+changelog y plantilla de PR. La protección de `main` se configura en los ajustes
+del repositorio, no en el código. Ver [flujo-de-trabajo.md](flujo-de-trabajo.md).
 
 ```
 ci: añadir workflow de integración continua y release automático
