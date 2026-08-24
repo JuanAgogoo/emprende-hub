@@ -7,22 +7,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.emprendehub.dto.BusquedaDirectorioRequest;
 import com.emprendehub.dto.NegocioPublicoResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Barrio;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
+import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.EstadoNegocio;
+import com.emprendehub.model.Foto;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
+import com.emprendehub.model.Producto;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
+import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.ProductoRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -44,6 +51,12 @@ class DirectorioServiceTest {
 
     @Mock
     private NegocioRepository repositorio;
+
+    @Mock
+    private FotoRepository fotoRepository;
+
+    @Mock
+    private ProductoRepository productoRepository;
 
     @InjectMocks
     private DirectorioService service;
@@ -68,7 +81,14 @@ class DirectorioServiceTest {
         negocio.setCalificacionPromedio(new BigDecimal("4.80"));
         negocio.setNumeroOpiniones(12);
         negocio.setMotivoRechazo("un rechazo antiguo que el público no debe ver");
+        negocio.setInstagram("https://instagram.com/panaderia");
         return negocio;
+    }
+
+    private Foto foto(Negocio negocio, String archivo, int orden) {
+        Foto foto = new Foto(negocio, archivo, orden);
+        foto.setEstado(EstadoFoto.APROBADA);
+        return foto;
     }
 
     /** Ejecuta una búsqueda y devuelve el {@code Pageable} que llegó al repositorio. */
@@ -198,6 +218,49 @@ class DirectorioServiceTest {
         assertNull(respuesta.barrio());
     }
 
+    // ---------- Portada de la tarjeta (B9) ----------
+
+    @Test
+    @DisplayName("La tarjeta lleva como portada la primera foto aprobada (B9)")
+    void buscar_tarjeta_llevaLaPrimeraFotoAprobada() {
+        Negocio negocio = negocioAprobado();
+        when(repositorio.buscarEnDirectorio(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(negocio)));
+        when(fotoRepository.findByNegocioIdInAndEstadoOrderByNegocioIdAscOrdenAsc(
+                List.of(7L), EstadoFoto.APROBADA))
+                .thenReturn(List.of(foto(negocio, "portada.jpg", 0),
+                        foto(negocio, "segunda.jpg", 1)));
+
+        NegocioPublicoResponse tarjeta =
+                service.buscar(SIN_FILTROS, null, Pageable.ofSize(12)).getContent().getFirst();
+
+        assertEquals("/fotos/portada.jpg", tarjeta.fotoPrincipal());
+    }
+
+    @Test
+    @DisplayName("Un negocio sin fotos aprobadas sale con la portada a nulo")
+    void buscar_sinFotos_portadaNula() {
+        when(repositorio.buscarEnDirectorio(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(negocioAprobado())));
+        when(fotoRepository.findByNegocioIdInAndEstadoOrderByNegocioIdAscOrdenAsc(
+                any(), any())).thenReturn(List.of());
+
+        assertNull(service.buscar(SIN_FILTROS, null, Pageable.ofSize(12))
+                .getContent().getFirst().fotoPrincipal());
+    }
+
+    @Test
+    @DisplayName("Una página vacía no pregunta por portadas")
+    void buscar_paginaVacia_noPideFotos() {
+        when(repositorio.buscarEnDirectorio(any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        service.buscar(SIN_FILTROS, null, Pageable.ofSize(12));
+
+        verify(fotoRepository, never())
+                .findByNegocioIdInAndEstadoOrderByNegocioIdAscOrdenAsc(any(), any());
+    }
+
     // ---------- Destacados (C7) ----------
 
     @Test
@@ -254,12 +317,34 @@ class DirectorioServiceTest {
     // ---------- Perfil público (B6) ----------
 
     @Test
-    @DisplayName("El perfil de un negocio visible se devuelve en su forma pública")
+    @DisplayName("El perfil de un negocio visible trae su galería y su escaparate")
     void perfilPublico_visible_loDevuelve() {
-        when(repositorio.buscarVisibleEnDirectorio(7L))
-                .thenReturn(Optional.of(negocioAprobado()));
+        Negocio negocio = negocioAprobado();
+        when(repositorio.buscarVisibleEnDirectorio(7L)).thenReturn(Optional.of(negocio));
+        when(fotoRepository.findByNegocioIdAndEstadoOrderByOrdenAsc(7L, EstadoFoto.APROBADA))
+                .thenReturn(List.of(foto(negocio, "portada.jpg", 0)));
+        when(productoRepository.findByNegocioIdOrderByNombreAsc(7L))
+                .thenReturn(List.of(new Producto(negocio, "Pan de masa madre",
+                        new BigDecimal("12000"), null, true)));
 
-        assertEquals("Panadería La Tradicional", service.obtenerPerfilPublico(7L).nombre());
+        PerfilNegocioResponse perfil = service.obtenerPerfilPublico(7L);
+
+        assertEquals("Panadería La Tradicional", perfil.nombre());
+        assertEquals("/fotos/portada.jpg", perfil.fotos().getFirst().url());
+        assertTrue(perfil.fotos().getFirst().principal());
+        assertEquals("Pan de masa madre", perfil.productos().getFirst().nombre());
+        assertEquals("https://instagram.com/panaderia", perfil.instagram());
+    }
+
+    @Test
+    @DisplayName("El perfil del público nunca enseña una foto sin revisar (B2)")
+    void perfilPublico_soloPideLasAprobadas() {
+        Negocio negocio = negocioAprobado();
+        when(repositorio.buscarVisibleEnDirectorio(7L)).thenReturn(Optional.of(negocio));
+
+        service.obtenerPerfilPublico(7L);
+
+        verify(fotoRepository).findByNegocioIdAndEstadoOrderByOrdenAsc(7L, EstadoFoto.APROBADA);
     }
 
     @Test

@@ -313,6 +313,51 @@ class NegocioServiceTest {
         verify(cambioRepository, never()).save(any());
     }
 
+    // ---------- Redes sociales (B8) ----------
+
+    @Test
+    @DisplayName("actualizarRedes: los enlaces se aplican al instante, sin revisión")
+    void actualizarRedes_seAplicanAlInstante() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.actualizarRedes(cliente(),
+                new com.emprendehub.dto.EditarRedesRequest(
+                        "https://instagram.com/panaderia",
+                        "https://linkedin.com/company/panaderia"));
+
+        assertEquals("https://instagram.com/panaderia", respuesta.instagram());
+        assertEquals("https://linkedin.com/company/panaderia", respuesta.linkedin());
+        assertEquals("APROBADO", respuesta.estado());
+        // Son datos de contacto, no contenido que el administrador revise (B2).
+        verify(cambioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("actualizarRedes: dejar un campo en blanco es quitar la red")
+    void actualizarRedes_enBlanco_quedaNula() {
+        Negocio negocio = negocioAprobado();
+        negocio.setInstagram("https://instagram.com/antigua");
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.actualizarRedes(cliente(),
+                new com.emprendehub.dto.EditarRedesRequest("   ", null));
+
+        assertNull(respuesta.instagram());
+        assertNull(respuesta.linkedin());
+    }
+
+    @Test
+    @DisplayName("actualizarRedes: quien no tiene negocio no tiene redes que cambiar")
+    void actualizarRedes_sinNegocio_lanzaNoEncontrado() {
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.actualizarRedes(cliente(),
+                new com.emprendehub.dto.EditarRedesRequest(null, null)));
+    }
+
     @Test
     @DisplayName("corregirYReenviar: un rechazado vuelve a PENDIENTE y pierde el motivo")
     void corregirYReenviar_rechazado_vuelveAPendiente() {
