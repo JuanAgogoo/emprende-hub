@@ -44,9 +44,14 @@ Lo que **no** necesita token, porque el directorio se explora sin registrarse:
 curl $A/catalogos/categorias-negocio
 curl $A/catalogos/ciudades
 curl "$A/cursos?categoria=MARKETING&gratuito=true"
+
+curl "$A/directorio?texto=pan&ciudadId=2&orden=RECIENTES"
+curl $A/directorio/destacados
+curl $A/directorio/1
+curl $A/estadisticas/portada
 ```
 
-**El contrato completo, con los 27 endpoints y un recorrido de demostración de
+**El contrato completo, con los 32 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Pruebas
