@@ -94,7 +94,7 @@ punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`postman/EmprendeHub.postman_collection.json`, con **65 peticiones que cubren los
+`postman/EmprendeHub.postman_collection.json`, con **71 peticiones que cubren los
 59 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
@@ -120,6 +120,7 @@ punta a punta, está en [docs/api.md](docs/api.md).**
 | 3 · Cliente | Opinar, denunciar y escribir al buzón |
 | 4 · Panel del emprendedor | Negocio, galería, escaparate, buzón, visitas y avisos |
 | 5 · Administración | Moderación, denuncias y cursos |
+| 6 · Seguridad | Los casos que tienen que fallar: 401, 403 y 400 |
 
 La variable `base` apunta a `http://localhost:8080/api/v1`.
 
