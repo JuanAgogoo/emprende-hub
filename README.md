@@ -94,18 +94,28 @@ punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`postman/EmprendeHub.postman_collection.json`, con **64 peticiones que cubren los
+`postman/EmprendeHub.postman_collection.json`, con **65 peticiones que cubren los
 59 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
-2. Ejecutar las tres primeras peticiones de **1 · Acceso**. Cada una guarda su
+2. Ejecutar las cuatro primeras peticiones de **1 · Acceso**. Cada una guarda su
    token en una variable de la colección.
 3. El resto de carpetas ya heredan el token que les toca: no hay que copiar nada
    a mano.
 
+> **La colección cambia datos, así que no es idempotente.** Aprueba el negocio
+> pendiente, publica el curso en borrador y renombra un negocio. Recorrerla dos
+> veces seguidas devuelve errores en la segunda pasada —«ya estaba publicado»,
+> «solo se resuelven negocios pendientes»— que son la regla de negocio haciendo
+> su trabajo, no un fallo. Para volver al estado inicial:
+>
+> ```bash
+> docker compose down -v && docker compose up -d && ./gradlew bootRun
+> ```
+
 | Carpeta | Qué contiene |
 |---|---|
-| 1 · Acceso | Los tres logins que dejan los tokens listos |
+| 1 · Acceso | Los cuatro logins que dejan los tokens listos |
 | 2 · Público | Todo lo que se explora sin registrarse |
 | 3 · Cliente | Opinar, denunciar y escribir al buzón |
 | 4 · Panel del emprendedor | Negocio, galería, escaparate, buzón, visitas y avisos |
