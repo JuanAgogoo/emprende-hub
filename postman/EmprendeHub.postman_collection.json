@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "EmprendeHub API",
-    "description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedora**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nTodas las cuentas sembradas usan la contraseña `contrasena123`; el administrador usa `admin12345`.",
+    "description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedor**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nTodas las cuentas sembradas usan la contraseña `contrasena123`; el administrador usa `admin12345`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -14,7 +14,7 @@
       "value": ""
     },
     {
-      "key": "tokenEmprendedora",
+      "key": "tokenEmprendedor",
       "value": ""
     },
     {
@@ -26,7 +26,7 @@
       "value": "1"
     },
     {
-      "key": "tokenRechazada",
+      "key": "tokenNegocioRechazado",
       "value": ""
     }
   ],
@@ -78,7 +78,7 @@
           ]
         },
         {
-          "name": "Entrar como emprendedora",
+          "name": "Entrar como emprendedor",
           "request": {
             "method": "POST",
             "header": [
@@ -97,7 +97,7 @@
                 "login"
               ]
             },
-            "description": "Dueña de la Pizzería Napolitana. Guarda {{tokenEmprendedora}}.",
+            "description": "Lucía Restrepo, de la Pizzería Napolitana. Guarda {{tokenEmprendedor}}.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"correo\": \"napolitana@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
@@ -111,8 +111,8 @@
                 "exec": [
                   "// Guarda el token para que el resto de peticiones lo hereden.",
                   "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    pm.collectionVariables.set('tokenEmprendedora', pm.response.json().token);",
-                  "    pm.test('Token de tokenEmprendedora guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "    pm.collectionVariables.set('tokenEmprendedor', pm.response.json().token);",
+                  "    pm.test('Token de tokenEmprendedor guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
                   "}"
                 ]
               }
@@ -120,7 +120,7 @@
           ]
         },
         {
-          "name": "Entrar como emprendedora rechazada",
+          "name": "Entrar como emprendedor con negocio rechazado",
           "request": {
             "method": "POST",
             "header": [
@@ -139,7 +139,7 @@
                 "login"
               ]
             },
-            "description": "Dueña de Accesorios Handmade, cuyo negocio está RECHAZADO en la siembra. Guarda {{tokenRechazada}} y es la única cuenta con la que se puede probar el reenvío tras rechazo (B1).",
+            "description": "Isabel Correa, de Accesorios Handmade. Lo RECHAZADO es su negocio, no su cuenta: entra con total normalidad. Guarda {{tokenNegocioRechazado}} y es la única cuenta con la que se puede probar el reenvío tras rechazo (B1).",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"correo\": \"handmade@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
@@ -153,8 +153,8 @@
                 "exec": [
                   "// Guarda el token para que el resto de peticiones lo hereden.",
                   "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    pm.collectionVariables.set('tokenRechazada', pm.response.json().token);",
-                  "    pm.test('Token de tokenRechazada guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "    pm.collectionVariables.set('tokenNegocioRechazado', pm.response.json().token);",
+                  "    pm.test('Token de tokenNegocioRechazado guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
                   "}"
                 ]
               }
@@ -705,7 +705,7 @@
     },
     {
       "name": "4 · Panel del emprendedor",
-      "description": "Su negocio, galería, escaparate, buzón y métricas. Usa {{tokenEmprendedora}}.",
+      "description": "Su negocio, galería, escaparate, buzón y métricas. Usa {{tokenEmprendedor}}.",
       "item": [
         {
           "name": "Mi negocio",
@@ -743,7 +743,7 @@
                 "negocios"
               ]
             },
-            "description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.\n\nCon el token de la emprendedora devuelve **400 a propósito**: su cuenta ya tiene un negocio y la regla A2 permite uno solo. Sirve justo para enseñar esa regla.\n\nPara ver un alta correcta —y el ascenso de CLIENTE a EMPRENDEDOR de A1-bis— ejecuta antes «Registrar un cliente nuevo» en 1 · Acceso y usa el token que deja.",
+            "description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.\n\nCon el token del emprendedor devuelve **400 a propósito**: su cuenta ya tiene un negocio y la regla A2 permite uno solo. Sirve justo para enseñar esa regla.\n\nPara ver un alta correcta —y el ascenso de CLIENTE a EMPRENDEDOR de A1-bis— ejecuta antes «Registrar un cliente nuevo» en 1 · Acceso y usa el token que deja.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Panadería La Tradicional\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\",\n  \"telefono\": \"3001234567\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 2,\n  \"barrioId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
@@ -860,12 +860,12 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{tokenRechazada}}",
+                  "value": "{{tokenNegocioRechazado}}",
                   "type": "string"
                 }
               ]
             },
-            "description": "Usa {{tokenRechazada}}, no el token de la emprendedora principal: su negocio está aprobado y el servicio solo reenvía los rechazados. Ejecuta antes «Entrar como emprendedora rechazada»."
+            "description": "Usa {{tokenNegocioRechazado}}, no el token del emprendedor principal: su negocio está aprobado y el servicio solo reenvía los rechazados. Ejecuta antes «Entrar como emprendedor con negocio rechazado»."
           }
         },
         {
@@ -1193,7 +1193,7 @@
         "bearer": [
           {
             "key": "token",
-            "value": "{{tokenEmprendedora}}",
+            "value": "{{tokenEmprendedor}}",
             "type": "string"
           }
         ]
