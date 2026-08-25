@@ -3,12 +3,10 @@ package com.emprendehub.controller;
 import com.emprendehub.dto.BusquedaDirectorioRequest;
 import com.emprendehub.dto.NegocioPublicoResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
-import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.DirectorioService;
-import com.emprendehub.service.VisitaService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,12 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class DirectorioController {
 
     private final DirectorioService directorioService;
-    private final VisitaService visitaService;
 
-    public DirectorioController(DirectorioService directorioService,
-                                VisitaService visitaService) {
+    public DirectorioController(DirectorioService directorioService) {
         this.directorioService = directorioService;
-        this.visitaService = visitaService;
     }
 
     @GetMapping
@@ -85,10 +80,7 @@ public class DirectorioController {
     public PerfilNegocioResponse obtenerPerfil(@PathVariable Long id,
                                                @AuthenticationPrincipal Usuario visitante,
                                                HttpServletRequest peticion) {
-        Negocio negocio = directorioService.buscarPerfilVisible(id);
-        visitaService.registrar(negocio, visitante, huellaDe(peticion));
-
-        return directorioService.obtenerPerfilPublico(id);
+        return directorioService.obtenerPerfilYRegistrarVisita(id, visitante, huellaDe(peticion));
     }
 
     /**

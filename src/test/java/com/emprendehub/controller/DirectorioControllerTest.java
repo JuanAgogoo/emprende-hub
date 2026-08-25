@@ -2,6 +2,7 @@ package com.emprendehub.controller;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -17,11 +18,9 @@ import com.emprendehub.dto.NegocioPublicoResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.ProductoResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
-import com.emprendehub.model.Negocio;
 import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.service.DirectorioService;
-import com.emprendehub.service.VisitaService;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -43,10 +42,6 @@ class DirectorioControllerTest extends ControllerTestBase {
 
     @MockitoBean
     private DirectorioService directorioService;
-
-    /** Mirar un perfil anota una visita (H1), así que el slice lo necesita. */
-    @MockitoBean
-    private VisitaService visitaService;
 
     private NegocioPublicoResponse negocioDePrueba() {
         return new NegocioPublicoResponse(7L, "Panadería La Tradicional",
@@ -195,34 +190,10 @@ class DirectorioControllerTest extends ControllerTestBase {
     }
 
     @Test
-    @DisplayName("Mirar un perfil anota una visita (H1)")
-    void perfil_visible_anotaLaVisita() throws Exception {
-        Negocio negocio = new Negocio();
-        when(directorioService.buscarPerfilVisible(7L)).thenReturn(negocio);
-        when(directorioService.obtenerPerfilPublico(7L)).thenReturn(perfilDePrueba());
-
-        mockMvc.perform(get("/api/v1/directorio/7")).andExpect(status().isOk());
-
-        // La huella sale de la petición: sin sesión, dirección y navegador.
-        verify(visitaService).registrar(eq(negocio), eq(null), any());
-    }
-
-    @Test
-    @DisplayName("Un perfil que no se ve no cuenta como visita (H1, B6)")
-    void perfil_noVisible_noAnotaVisita() throws Exception {
-        when(directorioService.buscarPerfilVisible(99L))
-                .thenThrow(new ResourceNotFoundException("Negocio", 99L));
-
-        mockMvc.perform(get("/api/v1/directorio/99")).andExpect(status().isNotFound());
-
-        verify(visitaService, never()).registrar(any(), any(), any());
-    }
-
-    @Test
     @DisplayName("GET /api/v1/directorio/{id} devuelve el perfil con galería y escaparate")
     void perfil_visible_devuelve200() throws Exception {
-        when(directorioService.buscarPerfilVisible(7L)).thenReturn(new Negocio());
-        when(directorioService.obtenerPerfilPublico(7L)).thenReturn(perfilDePrueba());
+        when(directorioService.obtenerPerfilYRegistrarVisita(eq(7L), any(), any()))
+                .thenReturn(perfilDePrueba());
 
         mockMvc.perform(get("/api/v1/directorio/7"))
                 .andExpect(status().isOk())
@@ -236,9 +207,26 @@ class DirectorioControllerTest extends ControllerTestBase {
     }
 
     @Test
+    @DisplayName("El controlador pasa al servicio la huella de la petición (H1)")
+    void perfil_pasaLaHuellaDeLaPeticion() throws Exception {
+        when(directorioService.obtenerPerfilYRegistrarVisita(eq(7L), any(), any()))
+                .thenReturn(perfilDePrueba());
+
+        mockMvc.perform(get("/api/v1/directorio/7").header("User-Agent", "curl/8"))
+                .andExpect(status().isOk());
+
+        // Sin sesión el visitante llega a null; la huella la arma el controlador
+        // con lo poco que distingue una petición anónima de otra.
+        ArgumentCaptor<String> huella = ArgumentCaptor.forClass(String.class);
+        verify(directorioService)
+                .obtenerPerfilYRegistrarVisita(eq(7L), eq(null), huella.capture());
+        assertTrue(huella.getValue().contains("curl/8"));
+    }
+
+    @Test
     @DisplayName("Un negocio no publicado devuelve 404, nunca 403 (B6)")
     void perfil_noVisible_devuelve404() throws Exception {
-        when(directorioService.buscarPerfilVisible(99L))
+        when(directorioService.obtenerPerfilYRegistrarVisita(eq(99L), any(), any()))
                 .thenThrow(new ResourceNotFoundException("Negocio", 99L));
 
         mockMvc.perform(get("/api/v1/directorio/99"))

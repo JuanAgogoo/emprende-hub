@@ -24,6 +24,10 @@
     {
       "key": "negocioId",
       "value": "1"
+    },
+    {
+      "key": "tokenRechazada",
+      "value": ""
     }
   ],
   "item": [
@@ -109,6 +113,48 @@
                   "if (pm.response.code === 200 || pm.response.code === 201) {",
                   "    pm.collectionVariables.set('tokenEmprendedora', pm.response.json().token);",
                   "    pm.test('Token de tokenEmprendedora guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar como emprendedora rechazada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Dueña de Accesorios Handmade, cuyo negocio está RECHAZADO en la siembra. Guarda {{tokenRechazada}} y es la única cuenta con la que se puede probar el reenvío tras rechazo (B1).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"handmade@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Guarda el token para que el resto de peticiones lo hereden.",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('tokenRechazada', pm.response.json().token);",
+                  "    pm.test('Token de tokenRechazada guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
                   "}"
                 ]
               }
@@ -491,17 +537,17 @@
               }
             ],
             "url": {
-              "raw": "{{base}}/negocios/{{negocioId}}/opiniones",
+              "raw": "{{base}}/negocios/9/opiniones",
               "host": [
                 "{{base}}"
               ],
               "path": [
                 "negocios",
-                "{{negocioId}}",
+                "9",
                 "opiniones"
               ]
             },
-            "description": "Una por persona y negocio (C2), nunca sobre el propio (A4).",
+            "description": "Apunta al negocio 9 a propósito, y no a {{negocioId}}.\\n\\nLa clienta de la demostración ya tiene una opinión sembrada en el negocio 1, y la regla C2 permite una sola por persona y negocio. Publicar allí devolvería 400 —correctamente— y parecería que el endpoint falla. El 9 es un negocio aprobado donde todavía no ha opinado.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"calificacion\": 5,\n  \"comentario\": \"La mejor pizza de Medellín, sin duda.\"\n}"
@@ -585,20 +631,21 @@
               }
             ],
             "url": {
-              "raw": "{{base}}/opiniones/1/denuncias",
+              "raw": "{{base}}/opiniones/2/denuncias",
               "host": [
                 "{{base}}"
               ],
               "path": [
                 "opiniones",
-                "1",
+                "2",
                 "denuncias"
               ]
             },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"motivo\": \"LENGUAJE_INAPROPIADO\"\n}"
-            }
+            },
+            "description": "Denuncia la opinión 2, que es de Carlos Rueda.\\n\\nLa 1 es de la propia clienta que tiene la sesión abierta, y el servicio rechaza denunciar la opinión de uno mismo: para eso está borrarla."
           }
         },
         {
@@ -696,7 +743,7 @@
                 "negocios"
               ]
             },
-            "description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.",
+            "description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.\n\nCon el token de la emprendedora devuelve **400 a propósito**: su cuenta ya tiene un negocio y la regla A2 permite uno solo. Sirve justo para enseñar esa regla.\n\nPara ver un alta correcta —y el ascenso de CLIENTE a EMPRENDEDOR de A1-bis— ejecuta antes «Registrar un cliente nuevo» en 1 · Acceso y usa el token que deja.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Panadería La Tradicional\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\",\n  \"telefono\": \"3001234567\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 2,\n  \"barrioId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
@@ -807,7 +854,18 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombre\": \"Accesorios Handmade\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\"\n}"
-            }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRechazada}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Usa {{tokenRechazada}}, no el token de la emprendedora principal: su negocio está aprobado y el servicio solo reenvía los rechazados. Ejecuta antes «Entrar como emprendedora rechazada»."
           }
         },
         {
@@ -873,7 +931,8 @@
                 "fotos",
                 "1"
               ]
-            }
+            },
+            "description": "Requiere haber subido una antes: la siembra no trae imágenes porque son ficheros, no filas. Sin fotos responde 404."
           }
         },
         {
@@ -1179,7 +1238,8 @@
                 "11",
                 "aprobar"
               ]
-            }
+            },
+            "description": "La siembra deja **un** negocio pendiente, así que esta petición y «Rechazar un negocio» son excluyentes: la que corras primero consume la cola y la otra devolverá 400 «Solo se pueden resolver negocios pendientes». No es un fallo. Para probar las dos, reinicia con `docker compose down -v`."
           }
         },
         {
@@ -1208,7 +1268,8 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"motivo\": \"La descripción no explica qué vendes.\"\n}"
-            }
+            },
+            "description": "Excluyente con «Aprobar un negocio»: hay un solo negocio pendiente en la siembra. Si ya lo aprobaste, esta devuelve 400. Reinicia la base para probar la otra rama."
           }
         },
         {
@@ -1247,7 +1308,8 @@
                 "cambio",
                 "aprobar"
               ]
-            }
+            },
+            "description": "Requiere haber ejecutado antes «Proponer cambio» en el panel del emprendedor. Es excluyente con «Rechazar un cambio»: resolver la propuesta la consume."
           }
         },
         {
@@ -1277,7 +1339,8 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"motivo\": \"La foto no muestra el local.\"\n}"
-            }
+            },
+            "description": "Requiere una propuesta viva y es excluyente con «Aprobar un cambio». Sin propuesta responde 404, que es lo correcto."
           }
         },
         {

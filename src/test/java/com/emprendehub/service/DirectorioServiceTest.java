@@ -58,6 +58,9 @@ class DirectorioServiceTest {
     @Mock
     private ProductoRepository productoRepository;
 
+    @Mock
+    private VisitaService visitaService;
+
     @InjectMocks
     private DirectorioService service;
 
@@ -356,5 +359,43 @@ class DirectorioServiceTest {
         when(repositorio.buscarVisibleEnDirectorio(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.obtenerPerfilPublico(99L));
+    }
+
+    // ---------- Perfil con registro de visita (H1) ----------
+
+    @Test
+    @DisplayName("Mirar un perfil visible anota la visita (H1)")
+    void obtenerPerfilYRegistrarVisita_visible_anotaLaVisita() {
+        Negocio negocio = negocioAprobado();
+        when(repositorio.buscarVisibleEnDirectorio(7L)).thenReturn(Optional.of(negocio));
+
+        service.obtenerPerfilYRegistrarVisita(7L, null, "1.2.3.4|curl");
+
+        verify(visitaService).registrar(negocio, null, "1.2.3.4|curl");
+    }
+
+    @Test
+    @DisplayName("Un perfil que no se ve no cuenta como visita (H1, B6)")
+    void obtenerPerfilYRegistrarVisita_noVisible_noAnotaNada() {
+        when(repositorio.buscarVisibleEnDirectorio(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.obtenerPerfilYRegistrarVisita(99L, null, "huella"));
+
+        // El orden importa: primero se comprueba la visibilidad, y solo
+        // entonces se cuenta. Un 404 no deja rastro en las métricas.
+        verify(visitaService, never()).registrar(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("El perfil devuelto es el mismo que sin registrar visita")
+    void obtenerPerfilYRegistrarVisita_devuelveElPerfilCompleto() {
+        when(repositorio.buscarVisibleEnDirectorio(7L))
+                .thenReturn(Optional.of(negocioAprobado()));
+
+        PerfilNegocioResponse perfil =
+                service.obtenerPerfilYRegistrarVisita(7L, null, "huella");
+
+        assertEquals("Panadería La Tradicional", perfil.nombre());
     }
 }
