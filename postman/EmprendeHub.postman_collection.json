@@ -1629,6 +1629,267 @@
           }
         ]
       }
+    },
+    {
+      "name": "6 · Seguridad · lo que tiene que fallar",
+      "description": "Los casos negativos, guardados como peticiones para no tener que trastear con la pestaña Authorization en directo.\n\nSe puede ejecutar en cualquier momento después de la carpeta 1 y **no cambia ningún dato**.",
+      "item": [
+        {
+          "name": "Login · contraseña incorrecta → 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"correo\": \"maria.garcia@gmail.com\",\n    \"contrasena\": \"noesesta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "La cuenta existe, la contraseña no es la suya.\n\nFíjate en el cuerpo: dice «Credenciales incorrectas», sin decir si falló el correo o la contraseña. Decirlo confirmaría a un atacante qué correos están registrados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login · correo que no existe → 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"correo\": \"nadie@ninguna.co\",\n    \"contrasena\": \"contrasena123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Mismo código y **mismo mensaje** que la contraseña incorrecta, y es a propósito: desde fuera no se distingue una cuenta inexistente de una contraseña mal puesta."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login · sin correo → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/login",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"correo\": \"\",\n    \"contrasena\": \"contrasena123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Aquí no llega a comprobarse ninguna credencial: `@NotBlank` para el vuelo antes de entrar al servicio. Es **validación de forma**, y por eso es 400 y no 401.\n\nEl cuerpo trae el campo que falla: `\"correo\": \"El correo es obligatorio\"`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sin token → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "El mismo `GET /negocios/mio` de la carpeta 4, pero sin cabecera `Authorization`.\n\n**401 es «no sé quién eres».**"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token inventado → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/negocios/mio",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "negocios",
+                "mio"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "noesuntoken",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "La cabecera va, pero el token no lo firmó este servidor. El filtro `JwtAuthenticationFilter` lo descarta antes de llegar al controlador."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rol equivocado → 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base}}/admin/moderacion/negocios-pendientes",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "admin",
+                "moderacion",
+                "negocios-pendientes"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEmprendedor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Un emprendedor autenticado pidiendo la cola de moderación.\n\n**403 es «sé quién eres y no puedes».** Este par 401/403 es la pregunta de seguridad más probable de toda la sustentación."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "auth": {
