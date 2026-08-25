@@ -8,6 +8,7 @@ import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.Foto;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.OrdenDirectorio;
+import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.ProductoRepository;
@@ -57,13 +58,16 @@ public class DirectorioService {
     private final NegocioRepository repositorio;
     private final FotoRepository fotoRepository;
     private final ProductoRepository productoRepository;
+    private final VisitaService visitaService;
 
     public DirectorioService(NegocioRepository repositorio,
                              FotoRepository fotoRepository,
-                             ProductoRepository productoRepository) {
+                             ProductoRepository productoRepository,
+                             VisitaService visitaService) {
         this.repositorio = repositorio;
         this.fotoRepository = fotoRepository;
         this.productoRepository = productoRepository;
+        this.visitaService = visitaService;
     }
 
     /**
@@ -115,13 +119,33 @@ public class DirectorioService {
     }
 
     /**
-     * El negocio del perfil, para quien además necesita la entidad.
+     * El perfil público, anotando además la visita (H1).
      *
-     * <p>Lo usa el controlador para anotar la visita (H1) sin repetir la
-     * comprobación de visibilidad: una visita a un perfil que no se ve no es
-     * una visita.
+     * <p>Las dos cosas van juntas a propósito. Antes el controlador pedía la
+     * entidad para registrar la visita y luego volvía a pedir el perfil: además
+     * de sacar una entidad JPA a la capa web, consultaba el negocio dos veces.
+     *
+     * <p>Una visita a un perfil que no se ve no es una visita, así que el orden
+     * importa: primero se comprueba la visibilidad, y solo entonces se cuenta.
      */
-    public Negocio buscarPerfilVisible(Long id) {
+    @Transactional
+    public PerfilNegocioResponse obtenerPerfilYRegistrarVisita(Long id, Usuario visitante,
+                                                               String huellaPeticion) {
+        Negocio negocio = buscarPerfilVisible(id);
+        visitaService.registrar(negocio, visitante, huellaPeticion);
+
+        return NegocioMapper.aPerfil(negocio,
+                fotoRepository.findByNegocioIdAndEstadoOrderByOrdenAsc(id, EstadoFoto.APROBADA),
+                productoRepository.findByNegocioIdOrderByNombreAsc(id));
+    }
+
+    /**
+     * El negocio del perfil, solo para uso interno de la capa de servicio.
+     *
+     * <p>Devuelve la entidad, así que no sale de aquí: los controladores reciben
+     * siempre records de {@code dto}.
+     */
+    private Negocio buscarPerfilVisible(Long id) {
         return repositorio.buscarVisibleEnDirectorio(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Negocio", id));
     }
