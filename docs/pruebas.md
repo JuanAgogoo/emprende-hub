@@ -78,7 +78,7 @@ taller solo mira `build/reports/tests/test/index.html`. Es una adición nuestra 
 conviene saberlo al sustentar.
 
 El umbral está **activo desde el PR 4** y colgado de la tarea `check`: un
-`./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
+`cd backend && ./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
 la prueba en su incremento que recuperar cobertura al final.
 
 ## Lo que depende del reloj se inyecta

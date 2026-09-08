@@ -15,7 +15,7 @@ Se deriva del material de `plataformas_progamacion_empresarial/2026_2`, revisado
 fichero por fichero. No es una elección de gusto: es la del curso.
 
 - **Java 25 y Spring Boot 4.1.x** — versiones exactas del taller calificable.
-- **Gradle** — es lo que usan los talleres (`./gradlew test`).
+- **Gradle** — es lo que usan los talleres (`cd backend && ./gradlew test`).
 - **PostgreSQL** — el enunciado del proyecto prohíbe bases de datos en memoria.
   Los talleres usan H2, pero el proyecto es explícito en lo contrario.
 - **Capas Controller/Service/Repository/Entity** — la rúbrica del taller calificable

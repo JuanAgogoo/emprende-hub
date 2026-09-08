@@ -100,7 +100,7 @@ Sin `@semantic-release/changelog` ni `@semantic-release/git`: no se escribe fich
 de changelog ni se commitea nada de vuelta al repositorio. Las notas de la versión
 se publican en la release de GitHub, generadas desde los mensajes de commit.
 
-**La versión del `build.gradle` se queda fija** en `0.0.1-SNAPSHOT`.
+**La versión del `backend/build.gradle` se queda fija** en `0.0.1-SNAPSHOT`.
 `semantic-release` no sabe actualizarla y hacerlo requeriría
 `@semantic-release/exec`, más piezas de las que este proyecto necesita. El
 versionado vive en los tags de Git, que es lo que se ve desde GitHub.
