@@ -16,6 +16,11 @@ jobs:
     name: Compilar y probar
     runs-on: ubuntu-latest
 
+    # El backend vive en backend/. El frontend tendra su propio job cuando exista.
+    defaults:
+      run:
+        working-directory: backend
+
     # PostgreSQL real para las pruebas: el enunciado prohíbe bases de datos en
     # memoria. Se publica en el 5433 para que coincida con application.yml y no
     # haga falta ninguna variable de entorno.
@@ -55,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: informe-cobertura
-          path: build/reports/jacoco/test/html
+          path: backend/build/reports/jacoco/test/html
           if-no-files-found: warn
 
       - name: Publicar el informe de pruebas
@@ -63,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: informe-pruebas
-          path: build/reports/tests/test
+          path: backend/build/reports/tests/test
           if-no-files-found: warn
 
   release:

@@ -94,7 +94,7 @@ punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`postman/EmprendeHub.postman_collection.json`, con **71 peticiones que cubren los
+`backend/postman/EmprendeHub.postman_collection.json`, con **71 peticiones que cubren los
 59 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
@@ -150,11 +150,11 @@ acceso completa, esta última con el servidor levantado.
 
 **La cobertura de `service/**` tiene que quedarse en el 80% o más**: por debajo,
 el build falla. Ejecutar una sola clase con `--tests` también lo hace fallar,
-porque la cobertura se mide sobre el paquete entero; para eso usa `./gradlew build`.
+porque la cobertura se mide sobre el paquete entero; para eso usa `cd backend && ./gradlew build`.
 
 ## Configuración
 
-Valores por defecto en `src/main/resources/application.yml`, todos sustituibles
+Valores por defecto en `backend/src/main/resources/application.yml`, todos sustituibles
 por variables de entorno:
 
 | Variable | Por defecto |

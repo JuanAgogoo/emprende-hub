@@ -664,9 +664,10 @@ La aplicación arranca con datos sembrados: 12 negocios, 8 cursos, 20 cuentas,
 opiniones, consultas y dos meses de histórico de visitas. Están descritos en el
 [README](../README.md#cuentas-sembradas), junto a las credenciales.
 
-La colección de Postman `postman/EmprendeHub.postman_collection.json` cubre los
-**59 endpoints** en 64 peticiones, agrupadas por quién las usa. El login guarda
-el token en una variable y el resto lo hereda.
+La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
+**59 endpoints** en 71 peticiones, agrupadas por quién las usa. El login guarda
+el token en una variable y el resto lo hereda. La carpeta **6 · Seguridad** cubre
+aparte los casos que tienen que fallar: 401, 403 y 400.
 
 ---
 
