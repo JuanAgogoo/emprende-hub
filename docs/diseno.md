@@ -265,8 +265,15 @@ que le dan, no al tamaño de la pantalla»*.
 - Todo lo pulsable mide **44×44px** como mínimo, con `min-height: 44px` en
   botones y campos.
 - Las acciones principales quedan al alcance del pulgar, en la mitad inferior.
-- Los filtros del directorio no son una barra lateral encogida: en móvil son una
-  hoja que sube desde abajo.
+- Los filtros del directorio no son una barra lateral encogida: en móvil se
+  pliegan sobre los resultados y a partir de tablet pasan a su propia columna.
+
+  Se resuelve con `<details>`, no con una hoja modal. La hoja obligaba a manejar
+  a mano el foco atrapado, la tecla Escape y el fondo: JavaScript que nadie pidió
+  para un desplegable. `<details>` da lo mismo con teclado incluido y sin una
+  línea de guion. **Cuidado con una trampa**: al ocultar el `summary` en
+  escritorio hay que forzar la visibilidad del contenido, o quien lo pliegue en
+  móvil y luego ensanche la ventana se queda sin poder abrirlo.
 - El asistente de registro muestra **un campo por fila**. Las dos columnas de la
   referencia son de escritorio.
 

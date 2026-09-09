@@ -189,17 +189,17 @@ verificarlo**, y se completa con el número del PR cuando se fusiona.
 
 | Marca | Significa |
 |---|---|
-| ✅ **Terminado** | Construido y verificado. Lleva el número de su PR si ya está fusionado |
-| 🔨 **En curso** | Rama abierta, trabajo sin cerrar |
-| ⬜ Pendiente | Sin empezar |
+| **TERMINADO** | Construido y verificado. Lleva el número de su PR si ya está fusionado |
+| **EN CURSO** | Rama abierta, trabajo sin cerrar |
+| *(sin marca)* | Sin empezar |
 
 Una fase se marca terminada cuando lo están **todos** sus incrementos.
 
 ---
 
-## ✅ Fase 0 — Preparar el terreno (PR 1–2) · terminada
+## Fase 0 — Preparar el terreno (PR 1–2) · **TERMINADA**
 
-### ✅ PR 1 · `chore/retirar-siembra-demo` — **backend** · terminado
+### PR 1 · `chore/retirar-siembra-demo` — backend · **TERMINADO**
 
 > Fusionado en [#20](https://github.com/JuanAgogoo/emprende-hub/pull/20), junto
 > con el PR 2. Verificado: 429 pruebas en verde, cobertura de `service/**` al
@@ -234,7 +234,7 @@ chore: retirar la siembra de demostración y dejar solo los catálogos
 > devuelve ceros con `calificacionPromedio` nulo —que es lo correcto, no un
 > fallo—. `cd backend && ./gradlew build` en verde, con la cobertura intacta.
 
-### ✅ PR 2 · `chore/frontend-andamiaje` · terminado
+### PR 2 · `chore/frontend-andamiaje` · **TERMINADO**
 
 > Fusionado en [#20](https://github.com/JuanAgogoo/emprende-hub/pull/20).
 > Verificado: `npm run build` sin errores ni advertencias, `npm run contraste`
@@ -291,20 +291,20 @@ chore(frontend): crear el andamiaje con React, TypeScript y el sistema de diseñ
 
 ---
 
-## 🔨 Fase 1 — Vitrina pública (PR 3–5) · en curso
+## Fase 1 — Vitrina pública (PR 3–5) · **EN CURSO**
 
 Los tres se verifican contra negocios creados a mano con Postman, según la
 decisión 1. **El estado vacío deja de ser un caso raro y pasa a ser el primero
 que se ve**, así que se construye antes que el lleno, no después.
 
-### ✅ PR 3 · `feat/portada` · terminado
+### PR 3 · `feat/portada` · **TERMINADO**
 
-> Entregado en la rama `feat/frontend-portada`, **pendiente de fusionar**.
+> Fusionado en [#21](https://github.com/JuanAgogoo/emprende-hub/pull/21).
 > Verificado con datos reales creados por la API —7 negocios, 3 destacados y
 > calificación media de 4,8—: `npm run build` sin errores ni advertencias,
 > `npm run contraste` 21 de 21, y las fotos llegando por el proxy con `200
-> image/png`. **Falta la revisión visual en el navegador**, que sigue sin estar
-> disponible en el entorno.
+> image/png`. **Falta la revisión visual en el navegador**: no hay ninguno
+> disponible en el entorno, y esa comprobación queda del lado de Pedro.
 >
 > **Aviso para los PR 4 y 5, que sale de construir este.** Una foto subida a un
 > negocio **ya aprobado** entra pendiente de revisión (B2) y el público no la ve:
@@ -334,7 +334,22 @@ feat(portada): mostrar las estadísticas y los negocios destacados
 > aprobarlos con Postman, las cifras suben y las tarjetas aparecen. Parar el
 > backend y recargar muestra el mensaje de error, no una pantalla en blanco.
 
-### PR 4 · `feat/directorio`
+### PR 4 · `feat/directorio` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-directorio`. Verificado contra el backend
+> con siete negocios: filtro por categoría, por ciudad y por barrio; búsqueda con
+> acentos —`texto=Panadería` devuelve su negocio, no un 400—; orden por nombre y
+> por calificación, con los negocios sin nota al final (C5); paginación con
+> `size=3` moviéndose entre tres páginas; y un `orden` inválido devolviendo 400
+> con la lista de valores admitidos.
+>
+> **Desviación de `diseno.md`, ya corregida allí:** los filtros en móvil no son
+> una hoja modal sino un `<details>` plegable. La hoja pedía manejar a mano el
+> foco atrapado, Escape y el fondo — JavaScript que nadie pidió para un
+> desplegable.
+>
+> **Falta la revisión visual en el navegador**, que sigue sin haber en el
+> entorno.
 Listado con los seis filtros combinables (`texto`, `categoriaId`, `ciudadId`,
 `barrioId`, `calificacionMinima`, `nivelPrecio`), la ordenación de lista cerrada
 (`CALIFICACION`, `NOMBRE`, `RECIENTES`) y la paginación. En móvil los filtros son

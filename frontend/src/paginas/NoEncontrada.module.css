@@ -1,0 +1,11 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  padding-block: var(--e-8);
+}
+
+.entrada {
+  max-width: var(--ancho-lectura);
+}

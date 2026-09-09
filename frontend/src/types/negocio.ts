@@ -22,3 +22,23 @@ export interface TarjetaNegocio {
   readonly fechaAprobacion: string;
   readonly fotoPrincipal: string | null;
 }
+
+/**
+ * La ordenación del directorio es un conjunto cerrado, no un nombre de columna:
+ * el backend rechaza con 400 cualquier otro valor. RECIENTES ordena por fecha de
+ * aprobación, no de creación (G7).
+ */
+export type OrdenDirectorio = 'CALIFICACION' | 'NOMBRE' | 'RECIENTES';
+
+/** Los seis filtros del directorio, todos opcionales y combinables. */
+export interface FiltrosDirectorio {
+  readonly texto?: string;
+  readonly categoriaId?: number;
+  readonly ciudadId?: number;
+  readonly barrioId?: number;
+  readonly calificacionMinima?: number;
+  readonly nivelPrecio?: NivelPrecio;
+  readonly orden?: OrdenDirectorio;
+  readonly page?: number;
+  readonly size?: number;
+}

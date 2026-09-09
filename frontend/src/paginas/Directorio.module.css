@@ -1,10 +1,158 @@
 .pagina {
-  padding-block: var(--e-6);
+  padding-block: var(--e-6) var(--e-7);
   display: flex;
   flex-direction: column;
-  gap: var(--e-3);
+  gap: var(--e-5);
 }
 
-.entrada {
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.buscador {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.etiquetaOculta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.campo {
+  flex: 1 1 14rem;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.campo::placeholder {
+  color: var(--color-apagado);
+}
+
+.primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: none;
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.primario:hover {
+  background: var(--color-acento-fuerte);
+}
+
+/* Mobile first: una sola columna, los filtros arriba y plegados. */
+.columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-5);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-4);
+}
+
+.vacio,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
   max-width: var(--ancho-lectura);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+.tituloVacio {
+  font-size: var(--texto-lg);
+}
+
+.error {
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  color: var(--color-error);
+}
+
+.limpiar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: transparent;
+  color: var(--color-acento);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.limpiar:hover {
+  background: var(--color-acento-suave);
+}
+
+@media (min-width: 40rem) {
+  .rejilla {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* A partir de tablet los filtros pasan a una columna propia y fija. */
+@media (min-width: 48rem) {
+  .columnas {
+    grid-template-columns: 17rem 1fr;
+    align-items: start;
+  }
+
+  .lateral {
+    position: sticky;
+    top: calc(60px + var(--e-4));
+  }
+}
+
+@media (min-width: 64rem) {
+  .rejilla {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Las tarjetas entran escalonadas al aparecer, sin JavaScript. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rejilla > * {
+      animation: aparecer linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
