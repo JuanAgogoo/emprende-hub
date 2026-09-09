@@ -416,7 +416,7 @@ feat(directorio): añadir el perfil público del negocio con galería y escapara
 
 ## Fase 2 — Acceso (PR 6–9) · **EN CURSO**
 
-### PR 6 · `feat/login` · **TERMINADO**
+### PR 6 · `feat/login` · **TERMINADO** · [#24](https://github.com/JuanAgogoo/emprende-hub/pull/24)
 
 > Entregado en la rama `feat/frontend-login`. Verificado contra el backend: los
 > tres roles entran y la respuesta trae `rol`, una contraseña mala devuelve 401
@@ -452,7 +452,21 @@ feat(auth): añadir el inicio de sesión con derivación por rol
 > cabecera; recargar la página mantiene la sesión; «Salir» la limpia; y una
 > contraseña mala muestra el mensaje sin vaciar el correo escrito.
 
-### PR 7 · `feat/paginas-informativas`
+### PR 7 · `feat/paginas-informativas` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-paginas-informativas`. El texto describe lo
+> que la aplicación hace de verdad —cada fila de la tabla es un campo que el
+> backend guarda—, no relleno genérico.
+>
+> **Cerró dos enlaces muertos que el pie arrastraba desde el PR 2** y destapó un
+> tercero: la portada ofrecía «Publicar mi negocio» hacia una ruta que no existe
+> hasta el PR 11. Retirado, y **el PR 11 tiene que volver a ponerlo**.
+>
+> De ahí sale una comprobación que conviene repetir en cada incremento: cotejar
+> todos los `to=` del código contra las rutas declaradas en `App.tsx`. Los dos
+> del pie llevaban cuatro incrementos sin que nadie lo notara.
+>
+> **Falta la revisión visual en el navegador.**
 Tratamiento de datos e información personal, con texto genérico. Enlazadas desde
 el pie y, en los PR siguientes, desde la casilla de los dos registros. Son
 públicas y se leen sin sesión.
