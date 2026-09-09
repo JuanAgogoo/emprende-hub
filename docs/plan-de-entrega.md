@@ -194,8 +194,8 @@ final para no volver a arrastrarla:
 
 | | |
 |---|---|
-| Endpoints | **59**, todos en [api.md](api.md) y en la colección de Postman |
-| Pruebas | **429** en verde, en los tres niveles |
+| Endpoints | **60**, todos en [api.md](api.md) y en la colección de Postman |
+| Pruebas | **444** en verde, en los tres niveles |
 | Cobertura de `service/**` | **98,1%**, sobre el 80% que exige la rúbrica |
 
 **Al cambiar el código, actualizar estas cifras aquí y en el README.** Un número
