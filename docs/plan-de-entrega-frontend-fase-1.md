@@ -291,7 +291,7 @@ chore(frontend): crear el andamiaje con React, TypeScript y el sistema de diseñ
 
 ---
 
-## Fase 1 — Vitrina pública (PR 3–5) · **EN CURSO**
+## Fase 1 — Vitrina pública (PR 3–5) · **TERMINADA**
 
 Los tres se verifican contra negocios creados a mano con Postman, según la
 decisión 1. **El estado vacío deja de ser un caso raro y pasa a ser el primero
@@ -334,7 +334,7 @@ feat(portada): mostrar las estadísticas y los negocios destacados
 > aprobarlos con Postman, las cifras suben y las tarjetas aparecen. Parar el
 > backend y recargar muestra el mensaje de error, no una pantalla en blanco.
 
-### PR 4 · `feat/directorio` · **TERMINADO**
+### PR 4 · `feat/directorio` · **TERMINADO** · [#22](https://github.com/JuanAgogoo/emprende-hub/pull/22)
 
 > Entregado en la rama `feat/frontend-directorio`. Verificado contra el backend
 > con siete negocios: filtro por categoría, por ciudad y por barrio; búsqueda con
@@ -373,7 +373,23 @@ feat(directorio): añadir búsqueda, filtros, ordenación y paginación de negoc
 > estado vacío con un botón para limpiar los filtros. Con más de 12 negocios
 > creados, la página 2 trae otros distintos.
 
-### PR 5 · `feat/perfil-publico`
+### PR 5 · `feat/perfil-publico` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-perfil-publico`. Verificado contra un
+> negocio preparado con tres fotos, tres productos —uno agotado— y las dos redes:
+> la galería cambia de foto, los precios salen como `$ 12.000`, y **un negocio
+> pendiente devuelve 404 y no 403** (B6), comprobado creando uno a propósito.
+>
+> La transición entre la tarjeta y el perfil lleva un `view-transition-name`
+> **único por negocio**: con un nombre compartido, el navegador no sabría cuál de
+> las tarjetas del listado está creciendo.
+>
+> **Falta la revisión visual en el navegador**, en este y en los tres anteriores.
+> Es la única comprobación del plan que no se ha podido hacer en ningún
+> incremento: el entorno no tiene navegador.
+
+> **Con este incremento la parte pública queda cerrada** y se recorre entera sin
+> iniciar sesión: portada, directorio con filtros y perfil de negocio.
 Perfil de `GET /directorio/{id}`: galería de fotos aprobadas, escaparate con
 precios formateados en pesos con `Intl.NumberFormat`, disponibilidad, teléfono y
 enlaces a Instagram y LinkedIn cuando existen. La calificación y el número de
