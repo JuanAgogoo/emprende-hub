@@ -234,8 +234,13 @@ combinaciones.
 **Incluye además el job de CI del frontend**, sin el cual los once incrementos
 que vienen pasarían la verificación sin que nadie los compile. `ci.yml` tiene hoy
 un solo job con `working-directory: backend`: se le añade otro con `npm ci`,
-`npm run build` y `npm run contraste`, y se filtran los dos por `paths` para que
-un PR de frontend no espere a Gradle ni al revés.
+`npm run contraste` y `npm run build`.
+
+**Los dos jobs corren siempre, sin filtrar por `paths`.** Filtrarlos era la idea
+inicial y no funciona: `release` depende de ellos con `needs`, y un job saltado
+por `paths` cuenta como no satisfecho, así que no se publicaría ninguna versión.
+Esperar dos minutos de más en un PR de frontend sale más barato que perseguir una
+release que no salió.
 
 Layout con cabecera y pie, dos rutas y `<Link>`. README del frontend con el
 arranque.
@@ -247,8 +252,8 @@ chore(frontend): crear el andamiaje con React, TypeScript y el sistema de diseñ
 > **Hito:** `npm run dev` levanta en el 5173. La cabecera y el pie se ven, y
 > pasar de una ruta a otra no recarga la página. `npm run build` termina con 0
 > errores y 0 advertencias, y `npm run contraste` con 21 de 21. A 360px de ancho
-> no hay desbordamiento horizontal. En la CI, un cambio que solo toque
-> `frontend/` ejecuta el job de frontend y no el de Gradle.
+> no hay desbordamiento horizontal. En la CI aparecen los tres jobs: backend,
+> frontend y release.
 
 ---
 

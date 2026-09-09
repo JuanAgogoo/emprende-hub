@@ -1,9 +1,12 @@
-# EmprendeHub — API REST
+# EmprendeHub
 
-Backend del portal de emprendimiento local EmprendeHub. Proyecto de la asignatura
-Plataformas de Programación Empresarial.
+Portal de emprendimiento local. Proyecto de la asignatura Plataformas de
+Programación Empresarial.
 
-**Java 25 · Spring Boot 4.1.1 · Gradle · PostgreSQL · Spring Data JPA · Spring Security**
+| Mitad | Dónde | Stack |
+|---|---|---|
+| **API REST** | [`backend/`](backend) | Java 25 · Spring Boot 4.1.1 · Gradle · PostgreSQL · Spring Data JPA · Spring Security |
+| **Interfaz web** | [`frontend/`](frontend) | React · Vite · TypeScript |
 
 ## Arrancar
 
@@ -11,9 +14,15 @@ Hace falta Docker. **No hace falta tener instalado ni Gradle ni el JDK 25**: el
 wrapper descarga Gradle y el toolchain descarga el JDK.
 
 ```bash
-docker compose up -d          # levanta PostgreSQL en el puerto 5433
-./gradlew bootRun             # arranca la API en http://localhost:8080
+docker compose up -d              # levanta PostgreSQL en el puerto 5433
+cd backend && ./gradlew bootRun   # arranca la API en http://localhost:8080
+cd frontend && npm install        # solo la primera vez
+npm run dev                       # la web en http://localhost:5173
 ```
+
+El servidor de Vite hace de proxy hacia el 8080, así que **el backend tiene que
+estar arriba** para que la web muestre algo. El detalle está en el
+[README del frontend](frontend/README.md).
 
 Para parar la base de datos:
 
@@ -122,6 +131,7 @@ La variable `base` apunta a `http://localhost:8080/api/v1`.
 ## Pruebas
 
 ```bash
+cd backend
 ./gradlew build               # compila, prueba y verifica la cobertura
 ```
 
@@ -167,7 +177,15 @@ los datos iniciales los carga un `CommandLineRunner` al arrancar.
 ## Estructura
 
 ```
-src/main/java/com/emprendehub
+backend/     API REST. Gradle, código, pruebas y colección de Postman
+frontend/    Interfaz web. React + Vite + TypeScript
+docs/        Documentación del proyecto
+```
+
+Dentro del backend:
+
+```
+backend/src/main/java/com/emprendehub
 ├── controller/   @RestController — rutas /api/v1/<recurso>
 ├── service/      @Service — lógica de negocio (aquí se mide la cobertura)
 ├── repository/   interfaces JpaRepository
@@ -189,4 +207,6 @@ Cada paquete lleva un `package-info.java` que explica qué entra y qué no.
 | [docs/arquitectura.md](docs/arquitectura.md) | Capas, stack, seguridad y decisiones técnicas |
 | [docs/pruebas.md](docs/pruebas.md) | Los tres niveles de prueba y sus trampas |
 | [docs/flujo-de-trabajo.md](docs/flujo-de-trabajo.md) | Ramas, commits, PRs y release |
-| [docs/plan-de-entrega.md](docs/plan-de-entrega.md) | Los 14 incrementos de la entrega |
+| [docs/plan-de-entrega.md](docs/plan-de-entrega.md) | Los 14 incrementos del backend |
+| [docs/diseno.md](docs/diseno.md) | Paleta, tipografía y accesibilidad del frontend |
+| [docs/plan-de-entrega-frontend-fase-1.md](docs/plan-de-entrega-frontend-fase-1.md) | Los 13 incrementos de la fase 1 del frontend |
