@@ -25,16 +25,13 @@ function validar(valores: Valores): Partial<Record<keyof Valores, string>> {
   return errores;
 }
 
-/**
- * A dónde va cada quien según su rol.
- *
- * El emprendedor pasará a su negocio cuando esa vista exista, en el incremento
- * que la construye. Mientras tanto todos llegan a la portada.
- */
+/** A dónde va cada quien según su rol. */
 function destino(rol: Rol): string {
   switch (rol) {
     case 'EMPRENDEDOR':
+      return '/mi-negocio';
     case 'CLIENTE':
+    // El panel de administración no es de esta fase.
     case 'ADMIN':
       return '/';
   }
