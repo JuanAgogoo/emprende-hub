@@ -1,0 +1,86 @@
+/* Compartido por las dos páginas informativas: mismo formato, distinto texto. */
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  /* Nunca más de 70 caracteres por línea en un texto largo. */
+  max-width: var(--ancho-lectura);
+  padding-block: var(--e-6) var(--e-8);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.entradilla {
+  font-size: var(--texto-lg);
+  color: var(--color-cuerpo);
+}
+
+.actualizado {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.seccion h2 {
+  font-size: var(--texto-xl);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin: 0;
+  padding-left: var(--e-5);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--e-2) var(--e-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-borde);
+  vertical-align: top;
+}
+
+.tabla th {
+  color: var(--color-tinta);
+  font-weight: 600;
+}
+
+/* Una tabla es lo que más desborda en un móvil estrecho. */
+.envoltorioTabla {
+  overflow-x: auto;
+}
+
+.destacado {
+  padding: var(--e-4);
+  border-left: 3px solid var(--color-acento);
+  border-radius: var(--radio-sm);
+  background: var(--color-acento-suave);
+  font-size: var(--texto-sm);
+  color: var(--color-tinta);
+}
+
+.aviso {
+  padding: var(--e-4);
+  border-left: 3px solid var(--color-aviso);
+  border-radius: var(--radio-sm);
+  background: color-mix(in srgb, var(--color-aviso) 8%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-tinta);
+}
