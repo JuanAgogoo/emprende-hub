@@ -31,6 +31,13 @@ formulario; el dueño ve el correo del cliente en su buzón para responder por f
 - **A1** Cliente tiene registro propio, separado del de negocio.
 - **A1-bis** Un cliente puede registrar un negocio más tarde **con su misma cuenta**,
   que pasa a emprendedor conservando sus opiniones. No abre una segunda cuenta.
+- **A1-ter** Quien llega sabiendo que tiene un negocio se da de alta con él en una
+  sola petición, y su cuenta **nace ya como emprendedor**. Convive con A1-bis a
+  propósito: son dos entradas al mismo estado porque las dos situaciones existen
+  —quien viene a publicar y quien se anima después—, y retirar la segunda dejaría
+  peor al cliente que ya tenía opiniones escritas. **Todo entra en una
+  transacción**: un fallo a mitad dejaría una cuenta creada sin negocio y a
+  alguien sin poder reintentar, porque su propio correo estaría cogido.
 - **A2** Un negocio por cuenta de emprendedor.
 - **A3** Un único admin, sembrado. Credenciales irrelevantes para el alcance del curso.
 - **A4** El emprendedor opina sobre otros negocios, **nunca sobre el suyo**.
