@@ -3,6 +3,8 @@ package com.emprendehub.controller;
 import com.emprendehub.dto.AuthResponse;
 import com.emprendehub.dto.LoginRequest;
 import com.emprendehub.dto.RegistroClienteRequest;
+import com.emprendehub.dto.RegistroEmprendedorRequest;
+import com.emprendehub.dto.RegistroEmprendedorResponse;
 import com.emprendehub.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,17 @@ public class AuthController {
             @Valid @RequestBody RegistroClienteRequest peticion) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(authService.registrarCliente(peticion));
+    }
+
+    /**
+     * Alta de emprendedor con su negocio (A1-ter). Nace ya con ese rol y su
+     * negocio queda PENDIENTE de revisión.
+     */
+    @PostMapping("/registro-emprendedor")
+    public ResponseEntity<RegistroEmprendedorResponse> registrarEmprendedor(
+            @Valid @RequestBody RegistroEmprendedorRequest peticion) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(authService.registrarEmprendedor(peticion));
     }
 
     @PostMapping("/login")

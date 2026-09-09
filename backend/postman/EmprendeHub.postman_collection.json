@@ -161,6 +161,50 @@
           ]
         },
         {
+          "name": "Registrar una emprendedora con su negocio (A1-ter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base}}/auth/registro-emprendedor",
+              "host": [
+                "{{base}}"
+              ],
+              "path": [
+                "auth",
+                "registro-emprendedor"
+              ]
+            },
+            "description": "El camino de A1-ter: cuenta, negocio, redes y escaparate en una sola transacción. La cuenta nace ya como EMPRENDEDOR y el negocio, PENDIENTE de revisión. Las fotos van aparte, por su endpoint multipart. No guarda variables a propósito: el resto de la colección trabaja sobre el negocio de las dos peticiones de arriba, que son el camino de A1-bis.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Restrepo\",\n  \"correo\": \"ana.reposteria@emprendehub.co\",\n  \"contrasena\": \"contrasena123\",\n  \"negocio\": {\n    \"nombre\": \"Repostería Ana\",\n    \"descripcion\": \"Tortas y postres por encargo para celebraciones, con masas de mantequilla y relleno hecho el mismo día de la entrega.\",\n    \"telefono\": \"3105557788\",\n    \"categoriaId\": 2,\n    \"ciudadId\": 3,\n    \"barrioId\": 1,\n    \"nivelPrecio\": \"MEDIO\"\n  },\n  \"redes\": {\n    \"instagram\": \"https://instagram.com/reposteriaana\"\n  },\n  \"productos\": [\n    {\n      \"nombre\": \"Torta de zanahoria\",\n      \"precio\": 72000,\n      \"disponible\": true\n    },\n    {\n      \"nombre\": \"Brownie\",\n      \"precio\": 6500,\n      \"disponible\": true\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// A propósito no guarda tokenEmprendedor ni negocioId: son el camino",
+                  "// alternativo, y pisarlos desviaría el resto de la colección a este negocio.",
+                  "if (pm.response.code === 201) {",
+                  "    const cuerpo = pm.response.json();",
+                  "    pm.test('Nace EMPRENDEDOR', () => pm.expect(cuerpo.rol).to.eql('EMPRENDEDOR'));",
+                  "    pm.test('Devuelve el negocio creado', () => pm.expect(cuerpo.negocioId).to.be.a('number'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Registrar a la clienta",
           "request": {
             "method": "POST",

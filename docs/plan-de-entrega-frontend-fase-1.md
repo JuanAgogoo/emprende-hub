@@ -516,7 +516,7 @@ feat(auth): añadir el registro de clientes con su validación
 > correo devuelve el mensaje del backend junto al campo; y sin marcar la casilla
 > el envío no sale. El foco salta al primer campo inválido.
 
-### PR 9 · `feat/mi-negocio` · **TERMINADO**
+### PR 9 · `feat/mi-negocio` · **TERMINADO** · [#27](https://github.com/JuanAgogoo/emprende-hub/pull/27)
 
 > Entregado en la rama `feat/frontend-mi-negocio`. Verificado contra el backend
 > en los cuatro casos: negocio aprobado, pendiente, rechazado —con el motivo que
@@ -561,12 +561,30 @@ feat(negocios): añadir la vista del negocio propio y la derivación del emprend
 
 ---
 
-## Fase 3 — Alta del emprendedor (PR 10–12)
+## Fase 3 — Alta del emprendedor (PR 10–12) · **EN CURSO**
 
 Los tres incrementos de las decisiones 2 y 3. El primero es de backend y los dos
 siguientes lo consumen: no hay asistente sin endpoint, ni fotos sin negocio.
 
-### PR 10 · `feat/registro-emprendedor` — **backend**
+### PR 10 · `feat/registro-emprendedor` — backend · **TERMINADO**
+
+> Entregado en la rama `feat/registro-emprendedor`. **444 pruebas en verde**
+> —quince nuevas— con la cobertura de `service/**` intacta en el 98,1%.
+>
+> **La transaccionalidad está comprobada, no supuesta**: con un barrio de otra
+> ciudad el alta falla *después* de guardar el usuario, y el login con ese correo
+> devuelve 401 —no quedó creado—; reintentar con el mismo correo funciona. Era
+> justo el escenario que motivaba la decisión 2.
+>
+> **Las redes hacían falta y se habían quedado fuera.** `RegistrarNegocioRequest`
+> no las lleva —tienen su propio endpoint—, así que enviarlas dentro del negocio
+> se ignoraba en silencio. Entran como campo propio `redes`, reutilizando la
+> validación de dominio de B8.
+>
+> **No hizo falta tocar `SecurityConfig`**: `/api/v1/auth/**` ya era público.
+>
+> Los errores anidados nombran su ruta (`negocio.descripcion`), que es lo que el
+> PR 11 necesita para devolver al paso que falló.
 
 Añade `POST /api/v1/auth/registro-emprendedor` con la forma de la decisión 2:
 cuenta, negocio y productos en una transacción.

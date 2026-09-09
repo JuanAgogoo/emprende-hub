@@ -90,6 +90,7 @@ lista suelta, porque son seis y no se paginan.
 | Método | Ruta | Acceso | Devuelve |
 |---|---|---|---|
 | `POST` | `/auth/registro` | Público | `201` con el token. Alta de cliente (A1) |
+| `POST` | `/auth/registro-emprendedor` | Público | `201` con el token y el negocio (A1-ter) |
 | `POST` | `/auth/login` | Público | `200` con el token |
 
 ```bash
@@ -103,6 +104,67 @@ Contraseña de **mínimo 8 caracteres** (A6). El correo identifica la cuenta, es
 
 No hay verificación de correo ni recuperación de contraseña (I1): quien la olvide
 tiene que pedírsela al administrador.
+
+### Alta de emprendedor con su negocio
+
+Quien llega sabiendo que tiene un negocio no da solo su correo: trae el nombre,
+la descripción, el contacto, la ubicación y su escaparate. Hacerlo pasar por el
+registro corto y luego por `POST /negocios` obligaría a encadenar dos peticiones
+y a dejar a medias a quien falle en la segunda.
+
+```bash
+curl -X POST localhost:8080/api/v1/auth/registro-emprendedor \
+  -H 'Content-Type: application/json' -d '{
+  "nombre": "Lucía Restrepo",
+  "correo": "lucia@emprendehub.co",
+  "contrasena": "contrasena123",
+  "negocio": {
+    "nombre": "Panadería La Espiga",
+    "descripcion": "Pan de masa madre horneado cada mañana en horno de leña …",
+    "telefono": "3105551234",
+    "categoriaId": 1, "ciudadId": 3, "barrioId": 1,
+    "nivelPrecio": "BAJO"
+  },
+  "redes":     { "instagram": "https://instagram.com/laespiga" },
+  "productos": [ { "nombre": "Pan de masa madre", "precio": 12000, "disponible": true } ]
+}'
+```
+
+| Parte | Regla |
+|---|---|
+| La cuenta | Las mismas que A1: correo único, contraseña de 8 caracteres |
+| `negocio` | **Obligatorio.** Las mismas validaciones que `POST /negocios` |
+| `redes` | Opcional. Se validan contra su dominio, igual que en B8 |
+| `productos` | Opcional. Una lista vacía o ausente es válida |
+
+**Todo entra en una sola transacción.** Si el negocio o un producto no pasan la
+validación, no queda ni cuenta ni negocio: quien lo reintente encontrará su
+correo libre. Es la razón de que esto sea un endpoint y no tres llamadas
+encadenadas desde el navegador.
+
+La cuenta **nace ya como `EMPRENDEDOR`**, sin pasar por cliente, y el negocio
+nace `PENDIENTE` de revisión (B6). La respuesta añade `negocioId` al cuerpo
+habitual, para que quien acaba de registrarse pueda subir sus fotos sin pedir
+antes `GET /negocios/mio`.
+
+Los errores de los campos anidados **nombran su ruta**, que es lo que permite
+llevar a quien rellena el formulario al paso que falló:
+
+```json
+{ "status": 400, "error": "Bad Request",
+  "message": "La petición no es válida",
+  "negocio.descripcion": "La descripción debe tener al menos 80 caracteres" }
+```
+
+**Las fotos no entran aquí.** Son binarios y ya tienen su endpoint multipart con
+su validación de tipo, tamaño y máximo; traerlas obligaría a mezclar JSON y
+ficheros en la misma petición y a duplicar esa comprobación. Se suben justo
+después, con el token que devuelve este endpoint.
+
+> `POST /negocios` sigue existiendo y es el camino de A1-bis: el cliente que ya
+> tiene cuenta y opiniones y se anima más tarde. Son dos entradas al mismo
+> estado, y está explicado en
+> [decisiones-dominio.md](decisiones-dominio.md).
 
 ## Catálogos · `/catalogos`
 
@@ -669,7 +731,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**59 endpoints** en 71 peticiones, agrupadas por quién las usa. Su primera
+**60 endpoints** en 71 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
