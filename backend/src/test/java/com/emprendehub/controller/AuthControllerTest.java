@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.emprendehub.dto.AuthResponse;
+import com.emprendehub.dto.RegistroEmprendedorResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.service.AuthService;
 import org.junit.jupiter.api.DisplayName;
@@ -123,5 +124,112 @@ class AuthControllerTest extends ControllerTestBase {
                         .content("{\"correo\":\"carlos@test.co\",\"contrasena\":\"contrasena123\"}"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("La cuenta está suspendida"));
+    }
+
+    // ---------- Registro de emprendedor ----------
+
+    private static final String REGISTRO_EMPRENDEDOR = """
+            {
+              "nombre": "Lucía Restrepo",
+              "correo": "lucia@emprendehub.co",
+              "contrasena": "contrasena123",
+              "negocio": {
+                "nombre": "Panadería La Espiga",
+                "descripcion": "Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.",
+                "telefono": "3105551234",
+                "categoriaId": 1,
+                "ciudadId": 1,
+                "nivelPrecio": "BAJO"
+              },
+              "productos": [
+                { "nombre": "Pan de masa madre", "precio": 12000, "disponible": true }
+              ]
+            }
+            """;
+
+    private RegistroEmprendedorResponse respuestaDeEmprendedor() {
+        return RegistroEmprendedorResponse.de(
+                AuthResponse.de("token-generado", 3600000L,
+                        "Lucía Restrepo", "lucia@emprendehub.co", "EMPRENDEDOR"),
+                7L);
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor devuelve 201 con el token y el negocio")
+    void registroEmprendedor_valido_devuelve201() throws Exception {
+        when(authService.registrarEmprendedor(any())).thenReturn(respuestaDeEmprendedor());
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_EMPRENDEDOR))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").value("token-generado"))
+                .andExpect(jsonPath("$.rol").value("EMPRENDEDOR"))
+                .andExpect(jsonPath("$.negocioId").value(7));
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor sin los datos del negocio devuelve 400")
+    void registroEmprendedor_sinNegocio_devuelve400() throws Exception {
+        String sinNegocio = """
+                {
+                  "nombre": "Lucía Restrepo",
+                  "correo": "lucia@emprendehub.co",
+                  "contrasena": "contrasena123"
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(sinNegocio))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.negocio").exists());
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor con descripción corta devuelve 400 y nombra el campo")
+    void registroEmprendedor_descripcionCorta_devuelve400() throws Exception {
+        String corta = REGISTRO_EMPRENDEDOR.replaceAll(
+                "\"descripcion\": \"[^\"]+\"", "\"descripcion\": \"Muy corta\"");
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corta))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor con un precio negativo devuelve 400")
+    void registroEmprendedor_precioNegativo_devuelve400() throws Exception {
+        String negativo = REGISTRO_EMPRENDEDOR.replace("\"precio\": 12000", "\"precio\": -1");
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(negativo))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor con el correo ya usado devuelve 400")
+    void registroEmprendedor_correoRepetido_devuelve400() throws Exception {
+        when(authService.registrarEmprendedor(any()))
+                .thenThrow(new ReglaDeNegocioException("Ya existe una cuenta con ese correo"));
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_EMPRENDEDOR))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Ya existe una cuenta con ese correo"));
+    }
+
+    @Test
+    @DisplayName("POST /registro-emprendedor es público: no exige token")
+    void registroEmprendedor_sinToken_noDevuelve401() throws Exception {
+        when(authService.registrarEmprendedor(any())).thenReturn(respuestaDeEmprendedor());
+
+        mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(REGISTRO_EMPRENDEDOR))
+                .andExpect(status().isCreated());
     }
 }
