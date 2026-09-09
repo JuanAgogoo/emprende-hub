@@ -22,6 +22,40 @@ npm run dev                       # http://localhost:5173
 | `npm run contraste` | Verifica la paleta contra WCAG 2.2. Falla si algo baja del mínimo |
 | `npm run preview` | Sirve lo compilado, para mirar el resultado real |
 
+## Las pantallas
+
+Las nueve rutas de la fase 1, todas declaradas en `src/App.tsx`:
+
+| Ruta | Pantalla | Quién entra |
+|---|---|---|
+| `/` | Portada: cifras, destacados y buscador | Cualquiera |
+| `/directorio` | Listado con seis filtros, ordenación y paginación | Cualquiera |
+| `/negocios/:id` | Perfil público: galería, escaparate y redes | Cualquiera |
+| `/entrar` | Un solo acceso que deriva según el rol | Cualquiera |
+| `/registro` | Alta de cliente: el formulario corto | Cualquiera |
+| `/registro-emprendedor` | El asistente de cuatro pasos | Cualquiera |
+| `/mi-negocio` | El negocio propio, **solo de consulta** | `EMPRENDEDOR` |
+| `/tratamiento-de-datos` | Texto legal | Cualquiera |
+| `/informacion-personal` | Texto legal | Cualquiera |
+
+Lo que **no** entra en esta fase, para que nadie lo busque: el panel de
+administración, el dashboard de gestión —editar, buzón, visitas—, los cursos, el
+listado de opiniones y recuperar la contraseña, que no existe en el backend.
+
+> `/mi-negocio` comprueba el rol **por comodidad de la interfaz, no por
+> seguridad**. Quien mande la petición a mano se topa igual con el backend, que
+> es donde se comprueba de verdad.
+
+### El asistente de registro
+
+Los tres primeros pasos recogen datos en el navegador y **se envían juntos** en
+una sola petición: cuenta, negocio y escaparate entran en una transacción, así
+que un fallo a mitad no deja el correo ocupado. El cuarto son las fotos, que van
+aparte porque son binarios y tienen su propio endpoint `multipart`.
+
+Al terminar el paso 3 el negocio ya existe y la sesión está abierta, por eso
+desde el paso 4 no se puede volver atrás.
+
 ## Por qué no hay CORS
 
 El backend no lo configura, así que `vite.config.ts` reenvía `/api/v1` y

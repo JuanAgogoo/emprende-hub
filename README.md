@@ -56,6 +56,108 @@ Las demás se crean al registrarse. La carpeta **1 · Acceso y datos de partida*
 de la colección de Postman las crea en orden —una clienta, una emprendedora y su
 negocio— y guarda cada token en su variable.
 
+## El recorrido de la sustentación
+
+El guion de punta a punta, con las dos mitades arriba. Son diez minutos y se
+puede ensayar entero antes del día.
+
+### Antes: preparar la vitrina
+
+**No hay siembra de negocios**, así que una base recién creada enseña la portada
+a ceros y el directorio vacío. Eso es correcto —las cifras se calculan (H4)—,
+pero no es lo que se quiere enseñar. Hay que crear los negocios a mano, y
+conviene hacerlo el día antes y no el mismo día.
+
+Con **siete u ocho negocios** ya se ve un portal lleno. Lo que tienen que cubrir
+entre todos, porque es lo que la interfaz enseña:
+
+| Hace falta | Para que se vea |
+|---|---|
+| Categorías distintas | La rejilla «Explora por categoría» de la portada lleva a alguna parte |
+| Al menos dos ciudades, y una con barrio | El filtro de barrio se repuebla al cambiar de ciudad |
+| Los tres niveles de precio | El filtro de precio deja fuera a alguien |
+| **Uno con 5 opiniones o más** | Sin eso no hay destacados: es la regla C7 |
+| Uno sin ninguna opinión | Se ve «Sin opiniones» y no «0,0», que no es lo mismo (C5) |
+| Uno sin fotos | Sale el marcador con la inicial, no una imagen rota |
+| Uno dejado en `PENDIENTE` | Hay algo que aprobar en directo el día de la sustentación |
+
+La forma rápida de crearlos es la carpeta **1 · Acceso y datos de partida** de la
+colección de Postman, y después repetir su petición de alta cambiando los datos.
+
+> **El orden importa, y esta es la trampa que más tiempo ha costado.** Hay que
+> **crear el negocio, subirle las fotos y aprobarlo al final**. Al revés no: una
+> foto subida a un negocio **ya aprobado** entra pendiente de revisión (B2), el
+> público no la ve, y el directorio devuelve `fotoPrincipal` nula. Las fichas
+> salen sin imagen y parece un fallo del frontend cuando es la regla funcionando.
+
+### Durante: el guion
+
+**1. Levantar las dos mitades.**
+
+```bash
+docker compose up -d              # PostgreSQL en el 5433
+cd backend && ./gradlew bootRun   # API en el 8080
+cd frontend && npm run dev        # la web en el 5173
+```
+
+> Si Vite dice que arranca en el **5174**, es que había otro `vite` vivo. Hay que
+> matarlo: en el 5174 el proxy responde donde nadie está mirando.
+
+**2. La parte pública, sin iniciar sesión.** En <http://localhost:5173>:
+
+- La portada, con las cuatro cifras **calculadas** y los destacados.
+- Buscar desde la portada: lleva al directorio con el texto ya puesto.
+- En el directorio, filtrar por categoría, cambiar de ciudad —el selector de
+  barrio se repuebla solo— y ordenar por calificación.
+- Entrar a un negocio: la foto de la tarjeta crece hasta ser la del detalle.
+  Galería, precios en pesos y enlaces a las redes.
+
+**3. El alta de emprendedor, de punta a punta.** «Publicar mi negocio», en la
+portada:
+
+| Paso | Qué enseñar |
+|---|---|
+| 1 · Cuenta | Enviar con la casilla sin marcar: el foco salta al campo que falla |
+| 2 · Negocio | El contador de la descripción; a 79 caracteres no deja avanzar |
+| 3 · Escaparate | Añadir dos productos, con el precio en pesos |
+| 4 · Fotos | Subir dos o tres. La primera queda marcada como portada (B9) |
+
+Al terminar aterriza en `/mi-negocio` **con el aviso de que está en revisión**.
+El negocio nace `PENDIENTE` (B6): buscarlo en el directorio no lo encuentra, y su
+identificador responde `404`. **No es un fallo, es la regla**, y conviene decirlo
+antes de que lo pregunten.
+
+**4. Aprobarlo, con el administrador.** Desde la carpeta **5 · Administración**
+de Postman, o con `curl`:
+
+```bash
+A=http://localhost:8080/api/v1
+
+TA=$(curl -s -X POST $A/auth/login -H 'Content-Type: application/json' \
+  -d '{"correo":"admin@emprendehub.co","contrasena":"admin12345"}' | jq -r .token)
+
+curl -s -H "Authorization: Bearer $TA" $A/admin/moderacion/negocios-pendientes
+curl -X PATCH $A/admin/moderacion/negocios/<id>/aprobar -H "Authorization: Bearer $TA"
+```
+
+Como el negocio todavía no estaba aprobado, **sus fotos se publican con él**: no
+hay que aprobar nada más.
+
+**5. Volver a la web y recargar el directorio.** El negocio recién creado ya
+aparece, con su foto de portada, y las cifras de la portada han subido. Con eso
+el círculo se cierra: se registró desde el navegador, se moderó desde la API y se
+publicó.
+
+### Si algo falla en directo
+
+| Síntoma | Qué es |
+|---|---|
+| La web carga pero no hay datos | El backend no está arriba: Vite hace de proxy hacia el 8080 |
+| Las fichas salen sin foto | Las fotos se subieron **después** de aprobar y esperan revisión |
+| El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto hasta que se apruebe |
+| Vite responde en el 5174 | Quedó otro `vite` vivo; matarlo y arrancar de nuevo |
+| Caen ~30 pruebas del backend | Se paró el contenedor: `docker compose up -d` y repetir |
+
 ## Probar la API
 
 Casi todo exige un token. Se obtiene entrando:
