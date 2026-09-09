@@ -115,9 +115,8 @@ export function Inicio() {
           <Link to="/directorio" className={estilos.primario}>
             Explorar el directorio
           </Link>
-          <Link to="/registro/emprendedor" className={estilos.secundario}>
-            Publicar mi negocio
-          </Link>
+          {/* El segundo camino, «Publicar mi negocio», llega con el asistente de
+              registro: hasta entonces sería un enlace a ninguna parte. */}
         </div>
       </section>
     </>
