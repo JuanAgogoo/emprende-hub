@@ -1,0 +1,81 @@
+/**
+ * El único fichero del proyecto con valores de color.
+ *
+ * Las reglas están en docs/diseno.md. Las dos que más se rompen:
+ * ningún color se escribe fuera de aquí —las variantes salen de color-mix()—
+ * y las 21 combinaciones de contraste se verifican con `npm run contraste`.
+ */
+
+:root {
+  /* ── Marca ─────────────────────────────────────────────────────────── */
+  --color-acento: #0f766e;
+  --color-acento-fuerte: #0b5b55;
+  --color-acento-suave: #ecfdf5;
+
+  /* ── Texto ─────────────────────────────────────────────────────────── */
+  --color-tinta: #0f172a;
+  --color-cuerpo: #475569;
+  --color-apagado: #64748b;
+
+  /* ── Superficies ───────────────────────────────────────────────────── */
+  --color-lienzo: #ffffff;
+  --color-lienzo-alt: #f8fafc;
+
+  /* ── Líneas ────────────────────────────────────────────────────────── */
+  --color-borde: #e2e8f0;
+  /* Los controles necesitan 3:1 (WCAG 1.4.11): el gris de arriba da 1,23. */
+  --color-borde-control: #64748b;
+
+  /* ── Señales ───────────────────────────────────────────────────────── */
+  --color-exito: #15803d;
+  --color-aviso: #a16207;
+  --color-error: #b91c1c;
+  --color-sobre-senal: #ffffff;
+
+  /* ── Tipografía ────────────────────────────────────────────────────── */
+  --fuente: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --texto-xs: 0.8125rem; /* 13px · el suelo, nada baja de aquí */
+  --texto-sm: 0.9375rem; /* 15px */
+  --texto-md: 1.0625rem; /* 17px · el cuerpo, no encoge en móvil */
+  --texto-lg: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+  --texto-xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --texto-2xl: clamp(1.6875rem, 1.4rem + 1.3vw, 2.25rem);
+  --texto-3xl: clamp(2.125rem, 1.7rem + 2.1vw, 3rem);
+
+  --alto-apretado: 1.15;
+  --alto-normal: 1.35;
+  --alto-comodo: 1.6;
+
+  /* ── Espaciado ─────────────────────────────────────────────────────── */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4rem;
+
+  /* ── Formas ────────────────────────────────────────────────────────── */
+  --radio-sm: 8px;
+  --radio-md: 12px;
+  --radio-lg: 16px;
+  --radio-full: 999px;
+
+  /* ── Elevación · tres niveles y cada uno significa algo ────────────── */
+  --sombra-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+  --sombra-md: 0 4px 12px rgb(15 23 42 / 0.06);
+  --sombra-lg: 0 12px 32px rgb(15 23 42 / 0.1);
+
+  /* ── Medidas ───────────────────────────────────────────────────────── */
+  --ancho-max: 72rem;
+  --ancho-lectura: 65ch;
+  --toque-min: 44px; /* área táctil mínima */
+
+  /* ── Movimiento ────────────────────────────────────────────────────── */
+  --dur-rapida: 150ms;
+  --dur-media: 250ms;
+  --dur-lenta: 400ms;
+  --curva: cubic-bezier(0.2, 0, 0, 1);
+}
