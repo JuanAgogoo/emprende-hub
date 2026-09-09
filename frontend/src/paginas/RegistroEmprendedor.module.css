@@ -1,0 +1,186 @@
+.tituloPaso {
+  font-size: var(--texto-xl);
+}
+
+/* El título recibe el foco al cambiar de paso: sin contorno no se vería. */
+.tituloPaso:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 4px;
+}
+
+.entradaPaso {
+  margin-top: calc(-1 * var(--e-2));
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.contadorListo {
+  font-size: var(--texto-xs);
+  color: var(--color-exito);
+}
+
+/* ── Navegación entre pasos ──────────────────────────────────────────── */
+
+.navegacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+/* «Siguiente» a la derecha, «Anterior» a la izquierda: el orden de la lectura. */
+.navegacion > :last-child {
+  margin-left: auto;
+}
+
+.secundario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.secundario:disabled {
+  color: var(--color-apagado);
+  cursor: progress;
+}
+
+.aviso {
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.errorCatalogos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  align-items: start;
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+/* ── El escaparate ───────────────────────────────────────────────────── */
+
+.vacio {
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+  text-align: center;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.producto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+.datosProducto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-2) var(--e-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.nombreProducto {
+  font-weight: 600;
+  color: var(--color-tinta);
+  /* Un nombre largo parte de línea en vez de estirar la fila. */
+  overflow-wrap: break-word;
+}
+
+.precioProducto {
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-cuerpo);
+}
+
+.agotado {
+  padding: var(--e-1) var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  font-size: var(--texto-xs);
+  color: var(--color-acento-fuerte);
+}
+
+.quitar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+  cursor: pointer;
+}
+
+.quitar:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* Para el lector de pantalla: «Quitar» a secas no dice cuál. */
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nuevoProducto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  align-items: stretch;
+  margin: 0;
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+}
+
+.leyenda {
+  padding-inline: var(--e-2);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--color-tinta);
+}
+
+/* Los errores que el backend nombra por posición y no tienen campo propio. */
+.erroresServidor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding-left: var(--e-5);
+}

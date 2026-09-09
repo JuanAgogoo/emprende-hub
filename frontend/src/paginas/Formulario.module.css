@@ -17,6 +17,12 @@
   box-shadow: var(--sombra-sm);
 }
 
+/* El asistente pide más sitio: una descripción larga y dos columnas de
+   selectores no caben en las 26rem que le bastan a un login. */
+.ancha {
+  max-width: 40rem;
+}
+
 .titulo {
   font-size: var(--texto-2xl);
 }
@@ -45,7 +51,9 @@
   color: var(--color-cuerpo);
 }
 
-.campo input {
+.campo input,
+.campo select,
+.campo textarea {
   min-height: var(--toque-min);
   padding-inline: var(--e-3);
   /* Un control se identifica por su borde: 3:1 como mínimo (WCAG 1.4.11). */
@@ -55,12 +63,22 @@
   color: var(--color-tinta);
 }
 
+.campo textarea {
+  padding-block: var(--e-3);
+  line-height: var(--alto-normal);
+  resize: vertical;
+}
+
 /* El grupo entero reacciona al foco y al error, sin clases condicionales. */
-.campo:has(input:focus-visible) label {
+.campo:has(input:focus-visible) label,
+.campo:has(select:focus-visible) label,
+.campo:has(textarea:focus-visible) label {
   color: var(--color-acento);
 }
 
-.campo:has(input[aria-invalid='true']) input {
+.campo:has(input[aria-invalid='true']) input,
+.campo:has(select[aria-invalid='true']) select,
+.campo:has(textarea[aria-invalid='true']) textarea {
   border-color: var(--color-error);
 }
 

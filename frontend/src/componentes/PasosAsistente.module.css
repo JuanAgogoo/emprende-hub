@@ -1,0 +1,120 @@
+.progreso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+/* ── Móvil: el contador y la barra ───────────────────────────────────── */
+
+.contador {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+}
+
+.tituloActual {
+  font-weight: 400;
+  color: var(--color-apagado);
+}
+
+.barra {
+  height: 6px;
+  border-radius: var(--radio-full);
+  background: var(--color-borde);
+  overflow: hidden;
+}
+
+.avance {
+  height: 100%;
+  border-radius: var(--radio-full);
+  background: var(--color-acento);
+  transition: width var(--dur-media) var(--curva);
+}
+
+/* Los círculos no caben en 360px: aparecen a partir de tablet. */
+.lista {
+  display: none;
+}
+
+/* ── Tablet en adelante: los círculos unidos por la línea ────────────── */
+
+@media (min-width: 40rem) {
+  .contador,
+  .barra {
+    display: none;
+  }
+
+  .lista {
+    display: flex;
+    align-items: start;
+    gap: var(--e-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .paso {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--e-2);
+    position: relative;
+    font-size: var(--texto-xs);
+    color: var(--color-apagado);
+    text-align: center;
+  }
+
+  /* La línea que une un paso con el siguiente, y que se rellena al avanzar. */
+  .paso:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: calc(50% + 1.5rem);
+    right: calc(-50% + 1.5rem);
+    height: 2px;
+    background: var(--color-borde);
+  }
+
+  .completado::after {
+    background: var(--color-acento);
+  }
+
+  .circulo {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--color-borde-control);
+    border-radius: var(--radio-full);
+    background: var(--color-lienzo);
+    font-size: var(--texto-sm);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .activo {
+    color: var(--color-tinta);
+    font-weight: 700;
+  }
+
+  .activo .circulo {
+    border-color: var(--color-acento);
+    background: var(--color-acento);
+    color: var(--color-sobre-senal);
+  }
+
+  .completado {
+    color: var(--color-cuerpo);
+  }
+
+  .completado .circulo {
+    border-color: var(--color-acento);
+    background: var(--color-acento-suave);
+    color: var(--color-acento-fuerte);
+  }
+
+  .titulo {
+    line-height: var(--alto-normal);
+  }
+}
