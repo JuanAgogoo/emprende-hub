@@ -452,7 +452,7 @@ feat(auth): añadir el inicio de sesión con derivación por rol
 > cabecera; recargar la página mantiene la sesión; «Salir» la limpia; y una
 > contraseña mala muestra el mensaje sin vaciar el correo escrito.
 
-### PR 7 · `feat/paginas-informativas` · **TERMINADO**
+### PR 7 · `feat/paginas-informativas` · **TERMINADO** · [#25](https://github.com/JuanAgogoo/emprende-hub/pull/25)
 
 > Entregado en la rama `feat/frontend-paginas-informativas`. El texto describe lo
 > que la aplicación hace de verdad —cada fila de la tabla es un campo que el
@@ -481,7 +481,22 @@ feat(legal): añadir las páginas de tratamiento de datos e información persona
 > **Hito:** los dos enlaces del pie abren su página, se leen sin sesión y se
 > vuelve atrás sin perder nada. El texto no baja de 17px ni se sale a 360px.
 
-### PR 8 · `feat/registro-cliente`
+### PR 8 · `feat/registro-cliente` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-registro-cliente`. Verificado contra el
+> backend: alta válida con `201` y sesión abierta, correo repetido con `400` y
+> «Ya existe una cuenta con ese correo», contraseña corta con su clave por campo,
+> y la cuenta nueva entrando por el login.
+>
+> **El backend devuelve dos formas de error distintas** y el formulario trata
+> cada una: la validación de forma trae una clave por campo, y la regla de
+> negocio solo `message`. Como aquí el único conflicto posible es el correo ya
+> usado, ese campo se marca además de decirlo arriba.
+>
+> **Devuelve al login su enlace al registro**, que el PR 6 tuvo que quitar por no
+> dejar enlaces muertos.
+>
+> **Falta la revisión visual en el navegador.**
 El registro corto de A1: nombre, correo y contraseña de mínimo 8 caracteres, más
 la casilla de tratamiento de datos. Formulario controlado con una función pura
 `validar()` fuera del componente; los mensajes aparecen **solo tras intentar

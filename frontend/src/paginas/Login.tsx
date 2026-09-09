@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { useSesion } from '../estado/SesionContext';
 import type { Rol } from '../types/sesion';
-import estilos from './Login.module.css';
+import estilos from './Formulario.module.css';
 
 interface Valores {
   readonly correo: string;
@@ -138,6 +138,10 @@ export function Login() {
             {enviando ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
+
+        <p className={estilos.pie}>
+          ¿No tienes cuenta? <Link to="/registro">Crear una cuenta</Link>
+        </p>
       </div>
     </div>
   );

@@ -98,3 +98,36 @@
   background: var(--color-apagado);
   cursor: progress;
 }
+
+/* ── Casilla de aceptación ───────────────────────────────────────────── */
+
+.casilla {
+  display: flex;
+  align-items: start;
+  gap: var(--e-3);
+  /* El área táctil la da la fila entera, no solo el cuadrito. */
+  min-height: var(--toque-min);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+  cursor: pointer;
+}
+
+.casilla input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  accent-color: var(--color-acento);
+  cursor: pointer;
+}
+
+.pie {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+  text-align: center;
+}
+
+.ayuda {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
