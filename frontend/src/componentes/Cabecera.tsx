@@ -48,6 +48,18 @@ export function Cabecera() {
               </li>
             ) : (
               <>
+                {sesion.rol === 'EMPRENDEDOR' && (
+                  <li>
+                    <NavLink
+                      to="/mi-negocio"
+                      className={({ isActive }) =>
+                        isActive ? `${estilos.enlace} ${estilos.enlaceActivo}` : estilos.enlace
+                      }
+                    >
+                      Mi negocio
+                    </NavLink>
+                  </li>
+                )}
                 <li className={estilos.cuenta}>
                   {/* El nombre completo no cabe en un móvil estrecho. */}
                   <span className={estilos.nombre}>{sesion.nombre.split(' ')[0]}</span>
