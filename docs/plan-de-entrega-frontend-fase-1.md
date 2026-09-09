@@ -740,10 +740,14 @@ El cuarto paso, ya con la sesión abierta: subida de imágenes contra
 `POST /api/v1/negocios/mio/fotos`, previsualización antes de enviar, la primera
 marcada como portada (B9), quitar una recién subida y saltar el paso.
 
-El tamaño y el tipo se comprueban **antes** de enviar, porque el límite de Tomcat
-está a 6 MB y la regla del dominio a 5: un fichero de 5,5 MB llega al backend
-solo para que lo rechace con el mensaje del dominio, y uno de 7 lo corta la
-infraestructura. Avisar antes ahorra las dos.
+El tamaño y el tipo se comprueban **antes** de enviar: una imagen de 6 MB viaja
+entera por la red para que el backend la rechace al llegar, y quien la subió
+espera todo ese rato para que le digan que no.
+
+~~Y porque un fichero por encima del límite del contenedor lo cortaría la
+infraestructura con otro mensaje.~~ **Eso era falso** y se comprobó al construir
+el incremento: `GlobalExceptionHandler` trata `MaxUploadSizeExceededException` y
+devuelve el mismo texto del dominio. La razón es la espera, no el mensaje.
 
 Con esto el asistente está entero y la fase cumple lo que pedía: **el emprendedor
 llega a su negocio con las fotos, el nombre y los precios ya puestos.**
@@ -762,7 +766,26 @@ feat(negocios): añadir la carga inicial de fotos al registro del emprendedor
 
 ## Cierre — Documentación (PR 13)
 
-### PR 13 · `docs/frontend-fase-1`
+### PR 13 · `docs/frontend-fase-1` · **TERMINADO**
+
+> Entregado en la rama `docs/frontend-fase-1`. El README de la raíz suma el
+> guion completo de la sustentación —levantar las dos mitades, la parte pública,
+> el asistente de punta a punta, la aprobación con el administrador y el negocio
+> apareciendo—, con la tabla de qué negocios crear antes y una de qué hacer si
+> algo falla en directo. El del frontend suma las nueve rutas y lo que **no**
+> entra en la fase, para que nadie lo busque.
+>
+> **El recorrido no se re-ejecutó desde una base limpia.** `docker compose down
+> -v` habría borrado los siete negocios que ya están creados a mano con sus fotos
+> y sus opiniones, que son justo la vitrina de la sustentación. Los pasos se
+> comprobaron sobre la base viva: la lista de pendientes responde y el guion
+> encaja con lo que devuelve. El ciclo completo de aprobación ya se verificó en
+> el PR 1.
+>
+> Queda escrita la trampa que más tiempo ha costado: **crear, subir fotos y
+> aprobar al final**, porque una foto subida a un negocio ya aprobado entra
+> pendiente y las fichas salen sin imagen.
+
 No añade funcionalidad. README de la raíz explicando cómo se levantan las dos
 mitades, y el guion del recorrido de la sustentación: base limpia, backend
 arriba, frontend arriba, registro de emprendedor de punta a punta, aprobación
@@ -781,6 +804,31 @@ docs: documentar el arranque del frontend y el recorrido de la fase 1
 
 > **Hito:** alguien que no ha tocado el proyecto lo levanta entero siguiendo solo
 > el README, y completa el recorrido sin preguntar nada.
+
+---
+
+## Estado de la fase 1 · **TERMINADA**
+
+Los trece incrementos entregados. Once de frontend y dos de backend, según lo
+previsto y sin incrementos de más.
+
+| Fase | Incrementos | Estado |
+|---|---|---|
+| 0 · Preparar el terreno | PR 1–2 | **TERMINADA** |
+| 1 · Vitrina pública | PR 3–5 | **TERMINADA** |
+| 2 · Acceso | PR 6–9 | **TERMINADA** |
+| 3 · Alta del emprendedor | PR 10–12 | **TERMINADA** |
+| Cierre · Documentación | PR 13 | **TERMINADO** |
+
+**Lo que queda pendiente, y hay que decirlo antes de que lo pregunten:** la
+revisión visual en el navegador **no se ha hecho en ningún incremento**. El
+entorno de desarrollo con el que se construyó no tiene navegador, así que los
+360px, el recorrido con el tabulador y los tres estados de cada vista están
+comprobados por código y por `curl`, pero no vistos. Es la única comprobación del
+plan que no se cumplió, y le corresponde a quien tenga la pantalla delante.
+
+Lo que la fase 2 recogerá, ya escrito en el alcance: el dashboard de gestión, el
+panel de administración, los cursos y las opiniones.
 
 ---
 
