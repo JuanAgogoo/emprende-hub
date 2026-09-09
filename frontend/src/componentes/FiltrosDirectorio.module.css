@@ -1,0 +1,135 @@
+.panel {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+}
+
+.resumen {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  font-weight: 700;
+  color: var(--color-tinta);
+  cursor: pointer;
+  list-style: none;
+}
+
+.resumen::-webkit-details-marker {
+  display: none;
+}
+
+/* El triángulo lo dibujamos nosotros para que gire al abrir. */
+.resumen::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--color-apagado);
+  border-bottom: 2px solid var(--color-apagado);
+  transform: rotate(-45deg);
+  transition: transform var(--dur-rapida) var(--curva);
+}
+
+.panel[open] .resumen::before {
+  transform: rotate(45deg);
+}
+
+.marca {
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.campos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+.recuento {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-apagado);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.campo select {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  /* Un control se identifica por su borde: necesita 3:1, no el gris decorativo. */
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.campo select:disabled {
+  background: var(--color-lienzo-alt);
+  color: var(--color-apagado);
+  cursor: not-allowed;
+}
+
+/* El grupo entero se marca cuando su control tiene el foco. */
+.campo:has(select:focus-visible) label {
+  color: var(--color-acento);
+}
+
+.ayuda {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.limpiar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: transparent;
+  color: var(--color-acento);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.limpiar:hover {
+  background: var(--color-acento-suave);
+}
+
+/*
+ * A partir de tablet los filtros están siempre a la vista: el resumen se oculta
+ * y el panel deja de poder plegarse. En móvil sigue siendo un desplegable, que
+ * es lo que evita que los filtros empujen los resultados fuera de la pantalla.
+ */
+@media (min-width: 48rem) {
+  .resumen {
+    display: none;
+  }
+
+  /* Si alguien lo plegó en móvil y luego ensancha la ventana, el resumen
+     desaparece: sin esto, el contenido quedaría oculto y sin forma de abrirlo. */
+  .panel:not([open]) .campos {
+    display: flex;
+  }
+
+  .campos {
+    border-top: none;
+  }
+}
