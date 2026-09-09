@@ -633,7 +633,40 @@ feat(auth): añadir el registro de emprendedores con su negocio en una transacci
 > devuelve `400`; y una descripción de 79 caracteres devuelve `400` **sin haber
 > creado la cuenta** —comprobado intentando el login después—.
 
-### PR 11 · `feat/registro-emprendedor` — **frontend**
+### PR 11 · `feat/registro-emprendedor` — **frontend** · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-registro-emprendedor`. Verificado contra el
+> backend con `curl`, enviando el mismo cuerpo que arma el asistente: `201` con
+> rol `EMPRENDEDOR` y `negocioId`, el negocio `PENDIENTE` con su barrio y su
+> Instagram guardados, los dos productos en el escaparate, y el identificador
+> devolviendo `404` en el directorio hasta que se apruebe (B6).
+>
+> **Las cinco formas del error se comprobaron una a una**, porque de ellas
+> depende a qué paso vuelve el asistente: `negocio.descripcion`,
+> `redes.instagram` y `productos[0].nombre` traen su clave con la ruta; el correo
+> repetido trae solo `message`; y la descripción de 79 caracteres **no deja la
+> cuenta creada** —el login posterior devuelve 401—.
+>
+> **`productos[0].nombre` no tiene un campo donde pintarse**: el backend nombra
+> el producto por su posición y la lista del navegador no la enseña. Se listan
+> aparte en el paso 3, o el aviso de «revisa los campos marcados» mandaría a
+> mirar algo que no está marcado.
+>
+> **`Formulario.module.css` se amplía en vez de duplicarse.** Es el tercer
+> formulario del proyecto —login, registro de cliente y este—, que es cuando toca
+> extraer: se le añaden `select` y `textarea` y una tarjeta más ancha.
+>
+> **Lectura de `diseno.md` que conviene dejar por escrito:** pide «el botón de
+> siguiente deshabilitado con una razón visible». Aquí no se deshabilita nunca:
+> al pulsarlo salen los errores y el foco va al primer campo que falla, que es el
+> `markAllAsTouched()` del curso. La razón visible se cumple igual, y sin un
+> botón muerto.
+>
+> **Devuelve a la portada el «Publicar mi negocio»** que el PR 7 tuvo que quitar
+> por no dejar enlaces muertos.
+>
+> **Falta la revisión visual en el navegador**, igual que en los siete
+> incrementos anteriores: el entorno sigue sin tener uno.
 El asistente, con su propia ruta y su recorrido, separado del registro de
 cliente: paso 1 la cuenta, paso 2 el negocio, paso 3 el escaparate. Los tres
 recogen datos en el navegador y **se envían juntos** en la única petición del PR

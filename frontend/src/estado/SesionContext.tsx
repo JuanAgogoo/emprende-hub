@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import { iniciarSesion, registrarCliente } from '../api/auth';
+import { iniciarSesion, registrarCliente, registrarEmprendedor } from '../api/auth';
 import { borrarSesion, guardarSesion, leerSesion } from '../almacenSesion';
+import type { RegistroEmprendedor } from '../types/registroEmprendedor';
 import type { RespuestaAuth, Sesion } from '../types/sesion';
 
 /**
@@ -14,6 +15,7 @@ interface ValorSesion {
   readonly sesion: Sesion | null;
   entrar: (correo: string, contrasena: string) => Promise<Sesion>;
   registrar: (nombre: string, correo: string, contrasena: string) => Promise<Sesion>;
+  registrarNegocio: (peticion: RegistroEmprendedor) => Promise<Sesion>;
   salir: () => void;
 }
 
@@ -55,13 +57,23 @@ export function SesionProvider({ children }: { readonly children: ReactNode }) {
     [],
   );
 
+  const registrarNegocio = useCallback(async (peticion: RegistroEmprendedor): Promise<Sesion> => {
+    // El alta de emprendedor también devuelve el token, y ya con el rol puesto:
+    // no hay que pasar por el login ni descodificar nada para saberlo.
+    const respuesta = await registrarEmprendedor(peticion);
+    const nueva = deRespuesta(respuesta);
+    guardarSesion(nueva);
+    setSesion(nueva);
+    return nueva;
+  }, []);
+
   const salir = useCallback(() => {
     borrarSesion();
     setSesion(null);
   }, []);
 
   return (
-    <SesionContext.Provider value={{ sesion, entrar, registrar, salir }}>
+    <SesionContext.Provider value={{ sesion, entrar, registrar, registrarNegocio, salir }}>
       {children}
     </SesionContext.Provider>
   );

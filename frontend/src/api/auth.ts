@@ -1,4 +1,8 @@
 import { enviar } from './cliente';
+import type {
+  RegistroEmprendedor,
+  RespuestaRegistroEmprendedor,
+} from '../types/registroEmprendedor';
 import type { RespuestaAuth } from '../types/sesion';
 
 /**
@@ -23,4 +27,20 @@ export function registrarCliente(
   contrasena: string,
 ): Promise<RespuestaAuth> {
   return enviar<RespuestaAuth>('/auth/registro', { nombre, correo, contrasena });
+}
+
+/**
+ * Alta de emprendedor con su negocio (A1-ter).
+ *
+ * No es el registro de cliente con más campos: cuenta, negocio, redes y
+ * escaparate entran **en una sola transacción**, así que un fallo a mitad no
+ * deja una cuenta creada con el negocio sin registrar.
+ *
+ * Las fotos se quedan fuera a propósito —son binarios y tienen su endpoint
+ * multipart— y se suben después con el token que devuelve esta llamada.
+ */
+export function registrarEmprendedor(
+  peticion: RegistroEmprendedor,
+): Promise<RespuestaRegistroEmprendedor> {
+  return enviar<RespuestaRegistroEmprendedor>('/auth/registro-emprendedor', peticion);
 }

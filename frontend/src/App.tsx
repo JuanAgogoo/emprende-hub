@@ -10,6 +10,7 @@ import { MiNegocio } from './paginas/MiNegocio';
 import { NoEncontrada } from './paginas/NoEncontrada';
 import { PerfilNegocio } from './paginas/PerfilNegocio';
 import { RegistroCliente } from './paginas/RegistroCliente';
+import { RegistroEmprendedor } from './paginas/RegistroEmprendedor';
 import { TratamientoDeDatos } from './paginas/TratamientoDeDatos';
 
 /** La estructura que comparten todas las rutas. */
@@ -37,6 +38,7 @@ export function App() {
         <Route path="/negocios/:id" element={<PerfilNegocio />} />
         <Route path="/entrar" element={<Login />} />
         <Route path="/registro" element={<RegistroCliente />} />
+        <Route path="/registro-emprendedor" element={<RegistroEmprendedor />} />
         <Route
           path="/mi-negocio"
           element={
