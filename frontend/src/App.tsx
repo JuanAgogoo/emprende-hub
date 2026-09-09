@@ -4,6 +4,7 @@ import { Pie } from './componentes/Pie';
 import { Directorio } from './paginas/Directorio';
 import { Inicio } from './paginas/Inicio';
 import { NoEncontrada } from './paginas/NoEncontrada';
+import { PerfilNegocio } from './paginas/PerfilNegocio';
 
 /** La estructura que comparten todas las rutas. */
 function Estructura() {
@@ -27,6 +28,7 @@ export function App() {
       <Route element={<Estructura />}>
         <Route path="/" element={<Inicio />} />
         <Route path="/directorio" element={<Directorio />} />
+        <Route path="/negocios/:id" element={<PerfilNegocio />} />
         <Route path="*" element={<NoEncontrada />} />
       </Route>
     </Routes>

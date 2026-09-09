@@ -23,6 +23,18 @@ export function calificacion(valor: number | null): string | null {
   return valor === null ? null : CALIFICACION.format(valor);
 }
 
+const PRECIO = new Intl.NumberFormat('es-CO', {
+  style: 'currency',
+  currency: 'COP',
+  // Los precios llegan en pesos enteros: los centavos solo estorban.
+  maximumFractionDigits: 0,
+});
+
+/** Un precio en pesos colombianos. Sustituye al CurrencyPipe, sin librería. */
+export function precio(valor: number): string {
+  return PRECIO.format(valor);
+}
+
 /** Los tres niveles de precio de G4, tal como se enseñan. */
 export function nivelPrecio(nivel: 'BAJO' | 'MEDIO' | 'ALTO'): string {
   switch (nivel) {

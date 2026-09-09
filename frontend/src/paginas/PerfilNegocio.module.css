@@ -1,0 +1,296 @@
+.pagina {
+  padding-block: var(--e-5) var(--e-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.migas {
+  display: flex;
+  gap: var(--e-2);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+/* Mobile first: todo en una columna, la ficha debajo de la galería. */
+.columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-6);
+}
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+  min-width: 0;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.tituloBloque {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-3);
+  font-size: var(--texto-xl);
+}
+
+.contador {
+  font-size: var(--texto-xs);
+  font-weight: 500;
+  color: var(--color-apagado);
+}
+
+.descripcion {
+  max-width: var(--ancho-lectura);
+}
+
+/* ── Escaparate ──────────────────────────────────────────────────────── */
+
+.productos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-3);
+  list-style: none;
+  padding: 0;
+}
+
+.producto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+.filaProducto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+.nombreProducto {
+  font-size: var(--texto-md);
+  font-weight: 600;
+}
+
+.precio {
+  font-weight: 700;
+  color: var(--color-acento);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.descripcionProducto {
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.agotado {
+  background: var(--color-lienzo-alt);
+}
+
+.etiquetaAgotado {
+  align-self: start;
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  background: color-mix(in srgb, var(--color-aviso) 14%, var(--color-lienzo));
+  color: var(--color-aviso);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.vacio {
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+/* ── Ficha ───────────────────────────────────────────────────────────── */
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.nombre {
+  font-size: var(--texto-2xl);
+}
+
+.meta,
+.nota,
+.sinNota {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  font-size: var(--texto-sm);
+}
+
+.meta {
+  color: var(--color-apagado);
+}
+
+.categoria {
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-weight: 600;
+}
+
+.estrella {
+  color: var(--color-aviso);
+}
+
+.opiniones {
+  color: var(--color-apagado);
+}
+
+.sinNota {
+  color: var(--color-apagado);
+  font-style: italic;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--e-2) var(--e-4);
+  margin: 0;
+  padding-block: var(--e-3);
+  border-block: 1px solid var(--color-borde);
+  font-size: var(--texto-sm);
+}
+
+.datos dt {
+  font-weight: 600;
+  color: var(--color-apagado);
+}
+
+.datos dd {
+  margin: 0;
+  color: var(--color-tinta);
+}
+
+.redes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.red {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-full);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-rapida) var(--curva),
+    color var(--dur-rapida) var(--curva);
+}
+
+.red:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+.primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.primario:hover {
+  background: var(--color-acento-fuerte);
+}
+
+/* ── Carga ───────────────────────────────────────────────────────────── */
+
+.esqueletoFoto,
+.esqueletoTexto {
+  border-radius: var(--radio-lg);
+  background: linear-gradient(
+    90deg,
+    var(--color-lienzo-alt) 25%,
+    color-mix(in srgb, var(--color-borde) 60%, var(--color-lienzo)) 50%,
+    var(--color-lienzo-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: barrido 1.4s var(--curva) infinite;
+}
+
+.esqueletoFoto {
+  aspect-ratio: 4 / 3;
+}
+
+.esqueletoTexto {
+  height: 8rem;
+}
+
+@keyframes barrido {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.error {
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  color: var(--color-error);
+}
+
+/* ── A partir de tablet: ficha al lado y fija ────────────────────────── */
+
+@media (min-width: 48rem) {
+  .productos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .columnas {
+    grid-template-columns: 1fr 20rem;
+    align-items: start;
+  }
+
+  .ficha {
+    position: sticky;
+    top: calc(60px + var(--e-4));
+  }
+}
