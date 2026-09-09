@@ -182,9 +182,33 @@ versión, y así se queda.
 
 ---
 
-## Fase 0 — Preparar el terreno (PR 1–2)
+## Cómo se lee el estado
 
-### PR 1 · `chore/retirar-siembra-demo` — **backend**
+Cada incremento y cada fase llevan su marca. Se pone **al terminar el trabajo y
+verificarlo**, y se completa con el número del PR cuando se fusiona.
+
+| Marca | Significa |
+|---|---|
+| ✅ **Terminado** | Construido y verificado. Lleva el número de su PR si ya está fusionado |
+| 🔨 **En curso** | Rama abierta, trabajo sin cerrar |
+| ⬜ Pendiente | Sin empezar |
+
+Una fase se marca terminada cuando lo están **todos** sus incrementos.
+
+---
+
+## ✅ Fase 0 — Preparar el terreno (PR 1–2) · terminada
+
+### ✅ PR 1 · `chore/retirar-siembra-demo` — **backend** · terminado
+
+> Fusionado en [#20](https://github.com/JuanAgogoo/emprende-hub/pull/20), junto
+> con el PR 2. Verificado: 429 pruebas en verde, cobertura de `service/**` al
+> 98,1%, y el ciclo completo probado con `curl` —registro, negocio pendiente,
+> rechazo con motivo, reenvío, aprobación y aparición en el directorio—.
+>
+> **Además de lo previsto** hubo que rehacer la primera carpeta de la colección
+> de Postman: tres peticiones entraban con cuentas sembradas y de ellas heredaban
+> el token casi todas las demás.
 
 Se retira `CargaInicialDemo` y con él los 12 negocios, las 20 cuentas, las
 opiniones, las consultas y los 60 días de visitas. **Se quedan** los otros tres
@@ -210,7 +234,17 @@ chore: retirar la siembra de demostración y dejar solo los catálogos
 > devuelve ceros con `calificacionPromedio` nulo —que es lo correcto, no un
 > fallo—. `cd backend && ./gradlew build` en verde, con la cobertura intacta.
 
-### PR 2 · `chore/frontend-andamiaje`
+### ✅ PR 2 · `chore/frontend-andamiaje` · terminado
+
+> Fusionado en [#20](https://github.com/JuanAgogoo/emprende-hub/pull/20).
+> Verificado: `npm run build` sin errores ni advertencias, `npm run contraste`
+> 21 de 21 —y comprobado que falla con código 1 al romper un token a propósito—,
+> y el proxy respondiendo en `/api/v1` y `/fotos` contra el backend real.
+>
+> **Queda pendiente la revisión visual**: no había navegador disponible, así que
+> el ancho de 360px y el recorrido con el tabulador no se comprobaron.
+>
+> **Corrección sobre lo planeado:** los jobs de CI no se filtran por `paths`.
 
 Proyecto creado con `npm create vite@latest frontend -- --template react-ts`.
 `tsconfig.json` con `strict`, `noImplicitAny`, `strictNullChecks` y
@@ -257,13 +291,27 @@ chore(frontend): crear el andamiaje con React, TypeScript y el sistema de diseñ
 
 ---
 
-## Fase 1 — Vitrina pública (PR 3–5)
+## 🔨 Fase 1 — Vitrina pública (PR 3–5) · en curso
 
 Los tres se verifican contra negocios creados a mano con Postman, según la
 decisión 1. **El estado vacío deja de ser un caso raro y pasa a ser el primero
 que se ve**, así que se construye antes que el lleno, no después.
 
-### PR 3 · `feat/portada`
+### ✅ PR 3 · `feat/portada` · terminado
+
+> Entregado en la rama `feat/frontend-portada`, **pendiente de fusionar**.
+> Verificado con datos reales creados por la API —7 negocios, 3 destacados y
+> calificación media de 4,8—: `npm run build` sin errores ni advertencias,
+> `npm run contraste` 21 de 21, y las fotos llegando por el proxy con `200
+> image/png`. **Falta la revisión visual en el navegador**, que sigue sin estar
+> disponible en el entorno.
+>
+> **Aviso para los PR 4 y 5, que sale de construir este.** Una foto subida a un
+> negocio **ya aprobado** entra pendiente de revisión (B2) y el público no la ve:
+> `fotoPrincipal` llega nula hasta que el administrador aprueba el cambio. Al
+> preparar datos para ver una pantalla llena, el orden es **crear, subir las
+> fotos y después aprobar**, o hay que aprobar también el cambio pendiente. No
+> es un fallo del frontend y cuesta un rato descubrirlo.
 La portada: hero, la barra de cuatro cifras de `GET /estadisticas/portada` y los
 destacados de `GET /directorio/destacados`, con los siete bloques que fija
 [diseno.md](diseno.md#la-portada).
