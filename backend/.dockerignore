@@ -1,0 +1,6 @@
+# El contexto se manda entero al demonio de Docker: lo pesado y lo que se
+# regenera no tiene por qué viajar.
+build/
+.gradle/
+uploads/
+bin/

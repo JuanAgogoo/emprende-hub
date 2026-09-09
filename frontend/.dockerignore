@@ -1,0 +1,3 @@
+# `node_modules` se instala dentro de la imagen, con los binarios de Alpine.
+node_modules/
+dist/
