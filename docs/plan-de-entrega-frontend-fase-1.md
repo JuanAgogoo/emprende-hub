@@ -568,7 +568,7 @@ feat(negocios): añadir la vista del negocio propio y la derivación del emprend
 
 ---
 
-## Fase 3 — Alta del emprendedor (PR 10–12) · **EN CURSO**
+## Fase 3 — Alta del emprendedor (PR 10–12) · **TERMINADA**
 
 Los tres incrementos de las decisiones 2 y 3. El primero es de backend y los dos
 siguientes lo consumen: no hay asistente sin endpoint, ni fotos sin negocio.
@@ -700,7 +700,42 @@ feat(auth): añadir el asistente de registro de emprendedores
 > paso 1 con el mensaje en su campo, y **no deja nada creado**: reintentar con
 > otro correo funciona.
 
-### PR 12 · `feat/carga-inicial-fotos`
+### PR 12 · `feat/carga-inicial-fotos` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-carga-inicial-fotos`. Verificado contra el
+> backend con `curl`: tres subidas seguidas quedan en `orden` 0, 1 y 2 con la
+> primera como `principal`; borrar la portada recoloca y la segunda pasa a serlo
+> (B9); la imagen se descarga de `/fotos/{archivo}` con `200 image/png` **sin
+> token**; y la galería sigue completa tras cerrar sesión y volver a entrar.
+>
+> **Los tres rechazos, comprobados uno a uno:** un `.txt` devuelve «La imagen
+> tiene que ser JPG o PNG», una de 5,95 MB «Cada imagen puede pesar 5 MB como
+> mucho», y la séptima «La galería admite 6 fotos como mucho».
+>
+> **Corrección a lo que decía este plan.** Daba por hecho que un fichero por
+> encima del límite del contenedor lo cortaba la infraestructura con otro
+> mensaje. No es así: `GlobalExceptionHandler` trata
+> `MaxUploadSizeExceededException` y devuelve **el mismo texto del dominio**. Se
+> comprobó con una imagen de 7,33 MB. Comprobar el tamaño en el navegador sigue
+> mereciendo la pena, pero por la espera que ahorra, no por el mensaje.
+>
+> **Las subidas van de una en una y en orden, a propósito.** En paralelo llegan
+> desordenadas y la portada sería la que ganara la carrera, porque el backend
+> numera por orden de llegada.
+>
+> **A partir del paso 4 no se puede volver atrás**: el negocio ya existe y
+> reenviar el formulario chocaría con el correo recién ocupado. El botón
+> «Anterior» desaparece.
+>
+> Las vistas previas se liberan con `URL.revokeObjectURL` al quitar una imagen,
+> al subirla y al salir del paso. Sin lo último, salir a `/mi-negocio` en una SPA
+> no descarga el documento y la memoria se queda reservada.
+>
+> **Falta la revisión visual en el navegador**, la única comprobación del plan
+> que no se ha hecho en ningún incremento: el entorno no tiene navegador.
+
+> **Con este incremento la fase 3 queda cerrada** y el asistente está entero.
+> Solo falta el PR 13, que es documentación.
 El cuarto paso, ya con la sesión abierta: subida de imágenes contra
 `POST /api/v1/negocios/mio/fotos`, previsualización antes de enviar, la primera
 marcada como portada (B9), quitar una recién subida y saltar el paso.
