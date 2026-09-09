@@ -219,6 +219,9 @@ export function RegistroCliente() {
         <p className={estilos.pie}>
           ¿Ya tienes cuenta? <Link to="/entrar">Entrar</Link>
         </p>
+        <p className={estilos.pie}>
+          ¿Tienes un negocio? <Link to="/registro-emprendedor">Publícalo en el directorio</Link>.
+        </p>
       </div>
     </div>
   );
