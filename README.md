@@ -22,35 +22,30 @@ docker compose down           # conserva los datos
 docker compose down -v        # los borra
 ```
 
-Al arrancar por primera vez se siembran los datos de la demostración: los
-catálogos, la cuenta de administrador, los 8 cursos y los 12 negocios del
-prototipo con sus opiniones, su escaparate, su buzón y **dos meses de histórico
-de visitas**. Sin ellos el directorio sale vacío y la gráfica del panel, plana.
-
-**La carga es idempotente**: si ya hay datos no toca nada, así que reiniciar no
+Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
+mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
+barrios y los catálogos de formación—, la cuenta de administrador y los 8 cursos.
+La carga es idempotente: si ya hay datos no toca nada, así que reiniciar no
 duplica. Para empezar de cero, `docker compose down -v`.
 
-### Cuentas sembradas
+**Los negocios no se siembran.** Antes había doce generados por código y se
+retiraron: la vitrina es parte del entregable y un catálogo escrito por un bucle
+se nota. Se crean uno a uno, con sus fotos y sus precios, desde la colección de
+Postman o desde el registro de emprendedor del frontend.
+
+Consecuencia al arrancar de cero: el directorio sale vacío y la portada muestra
+ceros con la calificación media nula. **Es lo correcto, no un fallo** — las
+cifras se calculan (H4) y todavía no hay nada que contar.
+
+### La única cuenta sembrada
 
 | Cuenta | Correo | Contraseña | Para qué sirve |
 |---|---|---|---|
 | Administrador | `admin@emprendehub.co` | `admin12345` | Moderación y cursos |
-| Emprendedora | `napolitana@emprendehub.co` | `contrasena123` | Panel con visitas, buzón y avisos |
-| Emprendedora | `handmade@emprendehub.co` | `contrasena123` | Negocio **rechazado**: lee su motivo |
-| Emprendedora | `yogaintegral@emprendehub.co` | `contrasena123` | Negocio **pendiente** de revisión |
-| Clienta | `maria.garcia@gmail.com` | `contrasena123` | Opina, denuncia y escribe al buzón |
 
-Los otros nueve emprendedores siguen el mismo patrón (`<negocio>@emprendehub.co`)
-y los otros siete clientes son `nombre.apellido@gmail.com`. Todos con
-`contrasena123`.
-
-### Qué queda listo para enseñar
-
-- **10 negocios publicados**, uno pendiente y uno rechazado con su motivo.
-- **Destacados** con cuatro negocios: los que pasan de cinco opiniones (C7).
-- Dos negocios **sin ninguna opinión**, que salen como «Nuevo» y sin calificación (C5).
-- **Dos meses de visitas** por negocio, con la variación semanal y mensual en positivo.
-- Consultas sin leer y avisos pendientes en los primeros buzones.
+Las demás se crean al registrarse. La carpeta **1 · Acceso y datos de partida**
+de la colección de Postman las crea en orden —una clienta, una emprendedora y su
+negocio— y guarda cada token en su variable.
 
 ## Probar la API
 
@@ -133,7 +128,7 @@ La variable `base` apunta a `http://localhost:8080/api/v1`.
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**427 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**429 pruebas en verde y 98,1% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |
