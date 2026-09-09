@@ -6,22 +6,10 @@
  * GlobalExceptionHandler del backend.
  */
 
+import { leerToken } from '../almacenSesion';
+
 /** Prefijo de la API. En desarrollo lo reescribe el proxy de Vite. */
 const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
-
-const CLAVE_TOKEN = 'emprendehub.token';
-
-export function leerToken(): string | null {
-  return localStorage.getItem(CLAVE_TOKEN);
-}
-
-export function guardarToken(token: string): void {
-  localStorage.setItem(CLAVE_TOKEN, token);
-}
-
-export function borrarToken(): void {
-  localStorage.removeItem(CLAVE_TOKEN);
-}
 
 /**
  * Un error de la API, ya legible.
