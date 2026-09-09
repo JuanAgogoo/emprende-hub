@@ -1,6 +1,6 @@
 import { consulta, obtener } from './cliente';
 import type { Pagina } from '../types/pagina';
-import type { FiltrosDirectorio, TarjetaNegocio } from '../types/negocio';
+import type { FiltrosDirectorio, PerfilNegocio, TarjetaNegocio } from '../types/negocio';
 
 /**
  * Los destacados devuelven **una lista, no una página**: son seis y no se
@@ -20,4 +20,15 @@ export function obtenerDestacados(limite?: number): Promise<TarjetaNegocio[]> {
  */
 export function buscarNegocios(filtros: FiltrosDirectorio): Promise<Pagina<TarjetaNegocio>> {
   return obtener<Pagina<TarjetaNegocio>>(`/directorio${consulta({ ...filtros })}`);
+}
+
+/**
+ * Perfil público de un negocio.
+ *
+ * Un negocio pendiente, rechazado o de una cuenta suspendida responde **404 y
+ * no 403** a propósito (B6): no se filtra información sobre lo que existe sin
+ * publicar. Pedir el perfil anota además una visita (H1).
+ */
+export function obtenerPerfil(id: number): Promise<PerfilNegocio> {
+  return obtener<PerfilNegocio>(`/directorio/${id}`);
 }

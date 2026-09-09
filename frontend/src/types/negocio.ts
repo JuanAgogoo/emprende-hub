@@ -42,3 +42,48 @@ export interface FiltrosDirectorio {
   readonly page?: number;
   readonly size?: number;
 }
+
+/** Una imagen de la galería. El público solo recibe las aprobadas. */
+export interface FotoNegocio {
+  readonly id: number;
+  readonly url: string;
+  readonly orden: number;
+  /** La primera por orden, que hace de portada (B9). */
+  readonly principal: boolean;
+  readonly estado: string;
+}
+
+/** Un artículo del escaparate (F1). El precio llega como número, en pesos. */
+export interface Producto {
+  readonly id: number;
+  readonly nombre: string;
+  readonly precio: number;
+  readonly descripcion: string | null;
+  readonly disponible: boolean;
+}
+
+/**
+ * El perfil público de un negocio, que **no** tiene la misma forma que la
+ * tarjeta del listado: trae la galería, el escaparate y las redes, y en cambio
+ * no lleva `fotoPrincipal`.
+ *
+ * Tampoco lleva el estado ni el motivo del rechazo: son conversación entre el
+ * dueño y el administrador. El teléfono sí es público; el correo no aparece.
+ */
+export interface PerfilNegocio {
+  readonly id: number;
+  readonly nombre: string;
+  readonly descripcion: string;
+  readonly telefono: string;
+  readonly categoria: string;
+  readonly ciudad: string;
+  readonly barrio: string | null;
+  readonly nivelPrecio: NivelPrecio;
+  readonly calificacionPromedio: number | null;
+  readonly numeroOpiniones: number;
+  readonly fechaAprobacion: string;
+  readonly instagram: string | null;
+  readonly linkedin: string | null;
+  readonly fotos: readonly FotoNegocio[];
+  readonly productos: readonly Producto[];
+}
