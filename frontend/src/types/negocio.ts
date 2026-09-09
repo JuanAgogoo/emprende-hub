@@ -87,3 +87,30 @@ export interface PerfilNegocio {
   readonly fotos: readonly FotoNegocio[];
   readonly productos: readonly Producto[];
 }
+
+/** Los tres estados por los que pasa un negocio. Nace PENDIENTE (B6). */
+export type EstadoNegocio = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+
+/**
+ * El negocio visto por su dueño.
+ *
+ * A diferencia del perfil público, este **sí** trae el estado y el motivo del
+ * rechazo, que son conversación entre el dueño y quien administra (B1). En
+ * cambio no trae la galería ni el escaparate: van por sus propios endpoints.
+ */
+export interface MiNegocio {
+  readonly id: number;
+  readonly nombre: string;
+  readonly descripcion: string;
+  readonly telefono: string;
+  readonly categoria: string;
+  readonly ciudad: string;
+  readonly barrio: string | null;
+  readonly nivelPrecio: NivelPrecio;
+  readonly estado: EstadoNegocio;
+  readonly motivoRechazo: string | null;
+  readonly calificacionPromedio: number | null;
+  readonly numeroOpiniones: number;
+  readonly instagram: string | null;
+  readonly linkedin: string | null;
+}
