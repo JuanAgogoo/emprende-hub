@@ -52,7 +52,7 @@ por supuesto:
 - Todo lo del §9 de `agent-docs/estilo/01-frontend-react.md`: Redux, react-query,
   axios, Zod, React Hook Form, Tailwind, i18n, Storybook, E2E.
 
-La fase consume **13 endpoints**: 12 de los 59 entregados, más el que añade el
+La fase consume **15 endpoints**: 14 de los 59 entregados, más el que añade el
 PR 10.
 
 ---
@@ -414,7 +414,7 @@ feat(directorio): añadir el perfil público del negocio con galería y escapara
 
 ---
 
-## Fase 2 — Acceso (PR 6–9) · **EN CURSO**
+## Fase 2 — Acceso (PR 6–9) · **TERMINADA**
 
 ### PR 6 · `feat/login` · **TERMINADO** · [#24](https://github.com/JuanAgogoo/emprende-hub/pull/24)
 
@@ -481,7 +481,7 @@ feat(legal): añadir las páginas de tratamiento de datos e información persona
 > **Hito:** los dos enlaces del pie abren su página, se leen sin sesión y se
 > vuelve atrás sin perder nada. El texto no baja de 17px ni se sale a 360px.
 
-### PR 8 · `feat/registro-cliente` · **TERMINADO**
+### PR 8 · `feat/registro-cliente` · **TERMINADO** · [#26](https://github.com/JuanAgogoo/emprende-hub/pull/26)
 
 > Entregado en la rama `feat/frontend-registro-cliente`. Verificado contra el
 > backend: alta válida con `201` y sesión abierta, correo repetido con `400` y
@@ -516,7 +516,28 @@ feat(auth): añadir el registro de clientes con su validación
 > correo devuelve el mensaje del backend junto al campo; y sin marcar la casilla
 > el envío no sale. El foco salta al primer campo inválido.
 
-### PR 9 · `feat/mi-negocio`
+### PR 9 · `feat/mi-negocio` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-mi-negocio`. Verificado contra el backend
+> en los cuatro casos: negocio aprobado, pendiente, rechazado —con el motivo que
+> escribió quien administra— y una cuenta sin negocio, que responde `404` y se
+> explica en vez de tratarse como un fallo.
+>
+> **`GET /negocios/mio` no trae la galería ni el escaparate**, aunque este plan
+> daba por hecho que sí. Van por `/negocios/mio/fotos` y `/negocios/mio/productos`,
+> así que la vista hace tres llamadas. La tabla de endpoints queda corregida.
+>
+> Aparece la primera ruta protegida por rol. Es una comodidad de la interfaz, no
+> una medida de seguridad: quien mande la petición a mano sigue topándose con el
+> backend, que es donde se comprueba de verdad.
+>
+> **Devuelve la derivación por rol que el PR 6 dejó a medias**: el emprendedor
+> aterriza en su negocio.
+>
+> **Falta la revisión visual en el navegador.**
+
+> **Con este incremento la fase 2 queda cerrada.** Falta la fase 3, que es el
+> alta de emprendedor de punta a punta.
 La vista de aterrizaje, **de solo lectura**, con `GET /api/v1/negocios/mio`: los
 datos del negocio, su galería, su escaparate y su estado. Si está `PENDIENTE`, lo
 explica; si está `RECHAZADO`, muestra el motivo que escribió el administrador
@@ -698,7 +719,7 @@ partición de commits cubre cada fichero exactamente una vez, con
 
 ## Endpoints que consume la fase
 
-Trece: doce ya entregados y documentados en [api.md](api.md), y uno nuevo.
+Quince: catorce ya entregados y documentados en [api.md](api.md), y uno nuevo.
 
 | Recurso | Endpoints | PR |
 |---|---|---|
@@ -708,13 +729,17 @@ Trece: doce ya entregados y documentados en [api.md](api.md), y uno nuevo.
 | Acceso | `POST /auth/login`, `/auth/registro` | 6, 8 |
 | Acceso | **`POST /auth/registro-emprendedor`** — nuevo | 10, 11 |
 | Negocios | `GET /negocios/mio` | 9 |
-| Fotos | `GET`, `POST`, `DELETE /negocios/mio/fotos` | 12 |
+| Fotos | `GET /negocios/mio/fotos` | 9 |
+| Fotos | `POST`, `DELETE /negocios/mio/fotos` | 12 |
+| Productos | `GET /negocios/mio/productos` | 9 |
 
-No aparecen los endpoints de productos: en el asistente se recogen en el
-navegador y viajan dentro del registro, y en `/mi-negocio` llegan dentro de
-`GET /negocios/mio`. `POST /negocios` y los de productos siguen existiendo y
-siguen probados —son el camino de A1-bis, decisión 4—, pero esta fase no los
-llama.
+Son quince y no trece: al construir el PR 9 se vio que `GET /negocios/mio`
+devuelve los datos del negocio pero **no** su galería ni su escaparate, que
+tienen endpoint propio. El recuento de arriba queda corregido aquí.
+
+`POST /negocios` y `POST /negocios/mio/productos` siguen existiendo y siguen
+probados —son el camino de A1-bis, decisión 4—, pero esta fase no los llama: el
+alta de emprendedor pasa por el endpoint nuevo y los productos viajan dentro.
 
 **Si un incremento necesitara un endpoint que no está en esta tabla, hay que
 pararse a mirar**: o se ha salido del alcance de la fase, o hace falta otro PR de
