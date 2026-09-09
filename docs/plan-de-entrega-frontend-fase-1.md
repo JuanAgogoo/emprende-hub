@@ -373,7 +373,7 @@ feat(directorio): añadir búsqueda, filtros, ordenación y paginación de negoc
 > estado vacío con un botón para limpiar los filtros. Con más de 12 negocios
 > creados, la página 2 trae otros distintos.
 
-### PR 5 · `feat/perfil-publico` · **TERMINADO**
+### PR 5 · `feat/perfil-publico` · **TERMINADO** · [#23](https://github.com/JuanAgogoo/emprende-hub/pull/23)
 
 > Entregado en la rama `feat/frontend-perfil-publico`. Verificado contra un
 > negocio preparado con tres fotos, tres productos —uno agotado— y las dos redes:
@@ -414,9 +414,24 @@ feat(directorio): añadir el perfil público del negocio con galería y escapara
 
 ---
 
-## Fase 2 — Acceso (PR 6–9)
+## Fase 2 — Acceso (PR 6–9) · **EN CURSO**
 
-### PR 6 · `feat/login`
+### PR 6 · `feat/login` · **TERMINADO**
+
+> Entregado en la rama `feat/frontend-login`. Verificado contra el backend: los
+> tres roles entran y la respuesta trae `rol`, una contraseña mala devuelve 401
+> con «Credenciales incorrectas», y el token abre `/negocios/mio` mientras que
+> sin él responde 401.
+>
+> **Pendiente para el PR 8:** el login no enlaza al registro porque esa página
+> todavía no existe, y el plan prohíbe dibujar enlaces muertos. Ese incremento
+> tiene que volver aquí a añadirlo.
+>
+> La persistencia quedó en `almacenSesion.ts`, no dentro del contexto, porque
+> `api/cliente.ts` también necesita el token para la cabecera. Con una sola clave
+> y un solo módulo no hay dos copias que se desincronicen.
+>
+> **Falta la revisión visual en el navegador.**
 Una sola pantalla de acceso. `POST /api/v1/auth/login` devuelve el token **y el
 rol**, así que no hay que descodificar nada para saber a quién se ha autenticado:
 la respuesta decide a dónde va cada quien.
