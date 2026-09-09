@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { obtenerCategoriasNegocio, obtenerCiudades } from '../api/catalogos';
+import { crearProducto } from '../api/negocios';
 import { ErrorApi } from '../api/cliente';
 import { CargaDeFotos } from '../componentes/CargaDeFotos';
+import { CampoContrasena } from '../componentes/CampoContrasena';
+import { EnlaceLegal } from '../componentes/EnlaceLegal';
 import { PasosAsistente } from '../componentes/PasosAsistente';
 import { useSesion } from '../estado/SesionContext';
 import { precio as formatearPrecio } from '../formato';
@@ -12,6 +15,7 @@ import type { NivelPrecio } from '../types/negocio';
 import type { RegistroEmprendedor as Peticion } from '../types/registroEmprendedor';
 import formulario from './Formulario.module.css';
 import estilos from './RegistroEmprendedor.module.css';
+import { useTitulo } from '../titulo';
 
 /**
  * Los cuatro pasos que ve quien se registra.
@@ -39,6 +43,8 @@ interface ValoresCuenta {
   readonly nombre: string;
   readonly correo: string;
   readonly contrasena: string;
+  /** Solo vive en el navegador: no viaja en la petición, solo la comprueba. */
+  readonly confirmacion: string;
   readonly aceptaDatos: boolean;
 }
 
@@ -59,17 +65,31 @@ interface ValoresProducto {
   readonly precio: string;
   readonly descripcion: string;
   readonly disponible: boolean;
+  /** Obligatoria: sin imagen el backend no crea el producto. */
+  readonly foto: File | null;
+  /**
+   * La URL local que pinta la miniatura mientras se rellena el formulario.
+   *
+   * Va en el estado y no se calcula al pintar: `createObjectURL` reserva memoria
+   * cada vez que se llama, y hacerlo en cada render las iría acumulando.
+   */
+  readonly vistaPrevia: string | null;
 }
 
 /**
- * Un producto ya añadido a la lista.
+ * Un producto ya añadido a la lista, con su imagen ya elegida.
  *
  * El identificador es local y solo sirve de `key`: el de verdad lo pone el
- * backend cuando la petición se envía. Sin él la lista tendría que usar el
- * índice, y quitar el primero renombraría a todos los demás.
+ * backend cuando se crea. Sin él la lista tendría que usar el índice, y quitar
+ * el primero renombraría a todos los demás.
+ *
+ * `foto` deja de ser nula aquí: no se añade a la lista sin ella. `vistaPrevia`
+ * es la URL local que pinta la miniatura, y hay que liberarla al quitarlo.
  */
 interface ProductoAnadido extends ValoresProducto {
   readonly id: number;
+  readonly foto: File;
+  readonly vistaPrevia: string;
 }
 
 interface Catalogos {
@@ -85,6 +105,7 @@ const CUENTA_VACIA: ValoresCuenta = {
   nombre: '',
   correo: '',
   contrasena: '',
+  confirmacion: '',
   aceptaDatos: false,
 };
 
@@ -105,7 +126,13 @@ const PRODUCTO_VACIO: ValoresProducto = {
   precio: '',
   descripcion: '',
   disponible: true,
+  foto: null,
+  vistaPrevia: null,
 };
+
+/** Las mismas reglas de imagen que la galería del negocio (B9). */
+const MAXIMO_BYTES_FOTO = 5 * 1024 * 1024;
+const TIPOS_FOTO: readonly string[] = ['image/jpeg', 'image/png'];
 
 const MINIMO_DESCRIPCION = 80;
 
@@ -131,6 +158,12 @@ function validarCuenta(valores: ValoresCuenta): ErroresCuenta {
   if (valores.contrasena === '') errores.contrasena = 'La contraseña es obligatoria';
   else if (valores.contrasena.length < 8)
     errores.contrasena = 'La contraseña debe tener al menos 8 caracteres';
+
+  // Se compara con la contraseña ya escrita, no con una regla propia: el campo
+  // no tiene requisitos, solo tiene que coincidir.
+  if (valores.confirmacion === '') errores.confirmacion = 'Repite la contraseña';
+  else if (valores.confirmacion !== valores.contrasena)
+    errores.confirmacion = 'Las dos contraseñas no coinciden';
 
   if (!valores.aceptaDatos)
     errores.aceptaDatos = 'Hay que aceptar el tratamiento de datos para crear la cuenta';
@@ -197,6 +230,11 @@ function validarProducto(valores: ValoresProducto): ErroresProducto {
   if (valores.descripcion.trim().length > 500)
     errores.descripcion = 'La descripción no puede pasar de 500 caracteres';
 
+  // Se comprueba aquí y no al llegar el 400: la imagen viaja entera para nada.
+  if (valores.foto === null) errores.foto = 'Cada producto necesita una foto';
+  else if (!TIPOS_FOTO.includes(valores.foto.type)) errores.foto = 'La foto tiene que ser JPG o PNG';
+  else if (valores.foto.size > MAXIMO_BYTES_FOTO) errores.foto = 'La foto no puede pasar de 5 MB';
+
   return errores;
 }
 
@@ -211,7 +249,6 @@ function validarProducto(valores: ValoresProducto): ErroresProducto {
  */
 function pasoDeClave(clave: string): number {
   if (clave.startsWith('negocio.') || clave.startsWith('redes.')) return PASO_NEGOCIO;
-  if (clave.startsWith('productos')) return PASO_ESCAPARATE;
   return PASO_CUENTA;
 }
 
@@ -240,11 +277,7 @@ function opcional(valor: string): string | undefined {
   return limpio === '' ? undefined : limpio;
 }
 
-function construirPeticion(
-  cuenta: ValoresCuenta,
-  negocio: ValoresNegocio,
-  productos: readonly ProductoAnadido[],
-): Peticion {
+function construirPeticion(cuenta: ValoresCuenta, negocio: ValoresNegocio): Peticion {
   const instagram = opcional(negocio.instagram);
   const linkedin = opcional(negocio.linkedin);
 
@@ -264,18 +297,13 @@ function construirPeticion(
     },
     // Sin ninguna red, el campo entero no viaja.
     redes: instagram === undefined && linkedin === undefined ? undefined : { instagram, linkedin },
-    productos: productos.map((producto) => ({
-      nombre: producto.nombre.trim(),
-      precio: Number(producto.precio),
-      descripcion: opcional(producto.descripcion),
-      disponible: producto.disponible,
-    })),
   };
 }
 
 // ── La página ─────────────────────────────────────────────────────────────
 
 export function RegistroEmprendedor() {
+  useTitulo('Registro de emprendedor');
   const { registrarNegocio } = useSesion();
   const navegar = useNavigate();
 
@@ -319,6 +347,23 @@ export function RegistroEmprendedor() {
     };
   }, [intentoCatalogos]);
 
+  // Las vistas previas del escaparate reservan memoria hasta que se liberan, y
+  // al salir del asistente no queda nadie que lo haga. Misma pareja de efectos
+  // que en el paso de las fotos: una ref al día y una limpieza al desmontar.
+  const vigentes = useRef<readonly string[]>([]);
+  useEffect(() => {
+    vigentes.current = [
+      ...productos.map((producto) => producto.vistaPrevia),
+      ...(borrador.vistaPrevia === null ? [] : [borrador.vistaPrevia]),
+    ];
+  }, [productos, borrador.vistaPrevia]);
+
+  useEffect(() => {
+    return () => {
+      for (const url of vigentes.current) URL.revokeObjectURL(url);
+    };
+  }, []);
+
   // Al cambiar de paso el foco va al título. Sin esto, quien navega con teclado
   // se queda en el botón de un formulario que ya no está en pantalla.
   useEffect(() => {
@@ -361,9 +406,9 @@ export function RegistroEmprendedor() {
   function siguiente() {
     if (paso === PASO_CUENTA) {
       setCuentaIntentada(true);
-      const primero = (['nombre', 'correo', 'contrasena', 'aceptaDatos'] as const).find(
-        (campo) => erroresCuenta[campo] !== undefined,
-      );
+      const primero = (
+        ['nombre', 'correo', 'contrasena', 'confirmacion', 'aceptaDatos'] as const
+      ).find((campo) => erroresCuenta[campo] !== undefined);
       if (primero !== undefined) {
         enfocar(`cuenta-${primero}`);
         return;
@@ -393,9 +438,21 @@ export function RegistroEmprendedor() {
     setPaso((actual) => actual + 1);
   }
 
+  /** Cambiar de fichero libera la vista previa anterior antes de crear otra. */
+  function elegirFotoDelProducto(archivo: File | null) {
+    setBorrador((previo) => {
+      if (previo.vistaPrevia !== null) URL.revokeObjectURL(previo.vistaPrevia);
+      return {
+        ...previo,
+        foto: archivo,
+        vistaPrevia: archivo === null ? null : URL.createObjectURL(archivo),
+      };
+    });
+  }
+
   function anadirProducto() {
     setProductoIntentado(true);
-    const primero = (['nombre', 'precio', 'descripcion'] as const).find(
+    const primero = (['nombre', 'precio', 'descripcion', 'foto'] as const).find(
       (campo) => erroresBorrador[campo] !== undefined,
     );
     if (primero !== undefined) {
@@ -403,14 +460,27 @@ export function RegistroEmprendedor() {
       return;
     }
 
-    setProductos((lista) => [...lista, { ...borrador, id: siguienteId.current++ }]);
+    // `validarProducto` ya descartó los casos nulos. Se copian a constantes para
+    // que el compilador los estreche también dentro del callback, sin un `as`.
+    const foto = borrador.foto;
+    const vistaPrevia = borrador.vistaPrevia;
+    if (foto === null || vistaPrevia === null) return;
+
+    // La vista previa se hereda en vez de crearse otra: es la misma imagen, y
+    // reservarla dos veces obligaría a liberar la del borrador aquí mismo.
+    setProductos((lista) => [...lista, { ...borrador, foto, vistaPrevia, id: siguienteId.current++ }]);
     setBorrador(PRODUCTO_VACIO);
     setProductoIntentado(false);
     enfocar('producto-nombre');
   }
 
   function quitarProducto(id: number) {
-    setProductos((lista) => lista.filter((producto) => producto.id !== id));
+    setProductos((lista) => {
+      const fuera = lista.find((producto) => producto.id === id);
+      // La vista previa reserva memoria hasta que se libera.
+      if (fuera !== undefined) URL.revokeObjectURL(fuera.vistaPrevia);
+      return lista.filter((producto) => producto.id !== id);
+    });
   }
 
   async function alEnviar(evento: FormEvent) {
@@ -429,11 +499,43 @@ export function RegistroEmprendedor() {
     setErroresServidor({});
     setEnviando(true);
 
+    // A partir del momento en que la cuenta existe, un fallo ya no se arregla
+    // volviendo atrás: reenviar el formulario chocaría con el correo ocupado.
+    let cuentaCreada = false;
+
     try {
-      await registrarNegocio(construirPeticion(cuenta, negocio, productos));
-      // La sesión ya está abierta: el paso de las fotos la necesita para subir.
+      await registrarNegocio(construirPeticion(cuenta, negocio));
+      cuentaCreada = true;
+
+      // El escaparate va después y no dentro: cada producto lleva su imagen, y
+      // subir binarios exige la sesión que el registro acaba de abrir. De uno en
+      // uno, para que el que falle se pueda nombrar.
+      for (const producto of productos) {
+        await crearProducto(
+          {
+            nombre: producto.nombre.trim(),
+            precio: Number(producto.precio),
+            descripcion: opcional(producto.descripcion),
+            disponible: producto.disponible,
+          },
+          producto.foto,
+        );
+      }
+
       setPaso(PASO_FOTOS);
     } catch (error: unknown) {
+      if (cuentaCreada) {
+        // La cuenta y el negocio están creados; lo que falló es un producto.
+        // Se sigue adelante diciéndolo, en vez de mandar a repetir un registro
+        // que ya no se puede repetir.
+        const mensaje = error instanceof Error ? error.message : 'un producto no se pudo crear';
+        setFallo(
+          `Tu cuenta y tu negocio se crearon, pero el escaparate quedó incompleto: ${mensaje}.`,
+        );
+        setPaso(PASO_FOTOS);
+        return;
+      }
+
       if (error instanceof ErrorApi) {
         const porCampo = Object.entries(error.porCampo);
 
@@ -521,8 +623,8 @@ export function RegistroEmprendedor() {
               errores={erroresBorrador}
               intentado={productoIntentado}
               productos={productos}
-              erroresServidor={erroresServidor}
               alCambiar={(cambio) => setBorrador((previos) => ({ ...previos, ...cambio }))}
+              alElegirFoto={elegirFotoDelProducto}
               alAnadir={anadirProducto}
               alQuitar={quitarProducto}
               encabezado={encabezado}
@@ -597,6 +699,7 @@ function PasoCuenta({
   const errorNombre = errorDe(erroresServidor.nombre, errores.nombre, intentado);
   const errorCorreo = errorDe(erroresServidor.correo, errores.correo, intentado);
   const errorContrasena = errorDe(erroresServidor.contrasena, errores.contrasena, intentado);
+  const errorConfirmacion = intentado ? errores.confirmacion : undefined;
   const errorCasilla = intentado ? errores.aceptaDatos : undefined;
 
   return (
@@ -646,16 +749,15 @@ function PasoCuenta({
 
       <div className={formulario.campo}>
         <label htmlFor="cuenta-contrasena">Contraseña *</label>
-        <input
+        <CampoContrasena
           id="cuenta-contrasena"
-          type="password"
+          valor={valores.contrasena}
           autoComplete="new-password"
-          value={valores.contrasena}
-          onChange={(evento) => alCambiar('contrasena', evento.target.value)}
-          aria-invalid={errorContrasena !== undefined}
-          aria-describedby={
+          invalido={errorContrasena !== undefined}
+          describedBy={
             errorContrasena !== undefined ? 'error-cuenta-contrasena' : 'ayuda-contrasena'
           }
+          alCambiar={(valor) => alCambiar('contrasena', valor)}
         />
         {errorContrasena !== undefined ? (
           <small id="error-cuenta-contrasena" className={formulario.error}>
@@ -664,6 +766,23 @@ function PasoCuenta({
         ) : (
           <small id="ayuda-contrasena" className={formulario.ayuda}>
             Al menos 8 caracteres
+          </small>
+        )}
+      </div>
+
+      <div className={formulario.campo}>
+        <label htmlFor="cuenta-confirmacion">Repite la contraseña *</label>
+        <CampoContrasena
+          id="cuenta-confirmacion"
+          valor={valores.confirmacion}
+          autoComplete="new-password"
+          invalido={errorConfirmacion !== undefined}
+          describedBy={errorConfirmacion !== undefined ? 'error-cuenta-confirmacion' : undefined}
+          alCambiar={(valor) => alCambiar('confirmacion', valor)}
+        />
+        {errorConfirmacion !== undefined && (
+          <small id="error-cuenta-confirmacion" className={formulario.error}>
+            {errorConfirmacion}
           </small>
         )}
       </div>
@@ -679,7 +798,8 @@ function PasoCuenta({
             aria-describedby={errorCasilla !== undefined ? 'error-cuenta-acepta' : undefined}
           />
           <span>
-            He leído y acepto el <Link to="/tratamiento-de-datos">tratamiento de datos</Link>.
+            He leído y acepto el{' '}
+            <EnlaceLegal a="/tratamiento-de-datos" texto="tratamiento de datos" />.
           </span>
         </label>
         {errorCasilla !== undefined && (
@@ -1047,8 +1167,8 @@ interface PropsEscaparate {
   readonly errores: ErroresProducto;
   readonly intentado: boolean;
   readonly productos: readonly ProductoAnadido[];
-  readonly erroresServidor: Readonly<Record<string, string>>;
   readonly alCambiar: (cambio: Partial<ValoresProducto>) => void;
+  readonly alElegirFoto: (archivo: File | null) => void;
   readonly alAnadir: () => void;
   readonly alQuitar: (id: number) => void;
   readonly encabezado: RefObject<HTMLHeadingElement | null>;
@@ -1059,8 +1179,8 @@ function PasoEscaparate({
   errores,
   intentado,
   productos,
-  erroresServidor,
   alCambiar,
+  alElegirFoto,
   alAnadir,
   alQuitar,
   encabezado,
@@ -1068,12 +1188,7 @@ function PasoEscaparate({
   const errorNombre = intentado ? errores.nombre : undefined;
   const errorPrecio = intentado ? errores.precio : undefined;
   const errorDescripcion = intentado ? errores.descripcion : undefined;
-
-  // El backend nombra el producto por su posición —`productos[0].nombre`—, así
-  // que no hay un campo suyo en pantalla donde pintarlo: se listan aquí.
-  const delServidor = Object.entries(erroresServidor).filter(([clave]) =>
-    clave.startsWith('productos'),
-  );
+  const errorFoto = intentado ? errores.foto : undefined;
 
   return (
     <>
@@ -1084,22 +1199,13 @@ function PasoEscaparate({
         Añade lo que vendes, uno a uno. Puedes dejarlo vacío y montarlo más adelante.
       </p>
 
-      {delServidor.length > 0 && (
-        <ul className={estilos.erroresServidor}>
-          {delServidor.map(([clave, mensaje]) => (
-            <li key={clave} className={formulario.error}>
-              {mensaje}
-            </li>
-          ))}
-        </ul>
-      )}
-
       {productos.length === 0 ? (
         <p className={estilos.vacio}>Todavía no has añadido ningún producto.</p>
       ) : (
         <ul className={estilos.lista}>
           {productos.map((producto) => (
             <li key={producto.id} className={estilos.producto}>
+              <img className={estilos.miniatura} src={producto.vistaPrevia} alt="" />
               <div className={estilos.datosProducto}>
                 <span className={estilos.nombreProducto}>{producto.nombre}</span>
                 <span className={estilos.precioProducto}>
@@ -1193,6 +1299,50 @@ function PasoEscaparate({
             />
             <span>Disponible ahora mismo</span>
           </label>
+        </div>
+
+        <div className={formulario.campo}>
+          <label htmlFor="producto-foto">Foto *</label>
+
+          <div className={estilos.zonaFoto}>
+            {borrador.vistaPrevia === null ? (
+              <p className={estilos.sinFoto}>Todavía sin foto</p>
+            ) : (
+              <>
+                <img className={estilos.previa} src={borrador.vistaPrevia} alt="" />
+                <p className={estilos.nombreArchivo}>{borrador.foto?.name}</p>
+              </>
+            )}
+
+            {/* El botón es la etiqueta del campo: al pulsarla el navegador abre
+                el selector, sin una línea de JavaScript. El input sigue ahí,
+                invisible pero enfocable, para que el tabulador lo alcance. */}
+            <label className={estilos.botonArchivo} htmlFor="producto-foto">
+              {borrador.foto === null ? 'Elegir una foto' : 'Cambiar la foto'}
+            </label>
+
+            <input
+              id="producto-foto"
+              className={estilos.archivoOculto}
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(evento) => alElegirFoto(evento.target.files?.[0] ?? null)}
+              aria-invalid={errorFoto !== undefined}
+              aria-describedby={
+                errorFoto !== undefined ? 'error-producto-foto' : 'ayuda-producto-foto'
+              }
+            />
+          </div>
+
+          {errorFoto !== undefined ? (
+            <small id="error-producto-foto" className={formulario.error}>
+              {errorFoto}
+            </small>
+          ) : (
+            <small id="ayuda-producto-foto" className={formulario.ayuda}>
+              JPG o PNG, 5 MB como mucho. Sin foto el producto no se puede añadir
+            </small>
+          )}
         </div>
 
         {/* Botón corriente y no `submit`: el envío del formulario es el registro. */}

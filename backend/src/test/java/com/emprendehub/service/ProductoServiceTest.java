@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.emprendehub.dto.ActualizarProductoRequest;
 import com.emprendehub.dto.CrearProductoRequest;
 import com.emprendehub.dto.ProductoResponse;
+import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
@@ -22,6 +23,7 @@ import com.emprendehub.model.Producto;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.config.AlmacenamientoFotos;
 import com.emprendehub.repository.ProductoRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,6 +35,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceTest {
@@ -42,6 +46,9 @@ class ProductoServiceTest {
 
     @Mock
     private NegocioRepository negocioRepository;
+
+    @Mock
+    private AlmacenamientoFotos almacenamiento;
 
     @InjectMocks
     private ProductoService service;
@@ -71,9 +78,14 @@ class ProductoServiceTest {
 
     private Producto producto() {
         Producto producto = new Producto(negocio(), "Pan de masa madre",
-                new BigDecimal("12000"), "Fermentado 24 horas", true);
+                new BigDecimal("12000"), "Fermentado 24 horas", true, "pan.jpg");
         producto.setId(3L);
         return producto;
+    }
+
+    /** Una imagen que pasa las tres reglas de B9: sin ella no hay alta. */
+    private MultipartFile imagenValida() {
+        return new MockMultipartFile("foto", "pan.jpg", "image/jpeg", new byte[] {1, 2, 3});
     }
 
     private CrearProductoRequest peticion(String descripcion, boolean disponible) {
@@ -89,7 +101,7 @@ class ProductoServiceTest {
         Negocio negocio = conNegocio();
         when(productoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        ProductoResponse respuesta = service.crear(duena, peticion("Fermentado 24 horas", true));
+        ProductoResponse respuesta = service.crear(duena, peticion("Fermentado 24 horas", true), imagenValida());
 
         ArgumentCaptor<Producto> captor = ArgumentCaptor.forClass(Producto.class);
         verify(productoRepository).save(captor.capture());
@@ -105,7 +117,7 @@ class ProductoServiceTest {
         when(productoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         assertEquals("Pan de masa madre",
-                service.crear(duena, peticion("Fermentado 24 horas", true)).nombre());
+                service.crear(duena, peticion("Fermentado 24 horas", true), imagenValida()).nombre());
     }
 
     @Test
@@ -114,7 +126,7 @@ class ProductoServiceTest {
         conNegocio();
         when(productoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        assertNull(service.crear(duena, peticion("   ", true)).descripcion());
+        assertNull(service.crear(duena, peticion("   ", true), imagenValida()).descripcion());
     }
 
     @Test
@@ -123,7 +135,49 @@ class ProductoServiceTest {
         conNegocio();
         when(productoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        assertFalse(service.crear(duena, peticion(null, false)).disponible());
+        assertFalse(service.crear(duena, peticion(null, false), imagenValida()).disponible());
+    }
+
+    @Test
+    @DisplayName("Sin imagen no hay producto: la foto es obligatoria")
+    void crear_sinFoto_lanza() {
+        // El servicio busca el negocio antes de mirar el fichero, igual que
+        // FotoService: sin este montaje fallaría por el motivo equivocado.
+        conNegocio();
+        MultipartFile vacia = new MockMultipartFile("foto", new byte[0]);
+
+        var error = assertThrows(ReglaDeNegocioException.class,
+                () -> service.crear(duena, peticion(null, true), vacia));
+
+        assertTrue(error.getMessage().contains("imagen"));
+        verify(productoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Una imagen que no es JPG ni PNG se rechaza (B9)")
+    void crear_tipoNoAdmitido_lanza() {
+        conNegocio();
+        MultipartFile pdf = new MockMultipartFile("foto", "hoja.pdf", "application/pdf",
+                new byte[] {1, 2, 3});
+
+        var error = assertThrows(ReglaDeNegocioException.class,
+                () -> service.crear(duena, peticion(null, true), pdf));
+
+        assertTrue(error.getMessage().contains("JPG o PNG"));
+        verify(productoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Al borrar un producto se borra también su imagen")
+    void eliminar_borraLaImagen() {
+        Producto producto = producto();
+        conNegocio();
+        when(productoRepository.findByIdAndNegocioId(3L, 7L)).thenReturn(Optional.of(producto));
+
+        service.eliminar(duena, 3L);
+
+        verify(productoRepository).delete(producto);
+        verify(almacenamiento).borrar("pan.jpg");
     }
 
     @Test
@@ -132,7 +186,7 @@ class ProductoServiceTest {
         when(negocioRepository.findByUsuarioId(4L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> service.crear(duena, peticion(null, true)));
+                () -> service.crear(duena, peticion(null, true), imagenValida()));
         verify(productoRepository, never()).save(any());
     }
 

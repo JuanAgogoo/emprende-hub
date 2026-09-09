@@ -1,5 +1,6 @@
 package com.emprendehub.service;
 
+import com.emprendehub.config.AlmacenamientoFotos;
 import com.emprendehub.dto.ActualizarProductoRequest;
 import com.emprendehub.dto.CrearProductoRequest;
 import com.emprendehub.dto.ProductoResponse;
@@ -12,6 +13,7 @@ import com.emprendehub.repository.ProductoRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * El escaparate de un negocio (F1, F2, F3).
@@ -30,11 +32,14 @@ public class ProductoService {
 
     private final ProductoRepository productoRepository;
     private final NegocioRepository negocioRepository;
+    private final AlmacenamientoFotos almacenamiento;
 
     public ProductoService(ProductoRepository productoRepository,
-                           NegocioRepository negocioRepository) {
+                           NegocioRepository negocioRepository,
+                           AlmacenamientoFotos almacenamiento) {
         this.productoRepository = productoRepository;
         this.negocioRepository = negocioRepository;
+        this.almacenamiento = almacenamiento;
     }
 
     public List<ProductoResponse> listarMios(Usuario solicitante) {
@@ -43,12 +48,29 @@ public class ProductoService {
                 productoRepository.findByNegocioIdOrderByNombreAsc(negocio.getId()));
     }
 
+    /**
+     * Alta de un artículo del escaparate, con su imagen.
+     *
+     * <p>La foto es obligatoria y llega en la misma petición: crear el producto
+     * primero y completarlo después es justo lo que permitiría que el hueco
+     * exista, y un escaparate con huecos no es un escaparate.
+     *
+     * <p>Las reglas de la imagen —JPG o PNG, cinco megas— son las mismas de la
+     * galería (B9) y se comprueban en el mismo sitio, sin reescribirlas.
+     *
+     * <p>El fichero se escribe antes de guardar la fila, igual que en
+     * {@link FotoService}. Si la transacción fallara después quedaría un fichero
+     * suelto que nadie referencia: no afecta a lo que ve el usuario.
+     */
     @Transactional
-    public ProductoResponse crear(Usuario solicitante, CrearProductoRequest peticion) {
+    public ProductoResponse crear(Usuario solicitante, CrearProductoRequest peticion,
+                                  MultipartFile foto) {
         Negocio negocio = buscarElMio(solicitante);
+        String extension = AlmacenamientoFotos.extensionDe(foto);
 
         Producto producto = new Producto(negocio, peticion.nombre().trim(), peticion.precio(),
-                normalizar(peticion.descripcion()), peticion.disponible());
+                normalizar(peticion.descripcion()), peticion.disponible(),
+                almacenamiento.guardar(foto, extension));
 
         return NegocioMapper.aRespuestaDeProducto(productoRepository.save(producto));
     }
@@ -75,9 +97,12 @@ public class ProductoService {
         return NegocioMapper.aRespuestaDeProducto(productoRepository.save(producto));
     }
 
+    /** Al quitar el producto se va también su imagen: nadie más la referencia. */
     @Transactional
     public void eliminar(Usuario solicitante, Long productoId) {
-        productoRepository.delete(buscarMio(solicitante, productoId));
+        Producto producto = buscarMio(solicitante, productoId);
+        productoRepository.delete(producto);
+        almacenamiento.borrar(producto.getFoto());
     }
 
     // ---------- Apoyo ----------

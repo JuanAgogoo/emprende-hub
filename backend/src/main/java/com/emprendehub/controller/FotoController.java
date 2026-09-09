@@ -1,17 +1,21 @@
 package com.emprendehub.controller;
 
 import com.emprendehub.dto.FotoResponse;
+import com.emprendehub.dto.ReordenarFotosRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.FotoService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +51,18 @@ public class FotoController {
                                               @RequestParam("archivo") MultipartFile archivo) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(fotoService.subir(usuario, archivo));
+    }
+
+    /**
+     * Cambia el orden de la galería. La primera es la portada (B9).
+     *
+     * <p>Es {@code PATCH} y no {@code PUT} porque no sustituye las fotos, solo
+     * cambia una propiedad suya.
+     */
+    @PatchMapping("/orden")
+    public List<FotoResponse> reordenar(@AuthenticationPrincipal Usuario usuario,
+                                        @Valid @RequestBody ReordenarFotosRequest peticion) {
+        return fotoService.reordenar(usuario, peticion);
     }
 
     /** Quita una imagen de la galería, al momento. */

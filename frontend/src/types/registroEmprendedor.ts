@@ -29,20 +29,17 @@ export interface RedesDelRegistro {
   readonly linkedin?: string;
 }
 
-/** Un artículo del escaparate. El precio viaja como número, en pesos. */
-export interface ProductoDelRegistro {
-  readonly nombre: string;
-  readonly precio: number;
-  readonly descripcion?: string;
-  readonly disponible: boolean;
-}
-
 /**
- * Todo lo que el asistente recoge, en una sola petición.
+ * La cuenta y el negocio, en una sola petición.
  *
- * Los tres pasos son una división visual del formulario, no tres envíos: el
- * backend crea cuenta, negocio y escaparate en una única transacción, y por eso
- * un fallo a mitad no deja el correo cogido.
+ * Los dos primeros pasos son una división visual del formulario, no dos envíos:
+ * el backend los crea en una única transacción y por eso un fallo a mitad no
+ * deja el correo cogido.
+ *
+ * **El escaparate ya no viaja aquí.** Desde que cada producto necesita su imagen
+ * obligatoria, meterlos exigiría N ficheros en una petición que además es
+ * pública, sin sesión con la que subirlos. Se crean justo después, uno a uno,
+ * con el token que devuelve esta llamada.
  */
 export interface RegistroEmprendedor {
   readonly nombre: string;
@@ -50,7 +47,6 @@ export interface RegistroEmprendedor {
   readonly contrasena: string;
   readonly negocio: NegocioDelRegistro;
   readonly redes?: RedesDelRegistro;
-  readonly productos: readonly ProductoDelRegistro[];
 }
 
 /**
@@ -61,4 +57,12 @@ export interface RegistroEmprendedor {
  */
 export interface RespuestaRegistroEmprendedor extends RespuestaAuth {
   readonly negocioId: number;
+}
+
+/** Los campos de un producto, sin la imagen, que viaja aparte como fichero. */
+export interface DatosDeProducto {
+  readonly nombre: string;
+  readonly precio: number;
+  readonly descripcion?: string;
+  readonly disponible: boolean;
 }

@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
+import { CampoContrasena } from '../componentes/CampoContrasena';
 import { useSesion } from '../estado/SesionContext';
 import type { Rol } from '../types/sesion';
 import estilos from './Formulario.module.css';
+import { useTitulo } from '../titulo';
 
 interface Valores {
   readonly correo: string;
@@ -30,7 +32,10 @@ function destino(rol: Rol): string {
   switch (rol) {
     case 'EMPRENDEDOR':
       return '/mi-negocio';
+    // Quien busca negocios entra directo al directorio, no a la portada, que
+    // ya ha visto para llegar hasta aquí.
     case 'CLIENTE':
+      return '/directorio';
     // El panel de administración no es de esta fase.
     case 'ADMIN':
       return '/';
@@ -38,6 +43,7 @@ function destino(rol: Rol): string {
 }
 
 export function Login() {
+  useTitulo('Inicio de sesión');
   const { entrar } = useSesion();
   const navegar = useNavigate();
 
@@ -112,16 +118,15 @@ export function Login() {
 
           <div className={estilos.campo}>
             <label htmlFor="contrasena">Contraseña</label>
-            <input
+            <CampoContrasena
               id="contrasena"
-              type="password"
+              valor={valores.contrasena}
               autoComplete="current-password"
-              value={valores.contrasena}
-              onChange={(evento) => cambiar('contrasena', evento.target.value)}
-              aria-invalid={enviado && errores.contrasena !== undefined}
-              aria-describedby={
+              invalido={enviado && errores.contrasena !== undefined}
+              describedBy={
                 enviado && errores.contrasena !== undefined ? 'error-contrasena' : undefined
               }
+              alCambiar={(valor) => cambiar('contrasena', valor)}
             />
             {enviado && errores.contrasena !== undefined && (
               <small id="error-contrasena" className={estilos.error}>

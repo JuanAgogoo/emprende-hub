@@ -6,6 +6,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,19 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class AlmacenamientoFotos {
 
+    /** B9: cinco megas por imagen. */
+    public static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
+
+    /**
+     * B9: solo JPG y PNG, con la extensión que le corresponde a cada uno.
+     *
+     * <p>El tipo sale de la cabecera, nunca del nombre del fichero: renombrar un
+     * ejecutable a {@code .jpg} es trivial.
+     */
+    private static final Map<String, String> EXTENSION_POR_TIPO = Map.of(
+            "image/jpeg", "jpg",
+            "image/png", "png");
+
     private final Path directorio;
 
     public AlmacenamientoFotos(
@@ -39,6 +53,29 @@ public class AlmacenamientoFotos {
     }
 
     /** Guarda los bytes y devuelve el nombre con el que quedaron. */
+    /**
+     * Comprueba que la imagen sirva y devuelve la extensión que le toca.
+     *
+     * <p>Es estático y vive aquí, y no en un servicio, porque las mismas tres
+     * reglas valen para la galería del negocio y para la foto de un producto:
+     * quien guarda las imágenes es quien dice cuáles admite.
+     */
+    public static String extensionDe(MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new ReglaDeNegocioException("No llegó ninguna imagen");
+        }
+        if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
+            throw new ReglaDeNegocioException("Cada imagen puede pesar 5 MB como mucho");
+        }
+
+        String tipo = archivo.getContentType();
+        String extension = tipo == null ? null : EXTENSION_POR_TIPO.get(tipo.toLowerCase());
+        if (extension == null) {
+            throw new ReglaDeNegocioException("La imagen tiene que ser JPG o PNG");
+        }
+        return extension;
+    }
+
     public String guardar(MultipartFile archivo, String extension) {
         String nombre = UUID.randomUUID() + "." + extension;
         try {

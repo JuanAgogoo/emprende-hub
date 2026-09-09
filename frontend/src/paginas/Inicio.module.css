@@ -157,37 +157,83 @@
 
 /* ── Categorías ──────────────────────────────────────────────────────── */
 
+/*
+ * Las 12 categorías, en **dos filas de seis** a partir de escritorio.
+ *
+ * Mobile first: dos columnas en el móvil, tres en tablet y seis arriba, que es
+ * donde salen las dos filas exactas. Con doce fijas, el número de columnas se
+ * escribe; `auto-fill` dejaría una fila coja según el ancho.
+ */
 .categorias {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-2);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--e-3);
   list-style: none;
   padding: 0;
 }
 
 .categoria {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--e-2);
-  min-height: var(--toque-min);
-  padding-inline: var(--e-4);
+  gap: var(--e-3);
+  height: 100%;
+  padding: var(--e-4) var(--e-3);
   border: 1px solid var(--color-borde);
-  border-radius: var(--radio-full);
+  border-radius: var(--radio-lg);
   background: var(--color-lienzo);
-  font-size: var(--texto-sm);
-  font-weight: 600;
-  color: var(--color-cuerpo);
   text-decoration: none;
   transition:
     border-color var(--dur-rapida) var(--curva),
-    background-color var(--dur-rapida) var(--curva),
-    color var(--dur-rapida) var(--curva);
+    box-shadow var(--dur-rapida) var(--curva),
+    transform var(--dur-rapida) var(--curva);
 }
 
 .categoria:hover {
   border-color: var(--color-acento);
+  box-shadow: var(--sombra-md);
+  /* Se levanta un pelo: el movimiento hace de indicación, no el color. */
+  transform: translateY(-2px);
+}
+
+/* La ilustración manda en la ficha: ocupa casi todo el ancho disponible. */
+.imagenCategoria {
+  width: 100%;
+  max-width: 7rem;
+  aspect-ratio: 1;
+  /* `contain` y no `cover`: son ilustraciones cuadradas con aire alrededor y
+     recortarlas les comería el margen. */
+  object-fit: contain;
+}
+
+/* El respaldo cuando una categoría no tiene ilustración. */
+.emojiCategoria {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 7rem;
+  aspect-ratio: 1;
+  border-radius: var(--radio-md);
   background: var(--color-acento-suave);
+  font-size: var(--texto-3xl);
+}
+
+.nombreCategoria {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.categoria:hover .nombreCategoria {
   color: var(--color-acento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categoria:hover {
+    transform: none;
+  }
 }
 
 /* ── Cómo funciona ───────────────────────────────────────────────────── */
@@ -250,6 +296,10 @@
 /* ── Puntos de ruptura: solo min-width, solo añaden ──────────────────── */
 
 @media (min-width: 40rem) {
+  .categorias {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .rejilla,
   .pasos {
     grid-template-columns: repeat(2, 1fr);
@@ -261,6 +311,11 @@
 }
 
 @media (min-width: 64rem) {
+  /* Doce entre seis: dos filas exactas. */
+  .categorias {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
   .rejilla,
   .pasos {
     grid-template-columns: repeat(3, 1fr);

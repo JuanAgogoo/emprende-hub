@@ -5,12 +5,14 @@ import { obtenerDestacados } from '../api/directorio';
 import { obtenerEstadisticasPortada } from '../api/estadisticas';
 import { EsqueletoTarjetas } from '../componentes/Esqueleto';
 import { TarjetaNegocio } from '../componentes/TarjetaNegocio';
+import { imagenDeCategoria } from '../categorias';
 import { calificacion, numero } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { CategoriaNegocio } from '../types/catalogo';
 import type { EstadisticasPortada } from '../types/estadisticas';
 import type { TarjetaNegocio as Negocio } from '../types/negocio';
 import estilos from './Inicio.module.css';
+import { useTitulo } from '../titulo';
 
 /** Todo lo que la portada necesita para pintarse. */
 interface DatosPortada {
@@ -26,6 +28,7 @@ const PASOS = [
 ] as const;
 
 export function Inicio() {
+  useTitulo();
   const [carga, setCarga] = useState<EstadoCarga<DatosPortada>>({ estado: 'CARGANDO' });
   const [texto, setTexto] = useState('');
   const navegar = useNavigate();
@@ -182,17 +185,30 @@ function ContenidoPortada({ carga }: { readonly carga: EstadoCarga<DatosPortada>
           <section className={`contenedor ${estilos.seccion}`}>
             <h2>Explora por categoría</h2>
             <ul className={estilos.categorias}>
-              {categorias.map((categoria) => (
-                <li key={categoria.id}>
-                  <Link
-                    to={`/directorio?categoriaId=${categoria.id}`}
-                    className={estilos.categoria}
-                  >
-                    <span aria-hidden="true">{categoria.icono}</span>
-                    {categoria.nombre}
-                  </Link>
-                </li>
-              ))}
+              {categorias.map((categoria) => {
+                const imagen = imagenDeCategoria(categoria.nombre);
+
+                return (
+                  <li key={categoria.id}>
+                    <Link
+                      to={`/directorio?categoriaId=${categoria.id}`}
+                      className={estilos.categoria}
+                    >
+                      {/* Decorativa: el nombre va justo debajo. Si alguna
+                          categoría se quedara sin ilustración, cae al emoji del
+                          catálogo en vez de dejar una imagen rota. */}
+                      {imagen === null ? (
+                        <span className={estilos.emojiCategoria} aria-hidden="true">
+                          {categoria.icono}
+                        </span>
+                      ) : (
+                        <img className={estilos.imagenCategoria} src={imagen} alt="" />
+                      )}
+                      <span className={estilos.nombreCategoria}>{categoria.nombre}</span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         </>

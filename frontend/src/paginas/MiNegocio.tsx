@@ -6,6 +6,7 @@ import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { EstadoNegocio, FotoNegocio, MiNegocio as Negocio, Producto } from '../types/negocio';
 import estilos from './MiNegocio.module.css';
+import { useTitulo } from '../titulo';
 
 interface Datos {
   readonly negocio: Negocio;
@@ -36,6 +37,7 @@ function explicar(estado: EstadoNegocio): { readonly titulo: string; readonly te
 }
 
 export function MiNegocio() {
+  useTitulo('Mi negocio');
   const [carga, setCarga] = useState<EstadoCarga<Datos>>({ estado: 'CARGANDO' });
   // Tener sesión de emprendedor y no tener negocio es un estado posible, no un
   // fallo: pasa entre crear la cuenta y registrar el negocio.
@@ -193,6 +195,12 @@ function Contenido({ datos }: { readonly datos: Datos }) {
             <ul className={estilos.productos}>
               {productos.map((producto) => (
                 <li key={producto.id} className={estilos.producto}>
+                  <img
+                    className={estilos.fotoProducto}
+                    src={producto.foto}
+                    alt=""
+                    loading="lazy"
+                  />
                   <span className={estilos.nombreProducto}>{producto.nombre}</span>
                   <span className={estilos.precio}>{precio(producto.precio)}</span>
                   {!producto.disponible && (

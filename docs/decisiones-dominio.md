@@ -124,6 +124,13 @@ ninguna otra entidad del sistema.
 - **F2** Nombre, precio y descripción opcional. (El prototipo se contradecía: el
   perfil mostraba descripciones que su propio formulario no permitía escribir.)
 - **F3** Sin inventario. Solo un interruptor disponible / no disponible.
+- **F4** **Cada producto lleva una foto obligatoria**, con las mismas reglas de
+  imagen que la galería (B9): JPG o PNG y 5 MB como mucho. Un escaparate con
+  huecos no es un escaparate, y la única forma de que el hueco no exista es que
+  la imagen entre en la misma petición que crea el producto. De ahí que el alta
+  sea `multipart` y no JSON, y de ahí que el escaparate saliera del alta de
+  emprendedor (A1-ter), que es pública y no tiene sesión con la que subir
+  binarios: los productos se crean justo después, con el token que devuelve.
 
 ## G. Catálogos
 

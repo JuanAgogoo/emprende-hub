@@ -10,26 +10,86 @@ Programación Empresarial.
 
 ## Arrancar
 
-Hace falta Docker. **No hace falta tener instalado ni Gradle ni el JDK 25**: el
-wrapper descarga Gradle y el toolchain descarga el JDK.
+Hace falta **solo Docker**. Ni Gradle, ni el JDK 25, ni Node: van dentro de las
+imágenes.
 
 ```bash
-docker compose up -d              # levanta PostgreSQL en el puerto 5433
-cd backend && ./gradlew bootRun   # arranca la API en http://localhost:8080
+docker compose up -d
+```
+
+Eso levanta las tres piezas y deja la web en <http://localhost:5173> y la API en
+<http://localhost:8080>. **La primera vez tarda varios minutos**: Gradle se
+descarga sus dependencias. Las siguientes son segundos, porque la caché vive en
+un volumen.
+
+```bash
+docker compose logs -f backend   # para ver cuándo termina de arrancar
+```
+
+> El backend tarda unos segundos más que la web. Hasta que responde, la portada
+> enseña su mensaje de error: es lo esperado, no un fallo.
+
+Las dos mitades corren **en modo desarrollo, con el código montado desde el
+host**, no copiado a la imagen:
+
+| Mitad | Al cambiar el código |
+|---|---|
+| Frontend | **Recarga en caliente.** Guardar el fichero y ya |
+| Backend | `docker compose restart backend`. Java no tiene recarga en caliente |
+
+### Sin Docker para las dos mitades
+
+Si prefieres el bucle de siempre —`bootRun` y `npm run dev` en el host—, arranca
+solo la base:
+
+```bash
+docker compose up -d postgres     # solo PostgreSQL, en el 5433
+cd backend && ./gradlew bootRun   # la API en el 8080
 cd frontend && npm install        # solo la primera vez
-npm run dev                       # la web en http://localhost:5173
+npm run dev                       # la web en el 5173
 ```
 
-El servidor de Vite hace de proxy hacia el 8080, así que **el backend tiene que
-estar arriba** para que la web muestre algo. El detalle está en el
-[README del frontend](frontend/README.md).
+**No mezcles los dos modos a la vez**: los dos quieren el 8080 y el 5173, y el
+segundo en arrancar falla. Para cambiar de uno a otro, `docker compose stop
+backend frontend` primero.
 
-Para parar la base de datos:
+### Parar y limpiar
 
 ```bash
-docker compose down           # conserva los datos
-docker compose down -v        # los borra
+docker compose stop           # para todo, sin borrar nada
+docker compose down           # además retira los contenedores; los datos siguen
+docker compose down -v        # borra también la base y las cachés
 ```
+
+> `down -v` se lleva la base entera, y con ella los negocios creados a mano. Las
+> fotos **no**: viven en `backend/uploads/`, en el disco. Después de un `down -v`
+> la base referencia ficheros que ya no tienen dueño y sobran ahí.
+
+### Puertos y usuario
+
+| Variable | Por defecto | Para qué |
+|---|---|---|
+| `DB_PORT` | `5433` | El 5432 suele estar ocupado por otro PostgreSQL |
+| `API_PORT` | `8080` | Cambiar si ya tienes un backend corriendo |
+| `WEB_PORT` | `5173` | |
+| `HOST_UID` / `HOST_GID` | `1000` | El usuario con el que corren los contenedores |
+| `MODERACION_AUTOMATICA` | `false` | **Provisional.** A `true`, los negocios nacen publicados y sus fotos aprobadas |
+
+`HOST_UID` existe para que las fotos que suba el backend **no queden siendo de
+root** dentro del repositorio. Con un usuario 1000 —lo normal en Linux— no hay
+que tocar nada; si el tuyo es otro:
+
+```bash
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose up -d
+```
+
+No uses `UID` a secas: en bash es una variable de solo lectura y la asignación
+falla. Para no repetirlo, `echo "HOST_UID=$(id -u)" >> .env`.
+
+`MODERACION_AUTOMATICA` está puesta a `true` en `docker-compose.yml` **mientras se
+construye**, para no tener que aprobar cada negocio a mano. Se quita esa línea
+para volver a la moderación de verdad, que es lo que hay que enseñar el día de la
+sustentación: el negocio nace `PENDIENTE` (B6) y el administrador lo publica.
 
 Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
 mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
@@ -92,16 +152,16 @@ colección de Postman, y después repetir su petición de alta cambiando los dat
 
 ### Durante: el guion
 
-**1. Levantar las dos mitades.**
+**1. Levantar el proyecto.** Un comando y una terminal:
 
 ```bash
-docker compose up -d              # PostgreSQL en el 5433
-cd backend && ./gradlew bootRun   # API en el 8080
-cd frontend && npm run dev        # la web en el 5173
+docker compose up -d
+docker compose logs -f backend    # esperar a «Started EmprendeHubApplication»
 ```
 
-> Si Vite dice que arranca en el **5174**, es que había otro `vite` vivo. Hay que
-> matarlo: en el 5174 el proxy responde donde nadie está mirando.
+> Hacerlo **antes** de que empiece la sustentación, no delante de nadie: aunque
+> las imágenes ya estén construidas, el backend tarda unos segundos en responder
+> y la portada enseña su mensaje de error mientras tanto.
 
 **2. La parte pública, sin iniciar sesión.** En <http://localhost:5173>:
 
@@ -150,13 +210,15 @@ publicó.
 
 ### Si algo falla en directo
 
-| Síntoma | Qué es |
-|---|---|
-| La web carga pero no hay datos | El backend no está arriba: Vite hace de proxy hacia el 8080 |
-| Las fichas salen sin foto | Las fotos se subieron **después** de aprobar y esperan revisión |
-| El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto hasta que se apruebe |
-| Vite responde en el 5174 | Quedó otro `vite` vivo; matarlo y arrancar de nuevo |
-| Caen ~30 pruebas del backend | Se paró el contenedor: `docker compose up -d` y repetir |
+| Síntoma | Qué es | Qué hacer |
+|---|---|---|
+| La web carga pero no hay datos | El backend todavía no responde | `docker compose logs -f backend` y esperar |
+| Las fichas salen sin foto | Se subieron **después** de aprobar y esperan revisión | Aprobar el cambio pendiente |
+| El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto | Aprobarlo con el administrador |
+| Un puerto ya está ocupado | Hay otro backend o otro Vite corriendo en el equipo | Pararlo, o `API_PORT=8081 docker compose up -d` |
+| Tras un fallo de puerto, sigue sin ir | El contenedor quedó creado **sin red**: ni publica puertos ni resuelve `postgres` | `docker compose up -d --force-recreate backend`. Un `up -d` a secas solo lo arranca |
+| Todas las fotos rotas | La base apunta a ficheros que no están en `backend/uploads/` | Recuperar el directorio; la base y el disco van por separado |
+| Caen ~30 pruebas del backend | Se paró el contenedor de la base | `docker compose up -d postgres` y repetir |
 
 ## Probar la API
 

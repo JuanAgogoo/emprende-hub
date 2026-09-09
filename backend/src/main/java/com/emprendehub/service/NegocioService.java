@@ -10,6 +10,7 @@ import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Barrio;
 import com.emprendehub.model.CambioPendiente;
 import com.emprendehub.model.EstadoNegocio;
+import java.time.Instant;
 import com.emprendehub.model.CategoriaNegocio;
 import com.emprendehub.model.Ciudad;
 import com.emprendehub.model.Negocio;
@@ -21,6 +22,7 @@ import com.emprendehub.repository.CategoriaNegocioRepository;
 import com.emprendehub.repository.CiudadRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,12 +50,25 @@ public class NegocioService {
     private final BarrioRepository barrioRepository;
     private final CambioPendienteRepository cambioRepository;
 
+    /**
+     * Interruptor **provisional** para trabajar sin moderación.
+     *
+     * <p>Con él puesto el negocio nace aprobado y no hay que pasar por el
+     * administrador para verlo en el directorio. **No cambia la regla B6**, que
+     * sigue siendo la de por defecto: solo la desactiva mientras se construye.
+     * Se enciende con {@code MODERACION_AUTOMATICA=true}.
+     */
+    private final boolean moderacionAutomatica;
+
     public NegocioService(NegocioRepository negocioRepository,
                           UsuarioRepository usuarioRepository,
                           CategoriaNegocioRepository categoriaRepository,
                           CiudadRepository ciudadRepository,
                           BarrioRepository barrioRepository,
-                          CambioPendienteRepository cambioRepository) {
+                          CambioPendienteRepository cambioRepository,
+                          @Value("${emprendehub.moderacion.automatica:false}")
+                          boolean moderacionAutomatica) {
+        this.moderacionAutomatica = moderacionAutomatica;
         this.cambioRepository = cambioRepository;
         this.negocioRepository = negocioRepository;
         this.usuarioRepository = usuarioRepository;
@@ -83,6 +98,14 @@ public class NegocioService {
         Negocio negocio = new Negocio(solicitante, peticion.nombre().trim(),
                 peticion.descripcion().trim(), peticion.telefono().trim(),
                 categoria, ciudad, barrio, peticion.nivelPrecio());
+
+        // Sin moderación, el negocio sale publicado del propio registro. La
+        // fecha de aprobación se sella igual porque de ella depende el orden
+        // RECIENTES del directorio (G7).
+        if (moderacionAutomatica) {
+            negocio.setEstado(EstadoNegocio.APROBADO);
+            negocio.setFechaAprobacion(Instant.now());
+        }
 
         // El ascenso a emprendedor es parte del mismo acto: si algo falla
         // después, tampoco queda un cliente con rol cambiado y sin negocio.

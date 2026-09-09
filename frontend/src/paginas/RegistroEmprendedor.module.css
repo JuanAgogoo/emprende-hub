@@ -102,6 +102,17 @@
   background: var(--color-lienzo-alt);
 }
 
+/* Recortada al mismo cuadrado que en «Mi negocio», para que la lista del
+   asistente y la de después se vean igual. */
+.miniatura {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+  background: var(--color-lienzo-alt);
+}
+
 .datosProducto {
   display: flex;
   flex-wrap: wrap;
@@ -183,4 +194,93 @@
   gap: var(--e-1);
   margin: 0;
   padding-left: var(--e-5);
+}
+
+/* ── El campo de la foto del producto ────────────────────────────────── */
+
+.zonaFoto {
+  display: flex;
+  flex-direction: column;
+  /* Todo centrado dentro del recuadro, que es lo que pide un campo de imagen:
+     no hay texto que alinear a la izquierda, hay una foto que mirar. */
+  align-items: center;
+  gap: var(--e-3);
+  position: relative;
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+/* El recuadro reacciona al foco y al error igual que los campos de texto. */
+.zonaFoto:has(input:focus-visible) {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.zonaFoto:has(input[aria-invalid='true']) {
+  border-color: var(--color-error);
+}
+
+/* Misma caja pase lo que pase con el original, como en el escaparate. */
+.previa {
+  width: 100%;
+  max-width: 12rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-lienzo);
+}
+
+.sinFoto {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.nombreArchivo {
+  max-width: 100%;
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+  /* Un nombre largo no estira el recuadro. */
+  overflow-wrap: break-word;
+}
+
+/*
+ * La etiqueta hace de botón: al pulsarla el navegador abre el selector.
+ *
+ * Va anidada bajo `.zonaFoto` para ganarle en especificidad a `.campo label`,
+ * que pinta las etiquetas pequeñas y apagadas.
+ */
+.zonaFoto .botonArchivo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  /* Gana a la regla de `.campo label`, que las pinta pequeñas y apagadas. */
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-acento);
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.zonaFoto .botonArchivo:hover {
+  background: var(--color-acento-suave);
+}
+
+/*
+ * El input de verdad, invisible pero **no** `display: none`: así sigue
+ * recibiendo el foco con el tabulador y anunciando su error.
+ */
+.archivoOculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  /* Los clics los recoge la etiqueta; este no debe interceptar ninguno. */
+  pointer-events: none;
 }

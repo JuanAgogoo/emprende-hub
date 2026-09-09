@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import estilos from './PaginaTexto.module.css';
+import { useTitulo } from '../titulo';
 
 /**
  * Qué se ve de ti y qué no, según con qué cuenta entres.
@@ -8,6 +9,7 @@ import estilos from './PaginaTexto.module.css';
  * esta dice quién lo ve y qué control tienes sobre ello.
  */
 export function InformacionPersonal() {
+  useTitulo('Información personal');
   return (
     <article className={`contenedor ${estilos.pagina}`}>
       <header className={estilos.encabezado}>

@@ -6,6 +6,7 @@ import { Galeria } from '../componentes/Galeria';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { PerfilNegocio as Perfil } from '../types/negocio';
+import { useTitulo } from '../titulo';
 import { NoEncontrada } from './NoEncontrada';
 import estilos from './PerfilNegocio.module.css';
 
@@ -45,6 +46,17 @@ export function PerfilNegocio() {
       vigente = false;
     };
   }, [id]);
+
+  // El caso de «no existe» se contempla aquí aunque `NoEncontrada` ponga el
+  // suyo: los efectos del hijo corren antes que los del padre, así que este lo
+  // pisaría después y la pestaña acabaría diciendo «Negocio».
+  useTitulo(
+    noExiste
+      ? 'Página no encontrada'
+      : carga.estado === 'EXITO'
+        ? carga.datos.nombre
+        : 'Negocio',
+  );
 
   if (noExiste) return <NoEncontrada />;
 
@@ -121,6 +133,14 @@ function Contenido({ negocio }: { readonly negocio: Perfil }) {
                       producto.disponible ? estilos.producto : `${estilos.producto} ${estilos.agotado}`
                     }
                   >
+                    {/* Decorativa: el nombre va justo debajo y el lector de
+                        pantalla lo leería dos veces. */}
+                    <img
+                      className={estilos.fotoProducto}
+                      src={producto.foto}
+                      alt=""
+                      loading="lazy"
+                    />
                     <div className={estilos.filaProducto}>
                       <h3 className={estilos.nombreProducto}>{producto.nombre}</h3>
                       <span className={estilos.precio}>{precio(producto.precio)}</span>

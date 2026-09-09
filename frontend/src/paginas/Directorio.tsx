@@ -12,6 +12,7 @@ import type { FiltrosDirectorio, NivelPrecio, OrdenDirectorio } from '../types/n
 import type { Pagina } from '../types/pagina';
 import type { TarjetaNegocio as Negocio } from '../types/negocio';
 import estilos from './Directorio.module.css';
+import { useTitulo } from '../titulo';
 
 const POR_PAGINA = 12;
 
@@ -50,6 +51,7 @@ function leerFiltros(parametros: URLSearchParams): FiltrosDirectorio {
 }
 
 export function Directorio() {
+  useTitulo('Directorio');
   const [parametros, setParametros] = useSearchParams();
   const filtros = leerFiltros(parametros);
 

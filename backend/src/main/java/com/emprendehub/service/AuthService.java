@@ -1,7 +1,6 @@
 package com.emprendehub.service;
 
 import com.emprendehub.dto.AuthResponse;
-import com.emprendehub.dto.CrearProductoRequest;
 import com.emprendehub.dto.EditarRedesRequest;
 import com.emprendehub.dto.LoginRequest;
 import com.emprendehub.dto.NegocioResponse;
@@ -19,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 /**
  * Registro e inicio de sesión.
@@ -36,17 +34,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final NegocioService negocioService;
-    private final ProductoService productoService;
 
     public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager, JwtService jwtService,
-                       NegocioService negocioService, ProductoService productoService) {
+                       NegocioService negocioService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.negocioService = negocioService;
-        this.productoService = productoService;
     }
 
     /**
@@ -110,13 +106,6 @@ public class AuthService {
         EditarRedesRequest redes = peticion.redes();
         if (redes != null) {
             negocioService.actualizarRedes(usuario, redes);
-        }
-
-        List<CrearProductoRequest> productos = peticion.productos();
-        if (productos != null) {
-            for (CrearProductoRequest producto : productos) {
-                productoService.crear(usuario, producto);
-            }
         }
 
         return RegistroEmprendedorResponse.de(respuestaPara(usuario), negocio.id());

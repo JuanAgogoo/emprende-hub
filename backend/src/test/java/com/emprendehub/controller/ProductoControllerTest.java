@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @WebMvcTest(ProductoController.class)
@@ -34,7 +35,12 @@ class ProductoControllerTest extends ControllerTestBase {
 
     private ProductoResponse productoDePrueba() {
         return new ProductoResponse(3L, "Pan de masa madre", new BigDecimal("12000"),
-                "Fermentado 24 horas", true);
+                "Fermentado 24 horas", true, "/fotos/pan.jpg");
+    }
+
+    /** La imagen obligatoria que acompaña a toda alta (B9). */
+    private MockMultipartFile imagen() {
+        return new MockMultipartFile("foto", "pan.jpg", "image/jpeg", new byte[] {1, 2, 3});
     }
 
     private String cuerpo(String nombre, String precio) {
@@ -47,10 +53,13 @@ class ProductoControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("POST devuelve 201 con el producto creado")
     void crear_devuelve201() throws Exception {
-        when(productoService.crear(any(), any())).thenReturn(productoDePrueba());
+        when(productoService.crear(any(), any(), any())).thenReturn(productoDePrueba());
 
-        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpo("Pan de masa madre", "12000")))
+        mockMvc.perform(multipart(RUTA).file(imagen())
+                        .param("nombre", "Pan de masa madre")
+                        .param("precio", "12000")
+                        .param("descripcion", "Fermentado 24 horas")
+                        .param("disponible", "true"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nombre").value("Pan de masa madre"))
                 .andExpect(jsonPath("$.precio").value(12000))
@@ -60,8 +69,10 @@ class ProductoControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("POST sin nombre devuelve 400 con una clave por campo inválido")
     void crear_sinNombre_devuelve400() throws Exception {
-        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpo("", "12000")))
+        mockMvc.perform(multipart(RUTA).file(imagen())
+                        .param("nombre", "")
+                        .param("precio", "12000")
+                        .param("disponible", "true"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.nombre").exists());
     }
@@ -69,8 +80,10 @@ class ProductoControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("POST con precio negativo devuelve 400 señalando el precio")
     void crear_precioNegativo_devuelve400() throws Exception {
-        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON)
-                        .content(cuerpo("Croissant", "-100")))
+        mockMvc.perform(multipart(RUTA).file(imagen())
+                        .param("nombre", "Croissant")
+                        .param("precio", "-100")
+                        .param("disponible", "true"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.precio").exists());
     }
@@ -101,7 +114,8 @@ class ProductoControllerTest extends ControllerTestBase {
     void cambiarDisponibilidad_devuelve200() throws Exception {
         when(productoService.cambiarDisponibilidad(any(), eq(3L), eq(false)))
                 .thenReturn(new ProductoResponse(3L, "Pan de masa madre",
-                        new BigDecimal("12000"), "Fermentado 24 horas", false));
+                        new BigDecimal("12000"), "Fermentado 24 horas", false,
+                        "/fotos/pan.jpg"));
 
         mockMvc.perform(patch(RUTA + "/3/disponibilidad").param("disponible", "false"))
                 .andExpect(status().isOk())

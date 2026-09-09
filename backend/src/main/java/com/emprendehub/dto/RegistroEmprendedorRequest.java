@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.util.List;
 
 /**
  * Alta de un emprendedor con su negocio, en una sola petición.
@@ -22,6 +21,12 @@ import java.util.List;
  * <p>Las fotos se quedan fuera a propósito. Son binarios y ya tienen su endpoint
  * multipart, que además valida tipo, tamaño y máximo; traerlas aquí obligaría a
  * mezclar JSON y ficheros en la misma petición y a duplicar esa validación.
+ *
+ * <p><strong>El escaparate también se quedó fuera</strong>, y por lo mismo. Desde
+ * que cada producto necesita su imagen obligatoria, crearlos aquí exigiría meter
+ * N ficheros en una petición que además es pública, sin sesión con la que
+ * subirlos. Se crean justo después, uno a uno, con el token que devuelve esta
+ * llamada: para quien se registra es el paso siguiente del mismo asistente.
  */
 public record RegistroEmprendedorRequest(
 
@@ -48,9 +53,5 @@ public record RegistroEmprendedorRequest(
          * dominio (B8), que aquí se reutiliza tal cual.
          */
         @Valid
-        EditarRedesRequest redes,
-
-        /** Opcional: quien todavía no tiene escaparate lo monta después. */
-        @Valid
-        List<CrearProductoRequest> productos) {
+        EditarRedesRequest redes) {
 }

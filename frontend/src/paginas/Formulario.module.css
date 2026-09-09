@@ -51,7 +51,9 @@
   color: var(--color-cuerpo);
 }
 
-.campo input,
+/* El de fichero se dibuja como botón en su propio recuadro, y la casilla es un
+   cuadrito: ninguno de los dos quiere el alto ni el borde de un campo de texto. */
+.campo input:not([type='checkbox']):not([type='file']),
 .campo select,
 .campo textarea {
   min-height: var(--toque-min);
@@ -76,7 +78,7 @@
   color: var(--color-acento);
 }
 
-.campo:has(input[aria-invalid='true']) input,
+.campo:has(input[aria-invalid='true']) input:not([type='checkbox']),
 .campo:has(select[aria-invalid='true']) select,
 .campo:has(textarea[aria-invalid='true']) textarea {
   border-color: var(--color-error);
@@ -117,6 +119,44 @@
   cursor: progress;
 }
 
+/* ── Contraseña, con el botón de revelarla ───────────────────────────── */
+
+.conRevelado {
+  display: flex;
+  position: relative;
+}
+
+/* Con `.campo` delante para ganarle en especificidad al padding-inline que la
+   regla de los campos deja puesto; si no, el texto pasaría por debajo del ojo. */
+.campo .conRevelado input {
+  flex: 1;
+  min-width: 0;
+  padding-inline: var(--e-3) var(--toque-min);
+}
+
+.ojo {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  /* El área táctil entera, aunque el dibujo mida 20px. */
+  width: var(--toque-min);
+  border: none;
+  background: none;
+  color: var(--color-apagado);
+  cursor: pointer;
+}
+
+.ojo:hover {
+  color: var(--color-cuerpo);
+}
+
+/* Dentro del campo, el contorno del foco se dibuja pegado al icono. */
+.ojo:focus-visible {
+  outline-offset: -4px;
+}
+
 /* ── Casilla de aceptación ───────────────────────────────────────────── */
 
 .casilla {
@@ -133,6 +173,8 @@
 .casilla input {
   width: 1.15rem;
   height: 1.15rem;
+  /* Centrada sobre la primera línea del texto —24px de alto— y no sobre el
+     bloque entero: con dos líneas tiene que quedar junto a la de arriba. */
   margin-top: 0.2rem;
   flex-shrink: 0;
   accent-color: var(--color-acento);
