@@ -1,0 +1,46 @@
+.pie {
+  margin-top: var(--e-8);
+  padding-block: var(--e-6);
+  background: var(--color-lienzo-alt);
+  border-top: 1px solid var(--color-borde);
+}
+
+.interior {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.nota {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4);
+  list-style: none;
+  padding: 0;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.enlace:hover {
+  color: var(--color-acento);
+}
+
+/* Tablet en adelante: cabe en una línea. */
+@media (min-width: 48rem) {
+  .interior {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
