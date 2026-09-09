@@ -13,7 +13,7 @@ export function TarjetaNegocio({ negocio }: Props) {
 
   return (
     <article className={estilos.tarjeta}>
-      <Link to={`/negocios/${negocio.id}`} className={estilos.enlace}>
+      <Link to={`/negocios/${negocio.id}`} className={estilos.enlace} viewTransition>
         <div className={estilos.marco}>
           {negocio.fotoPrincipal === null ? (
             // Sin foto no se enseña una imagen rota: se enseña la inicial.
@@ -26,6 +26,9 @@ export function TarjetaNegocio({ negocio }: Props) {
               src={negocio.fotoPrincipal}
               alt={`Local de ${negocio.nombre}`}
               loading="lazy"
+              /* Único por negocio: si todas las tarjetas compartieran nombre,
+                 el navegador no sabría cuál de ellas está creciendo. */
+              style={{ viewTransitionName: `negocio-${negocio.id}` }}
             />
           )}
           <span className={estilos.categoria}>{negocio.categoria}</span>
