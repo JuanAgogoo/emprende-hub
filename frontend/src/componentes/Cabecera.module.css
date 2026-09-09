@@ -61,3 +61,45 @@
   color: var(--color-acento);
   background: var(--color-acento-suave);
 }
+
+/* El botón de salir es un <button>, no un enlace: hace una acción, no navega. */
+.enlace {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.acceso {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.acceso:hover {
+  background: var(--color-acento-fuerte);
+}
+
+.cuenta {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--e-2);
+}
+
+.nombre {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-tinta);
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
