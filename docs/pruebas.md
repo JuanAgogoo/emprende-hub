@@ -2,6 +2,11 @@
 
 Cómo se prueba este proyecto y qué muerde al hacerlo.
 
+Las dos mitades se verifican de forma distinta: el backend con **tres niveles de
+prueba automática y un umbral de cobertura**, y el frontend **comprobando la
+pantalla**, porque ahí los fallos que importan no los ve un compilador. Las dos
+secciones están abajo.
+
 Los tres niveles y sus convenciones salen del taller de la semana 4 del curso.
 Las trampas son cicatrices: cada una costó tiempo real en esta entrega.
 
@@ -81,6 +86,40 @@ El umbral está **activo desde el PR 4** y colgado de la tarea `check`: un
 `cd backend && ./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
 la prueba en su incremento que recuperar cobertura al final.
 
+## El frontend no tiene pruebas automáticas, y es a propósito
+
+Nadie las pidió, y añadir Vitest y Testing Library significaría dos dependencias,
+una configuración y un patrón más que defender, para cubrir vistas que cambian en
+cada incremento. Lo que sí hay es un cierre obligatorio en cada rebanada:
+
+```bash
+cd frontend
+npm run build      # tipos y compilación: 0 errores y 0 advertencias
+npm run contraste  # las 21 combinaciones de la paleta contra WCAG 2.2
+```
+
+Más cuatro comprobaciones por `grep`, que son las reglas que un build en verde no
+detecta:
+
+```bash
+grep -rn ': any\|as any' src/                                        # vacío
+grep -rn 'fetch(' src --include=*.tsx | grep -v '^src/api/'          # vacío
+grep -rnE '#[0-9a-fA-F]{3,8}|rgb\(' src --include=*.css | grep -v tokens.css   # vacío
+```
+
+Y la que ningún script sustituye: **abrir el navegador**. En el backend la regla
+es no fiarse de las pruebas y llamar al endpoint con `curl`; aquí es mirar la
+pantalla, a 360 px de ancho y recorriéndola con el tabulador. Los tres estados de
+cada vista —cargando, vacío y error— se ven provocándolos: el vacío con un filtro
+imposible, el error parando el backend.
+
+### La comprobación de enlaces
+
+Un `<Link>` a una ruta que no existe compila, pasa la CI y solo se nota al
+pulsar. Aparecieron **tres en siete incrementos**, dos de ellos vivieron cuatro.
+Antes de cerrar una rebanada, cotejar los `to=` del código contra las rutas
+declaradas en `App.tsx`.
+
 ## Lo que depende del reloj se inyecta
 
 `LocalDate.now()` escrito dentro de un servicio hace que su prueba dependa del
@@ -131,6 +170,18 @@ autenticación en cada prueba y esconde lo que cada una comprueba.
 **Nota sobre paquetes de Spring Boot 4**: `TestRestTemplate` se movió a
 `org.springframework.boot.resttestclient` y su bean no se autoconfigura, por eso
 las pruebas de HTTP real usan `java.net.http.HttpClient`.
+
+## Jackson descarta en silencio lo que el DTO no declara
+
+Enviar un campo que el `record` no tiene **no da error**: Jackson lo ignora y la
+petición responde `201` como si todo hubiera ido bien. Pasó con las redes
+sociales en el alta de emprendedor —`instagram` viajaba dentro del negocio, que
+no lo declara— y el dato se perdía sin una sola señal.
+
+No lo detecta ninguna prueba unitaria que simule el servicio, porque el problema
+está en el mapeo del JSON. **Al probar un endpoint con `curl`, mirar el cuerpo de
+la respuesta y no solo el código de estado**, y comprobar después que el dato se
+guardó de verdad.
 
 ## Filtros opcionales en PostgreSQL
 

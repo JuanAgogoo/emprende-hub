@@ -353,6 +353,13 @@ dos:
 Las imágenes se descargan de **`/fotos/{archivo}`**, que es público y va fuera de
 `/api`: la etiqueta `<img>` de un navegador no manda cabecera de token.
 
+> **Al preparar datos, el orden importa.** Subir las fotos *después* de aprobar
+> el negocio las deja esperando revisión, y entonces el directorio devuelve
+> `fotoPrincipal` nula y las fichas salen sin imagen. Parece un fallo del
+> frontend y es la regla funcionando. Para dejar una demostración lista: crear el
+> negocio, subir las fotos y **después** aprobarlo; o aprobar también el cambio
+> pendiente que la subida generó.
+
 ## Productos · `/negocios/mio/productos`
 
 Solo el **dueño**. Es un **escaparate**: no se vende nada (F1).

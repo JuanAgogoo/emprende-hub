@@ -4,9 +4,10 @@ Las reglas visuales del frontend. Manda sobre cualquier criterio estético
 improvisado dentro de un incremento: si algo no está aquí, se añade aquí primero
 y se usa después.
 
-Está subordinado a `agent-docs/estilo/00-punto-dulce.md`. Todo lo que sigue se
-resuelve **con CSS estándar y sin una sola dependencia de estilo**: nada de
-Tailwind, styled-components, Emotion ni sistemas de diseño de terceros.
+Manda sobre él la regla que gobierna todo el proyecto: **ante dos opciones, gana
+la que el equipo pueda explicar**. Por eso todo lo que sigue se resuelve **con CSS
+estándar y sin una sola dependencia de estilo**: nada de Tailwind,
+styled-components, Emotion ni sistemas de diseño de terceros.
 
 ---
 
@@ -460,8 +461,9 @@ deshabilitado y en silencio.
 
 ## Antes de dar un incremento por terminado
 
-A los cinco puntos del §10 de `agent-docs/estilo/01-frontend-react.md` se suman
-estos cinco. Son la parte visual de la misma lista:
+A las comprobaciones de código que fija
+[pruebas.md](pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito)
+se suman estas cinco, que son su parte visual:
 
 1. `npm run contraste` en verde. Si se añadió un token, se añadió su fila.
 2. **Ningún color fuera de `tokens.css`**:

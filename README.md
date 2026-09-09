@@ -157,6 +157,25 @@ acceso completa, esta última con el servidor levantado.
 el build falla. Ejecutar una sola clase con `--tests` también lo hace fallar,
 porque la cobertura se mide sobre el paquete entero; para eso usa `cd backend && ./gradlew build`.
 
+### Verificar el frontend
+
+No tiene pruebas automáticas a propósito: nadie las pidió, y las vistas cambian
+en cada incremento. Lo que sí tiene es un cierre obligatorio.
+
+```bash
+cd frontend
+npm run build      # tipos y compilación: 0 errores y 0 advertencias
+npm run contraste  # las 21 combinaciones de la paleta contra WCAG 2.2
+```
+
+`npm run contraste` lee los colores de `src/estilos/tokens.css` y falla si alguna
+combinación baja de su mínimo: 4,5:1 en texto y 3:1 en bordes de control. Si se
+añade un token, se añade su fila.
+
+Y lo que ningún script sustituye: **abrirlo en el navegador**, mirarlo a 360 px
+de ancho y recorrerlo con el tabulador. El detalle está en
+[docs/pruebas.md](docs/pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito).
+
 ## Configuración
 
 Valores por defecto en `backend/src/main/resources/application.yml`, todos sustituibles
@@ -197,6 +216,21 @@ backend/src/main/java/com/emprendehub
 ```
 
 Cada paquete lleva un `package-info.java` que explica qué entra y qué no.
+
+Y dentro del frontend:
+
+```
+frontend/src
+├── types/        interfaces y uniones del dominio
+├── api/          lo que habla con el backend — el único sitio con fetch
+├── estado/       un contexto por dominio
+├── componentes/  piezas reutilizables, con su módulo CSS al lado
+├── paginas/      una por ruta
+└── estilos/      tokens.css manda: ningún color se escribe fuera
+```
+
+La única dependencia añadida a la plantilla de Vite es `react-router-dom`. El
+porqué está en [docs/arquitectura.md](docs/arquitectura.md#el-frontend).
 
 ## Documentación
 

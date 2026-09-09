@@ -1,9 +1,16 @@
 # Arquitectura
 
-Capas Spring clásicas, **las mismas que enseña el curso**: Controller, Service,
-Repository y Entity.
+El proyecto tiene dos mitades que se despliegan y se prueban por separado:
 
-Stack: **Java 25 + Spring Boot 4.1.x + Gradle + PostgreSQL + Spring Data JPA**.
+| Mitad | Dónde | Stack |
+|---|---|---|
+| API REST | `backend/` | **Java 25 + Spring Boot 4.1.x + Gradle + PostgreSQL + Spring Data JPA** |
+| Interfaz web | `frontend/` | **React + Vite + TypeScript** |
+
+El backend usa las capas Spring clásicas, **las mismas que enseña el curso**:
+Controller, Service, Repository y Entity. La mayor parte de este documento habla
+de él, porque es donde está el dominio; el frontend tiene su propia sección al
+final y sus reglas visuales en [diseno.md](diseno.md).
 
 Este documento explica **cómo está diseñado** el sistema. Cómo se prueba, y qué
 trampas tiene hacerlo, está en [pruebas.md](pruebas.md). El contrato de los
@@ -238,6 +245,77 @@ sin interacción de usuarios. Sirve para dejar montadas las capas, el arranque d
 la base de datos y los tres niveles de prueba antes de entrar en Negocio, donde
 está toda la complejidad.
 
+## El frontend
+
+React con Vite y TypeScript. El material del curso es de Angular, así que aquí el
+criterio no se copia: se traduce. La regla que decide cada duda es la misma que
+eligió el stack del backend —gana lo que el equipo pueda explicar—, y las
+consecuencias concretas son estas.
+
+### Qué no entra, y por qué
+
+**Ninguna dependencia de estado, datos, formularios ni estilos.** La única que se
+añadió a la plantilla de Vite es `react-router-dom`, porque sin ella no hay rutas.
+
+| En vez de | Se usa | Razón |
+|---|---|---|
+| Redux, Zustand, Jotai | Un contexto por dominio con `useState` | Es la traducción directa del servicio con Signals del curso: estado privado, lectura pública, mutaciones por métodos |
+| axios, react-query, SWR | `fetch` en `api/` | `HttpClient` tampoco cachea ni reintenta. Son quince endpoints |
+| React Hook Form, Zod | Una función `validar()` pura | Es lo que hace `Validators`, y se prueba y se explica sola |
+| Tailwind, styled-components | CSS plano y módulos CSS | Los valores viven en un fichero de tokens, no en las clases |
+
+Lo que **sí** se conserva, porque recortarlo no es simplificar sino incumplir:
+tipado estricto sin `any`, validación en los formularios, manejo de errores y
+separación de capas.
+
+### Cómo se organiza
+
+```
+frontend/src/
+├── types/       Interfaces y uniones del dominio
+├── api/         Lo que habla con el backend. El único sitio con fetch
+├── estado/      Un contexto por dominio
+├── componentes/ Piezas reutilizables, con su módulo CSS al lado
+├── paginas/     Una por ruta
+└── estilos/     tokens.css manda: ningún color se escribe fuera
+```
+
+Tres reglas que se verifican con `grep` antes de cerrar cada incremento: ninguna
+llamada a `fetch` fuera de `api/`, ningún `any`, y ningún color fuera de
+`tokens.css`.
+
+### Las tres decisiones que hay que saber defender
+
+**No hay CORS: hay proxy.** El backend no configura CORS por ninguna parte, así
+que el servidor de Vite reenvía `/api/v1` y `/fotos` al 8080 y todo sale del
+mismo origen. **Vale en desarrollo**; si el frontend acabara servido compilado
+desde otro origen, haría falta añadir CORS en `SecurityConfig`.
+
+**El estado de carga es una unión discriminada.** `EstadoCarga<T>` tiene
+`CARGANDO`, `EXITO` y `ERROR`, y se consume con un `switch` cuyo `default`
+comprueba exhaustividad: añadir una variante y olvidar tratarla deja de compilar.
+Es la técnica del curso, y obliga a dibujar los tres estados de cada vista en vez
+de suponer que la petición siempre responde.
+
+**La sesión vive en un solo módulo.** El token lo necesita el cliente HTTP para
+la cabecera y los datos de usuario los necesita el contexto. Con dos sitios
+guardando cosas distintas aparecen dos copias que se desincronizan, así que hay
+una única clave en `localStorage` y un único módulo que la lee y la escribe. Lo
+que sale de ahí se comprueba antes de usarse: un formato viejo se descarta en
+vez de romper el arranque.
+
+### Lo que el navegador hace y no una librería
+
+Lo llamativo de la interfaz es CSS estándar, no un paquete: transiciones entre
+vistas al abrir un negocio, entrada escalonada de tarjetas con
+`animation-timeline: view()` —sin JavaScript ni `IntersectionObserver`—, estados
+de formulario con `:has()`, y componentes que se adaptan a su hueco con container
+queries en lugar de a la ventana.
+
+Todo va dentro de `@supports`: si el navegador no lo soporta, la aplicación
+funciona igual y solo se pierde el efecto. **Ninguna funcionalidad depende de una
+animación.**
+
 ## Entregables
 
 Además del código, la entrega incluye:
@@ -246,7 +324,9 @@ Además del código, la entrega incluye:
   incluidas. La rúbrica evalúa cada endpoint vía Postman o cURL; sin credenciales
   sembradas y una colección lista, el evaluador prueba a ciegas.
 - **Informe de cobertura de JaCoCo**, acotado a `service/**`, como evidencia del 80%.
-- **Datos sembrados** por `CommandLineRunner`, condicionado a que la base esté vacía.
+- **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador y
+  cursos. **Los negocios no se siembran**, se crean: doce generados por un bucle
+  se notan, y la vitrina es parte de lo que se enseña.
 - **`docker-compose.yml`** que levanta PostgreSQL con un solo comando.
-- **README** con los pasos para arrancar y ejecutar las pruebas.
+- **README** con los pasos para arrancar las dos mitades y verificarlas.
 

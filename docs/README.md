@@ -9,15 +9,17 @@ el docente y quien sustente. Va versionada en Git y se entrega con el repositori
 
 - [decisiones-dominio.md](decisiones-dominio.md) — Todas las reglas de negocio,
   con su código (`B2-bis`, `G7`, `C7`…). Se citan desde el código y los PRs.
-- [arquitectura.md](arquitectura.md) — Stack, capas, seguridad y decisiones técnicas.
+- [arquitectura.md](arquitectura.md) — Las dos mitades: stack, capas y seguridad
+  del backend, y las decisiones del frontend con lo que deliberadamente no entra.
 - [api.md](api.md) — El contrato de los endpoints, con un recorrido de demostración.
 - [diseno.md](diseno.md) — El sistema de diseño del frontend: paleta, tipografía,
   mobile first y accesibilidad. Manda sobre cualquier criterio estético suelto.
 
 **Cómo lo construimos**
 
-- [pruebas.md](pruebas.md) — Los tres niveles, la cobertura y las trampas que ya
-  costaron tiempo.
+- [pruebas.md](pruebas.md) — Cómo se verifica cada mitad: los tres niveles y la
+  cobertura en el backend, el cierre obligatorio en el frontend, y las trampas
+  que ya costaron tiempo.
 - [flujo-de-trabajo.md](flujo-de-trabajo.md) — Ramas, commits, Pull Requests y release.
 - [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos del backend, uno
   por rama y PR.
@@ -41,9 +43,10 @@ Relevante para este proyecto:
 | `2026_2/plataformas/procode/unitarias/` | Pruebas unitarias: Mockito, `@DataJpaTest`, `@WebMvcTest` |
 | `2026_2/ing_sw/clases_practicas/taller_ci_devops_guiado.html` | CI con GitHub Actions (el ejemplo es en Python) |
 
-**Entrega: martes 25 de agosto de 2026, antes de la clase.** Una sola persona del
-equipo envía el enlace del repositorio a `juan.canoc@upb.edu.co`, con asunto
-`Entrega Backend - [Nombre del Proyecto]`.
+**El backend se entregó el martes 25 de agosto de 2026** y se sustentó. Se envió
+el enlace del repositorio a `juan.canoc@upb.edu.co` con asunto
+`Entrega Backend - [Nombre del Proyecto]`. Lo que se construye ahora es el
+frontend, según su plan de entrega.
 
 ## Qué va aquí y qué no
 
