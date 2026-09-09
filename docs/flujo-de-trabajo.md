@@ -7,8 +7,8 @@ a GitFlow. Sus reglas, citadas del material:
 > Una sola fuente de verdad: la rama `main`. Ramas efímeras: las de `feature`
 > duran horas o máximo 1-2 días. Las ramas de larga duración son un anti-patrón.
 
-Los 14 incrementos del plan de entrega están dimensionados para eso: cada rama
-nace y muere el mismo día.
+Los incrementos de los dos planes de entrega —el del backend y el del frontend—
+están dimensionados para eso: cada rama nace y muere el mismo día.
 
 No usamos GitFlow (`develop`, `release/*`, `hotfix/*`) porque el propio material lo
 describe como «seguro pero lento, ideal cuando los despliegues a producción son
