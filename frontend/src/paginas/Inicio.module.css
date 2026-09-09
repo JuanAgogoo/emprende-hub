@@ -1,3 +1,5 @@
+/* Mobile first: el caso base es el móvil y las consultas solo añaden. */
+
 .hero {
   padding-block: var(--e-7) var(--e-6);
   display: flex;
@@ -17,7 +19,225 @@
 .entrada {
   max-width: var(--ancho-lectura);
   font-size: var(--texto-lg);
+}
+
+.buscador {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  width: 100%;
+  margin-top: var(--e-2);
+}
+
+.etiquetaOculta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.campo {
+  flex: 1 1 14rem;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  /* El borde de un control necesita 3:1, no vale el gris de los separadores. */
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.campo::placeholder {
+  color: var(--color-apagado);
+}
+
+.primario,
+.secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid transparent;
+  border-radius: var(--radio-md);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-rapida) var(--curva),
+    border-color var(--dur-rapida) var(--curva);
+}
+
+.primario {
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+}
+
+.primario:hover {
+  background: var(--color-acento-fuerte);
+}
+
+.secundario {
+  background: transparent;
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+.secundario:hover {
+  background: var(--color-acento-suave);
+}
+
+/* ── Cifras ──────────────────────────────────────────────────────────── */
+
+.franjaCifras {
+  background: var(--color-lienzo-alt);
+  border-block: 1px solid var(--color-borde);
+  padding-block: var(--e-5);
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--e-5) var(--e-4);
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column-reverse; /* el valor arriba, la etiqueta debajo */
+  gap: var(--e-1);
+}
+
+.cifraValor {
+  margin: 0;
+  font-size: var(--texto-2xl);
+  font-weight: 800;
+  line-height: var(--alto-apretado);
+  color: var(--color-acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.cifraEtiqueta {
+  font-size: var(--texto-xs);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--color-apagado);
+}
+
+/* ── Secciones ───────────────────────────────────────────────────────── */
+
+.seccion {
+  padding-block: var(--e-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-4);
+}
+
+.vacio,
+.error {
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+}
+
+.error {
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  color: var(--color-error);
+}
+
+/* ── Categorías ──────────────────────────────────────────────────────── */
+
+.categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  list-style: none;
+  padding: 0;
+}
+
+.categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-full);
+  background: var(--color-lienzo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
   color: var(--color-cuerpo);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-rapida) var(--curva),
+    background-color var(--dur-rapida) var(--curva),
+    color var(--dur-rapida) var(--curva);
+}
+
+.categoria:hover {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+
+/* ── Cómo funciona ───────────────────────────────────────────────────── */
+
+.pasos {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-5);
+  list-style: none;
+  padding: 0;
+  counter-reset: paso;
+}
+
+.paso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.numeroPaso {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-weight: 800;
+}
+
+.tituloPaso {
+  font-size: var(--texto-lg);
+}
+
+/* ── Cierre ──────────────────────────────────────────────────────────── */
+
+.cierre {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-4);
+  padding-block: var(--e-7);
+}
+
+.tituloCierre {
+  max-width: 20ch;
+}
+
+.entradaCierre {
+  max-width: var(--ancho-lectura);
 }
 
 .acciones {
@@ -27,21 +247,55 @@
   margin-top: var(--e-2);
 }
 
-/* El único botón primario de la vista. */
-.primario {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--toque-min);
-  padding-inline: var(--e-5);
-  border-radius: var(--radio-md);
-  background: var(--color-acento);
-  color: var(--color-sobre-senal);
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color var(--dur-rapida) var(--curva);
+/* ── Puntos de ruptura: solo min-width, solo añaden ──────────────────── */
+
+@media (min-width: 40rem) {
+  .rejilla,
+  .pasos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cifras {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.primario:hover {
-  background: var(--color-acento-fuerte);
+@media (min-width: 64rem) {
+  .rejilla,
+  .pasos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hero {
+    padding-block: var(--e-8) var(--e-7);
+  }
+}
+
+/* ── Movimiento ──────────────────────────────────────────────────────── */
+
+/*
+ * Entrada escalonada al aparecer en pantalla, sin JavaScript ni
+ * IntersectionObserver. Si el navegador no lo soporta, las tarjetas
+ * sencillamente están ahí: no se pierde nada.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rejilla > *,
+    .paso {
+      animation: aparecer linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
