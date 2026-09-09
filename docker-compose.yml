@@ -1,3 +1,11 @@
+# El proyecto entero con un solo comando:
+#
+#   docker compose up -d              las tres piezas: base, API y web
+#   docker compose up -d postgres     solo la base, para trabajar con bootRun
+#
+# Las dos mitades corren en **modo desarrollo** con el código montado desde el
+# host, no copiado a la imagen: el frontend recarga en caliente y el backend se
+# recompila con `docker compose restart backend`.
 services:
   postgres:
     image: postgres:17-alpine
@@ -17,5 +25,55 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build: ./backend
+    container_name: emprendehub-api
+    # Con el usuario del host, los ficheros que escriba —las fotos de
+    # `backend/uploads/`— no quedan siendo de root dentro del repositorio.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Dentro de la red de compose la base es `postgres:5432`. El 5433 es el
+      # puerto que se publica al host, y aquí no pinta nada.
+      DB_URL: jdbc:postgresql://postgres:5432/emprendehub
+      TZ: America/Bogota
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - ./backend:/app
+      # La caché de Gradle sobrevive entre arranques: sin esto se descargarían
+      # las dependencias enteras cada vez que se recrea el contenedor.
+      - gradle-cache:/gradle
+      # `build/` y `.gradle/` con volumen propio para que las compilaciones del
+      # contenedor y las del host no se pisen dentro del mismo directorio.
+      - backend-build:/app/build
+      - backend-gradle:/app/.gradle
+
+  frontend:
+    build: ./frontend
+    container_name: emprendehub-web
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    # Solo ordena el arranque: Vite levanta en segundos y el backend tarda más,
+    # así que las primeras peticiones fallarán hasta que la API responda.
+    depends_on:
+      - backend
+    environment:
+      # El proxy de Vite apunta al servicio, no a localhost, que dentro del
+      # contenedor sería el propio contenedor.
+      VITE_PROXY_TARGET: http://backend:8080
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      # Los de la imagen, compilados para Alpine. Sin este volumen el montaje de
+      # arriba los taparía con los del host.
+      - frontend-modules:/app/node_modules
+
 volumes:
   emprendehub-data:
+  gradle-cache:
+  backend-build:
+  backend-gradle:
+  frontend-modules:

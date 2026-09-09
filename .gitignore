@@ -34,3 +34,6 @@ bin/
 
 # --- Subidas locales de imagenes ---
 uploads/
+
+# Los puertos y el usuario con que corre docker-compose: son de cada máquina.
+.env
