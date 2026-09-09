@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type RefObject } from 'rea
 import { Link, useNavigate } from 'react-router-dom';
 import { obtenerCategoriasNegocio, obtenerCiudades } from '../api/catalogos';
 import { ErrorApi } from '../api/cliente';
+import { CargaDeFotos } from '../componentes/CargaDeFotos';
 import { PasosAsistente } from '../componentes/PasosAsistente';
 import { useSesion } from '../estado/SesionContext';
 import { precio as formatearPrecio } from '../formato';
@@ -13,17 +14,24 @@ import formulario from './Formulario.module.css';
 import estilos from './RegistroEmprendedor.module.css';
 
 /**
- * Los cuatro pasos que ve quien se registra. El cuarto —las fotos— llega en el
- * incremento siguiente: son binarios y van por su propio endpoint, con la sesión
- * que este asistente acaba de abrir.
+ * Los cuatro pasos que ve quien se registra.
+ *
+ * Los tres primeros recogen datos y se envían juntos; el cuarto son binarios y
+ * van por su propio endpoint, ya con la sesión que el tercero acaba de abrir.
  */
 const PASOS = ['Cuenta', 'Negocio', 'Escaparate', 'Fotos'] as const;
 
 const PASO_CUENTA = 1;
 const PASO_NEGOCIO = 2;
 const PASO_ESCAPARATE = 3;
-/** Hasta dónde llega el asistente hoy. El paso 4 es del PR siguiente. */
-const ULTIMO_PASO = PASO_ESCAPARATE;
+const PASO_FOTOS = 4;
+/**
+ * El paso cuyo envío crea la cuenta, el negocio y el escaparate de una vez.
+ *
+ * A partir de aquí no se puede volver atrás: reenviar el formulario chocaría
+ * con el correo que se acaba de ocupar.
+ */
+const PASO_DEL_ENVIO = PASO_ESCAPARATE;
 
 // ── Lo que se recoge en el navegador ──────────────────────────────────────
 
@@ -407,8 +415,12 @@ export function RegistroEmprendedor() {
 
   async function alEnviar(evento: FormEvent) {
     evento.preventDefault();
-    // El envío solo ocurre en el último paso: en los demás el botón avanza.
-    if (paso !== ULTIMO_PASO) {
+    // El paso de las fotos ya no envía nada: tiene sus propios botones y el
+    // negocio existe desde el paso anterior.
+    if (paso === PASO_FOTOS) return;
+
+    // El envío solo ocurre en el paso 3: en los anteriores el botón avanza.
+    if (paso !== PASO_DEL_ENVIO) {
       siguiente();
       return;
     }
@@ -419,7 +431,8 @@ export function RegistroEmprendedor() {
 
     try {
       await registrarNegocio(construirPeticion(cuenta, negocio, productos));
-      navegar('/mi-negocio', { replace: true });
+      // La sesión ya está abierta: el paso de las fotos la necesita para subir.
+      setPaso(PASO_FOTOS);
     } catch (error: unknown) {
       if (error instanceof ErrorApi) {
         const porCampo = Object.entries(error.porCampo);
@@ -456,7 +469,7 @@ export function RegistroEmprendedor() {
 
   const textoDelBoton = enviando
     ? 'Creando el negocio…'
-    : paso === ULTIMO_PASO
+    : paso === PASO_DEL_ENVIO
       ? 'Crear el negocio'
       : 'Siguiente';
 
@@ -516,34 +529,47 @@ export function RegistroEmprendedor() {
             />
           )}
 
-          <div className={estilos.navegacion}>
-            {paso > PASO_CUENTA && (
-              <button
-                type="button"
-                className={estilos.secundario}
-                onClick={() => setPaso((actual) => actual - 1)}
-                disabled={enviando}
-              >
-                Anterior
-              </button>
-            )}
+          {/* El paso 4 trae sus propios botones: ni envía el formulario ni
+              vuelve atrás, porque el negocio ya está creado. */}
+          {paso === PASO_FOTOS ? (
+            <CargaDeFotos
+              alTerminar={() => navegar('/mi-negocio', { replace: true })}
+              encabezado={encabezado}
+            />
+          ) : (
+            <>
+              <div className={estilos.navegacion}>
+                {paso > PASO_CUENTA && (
+                  <button
+                    type="button"
+                    className={estilos.secundario}
+                    onClick={() => setPaso((actual) => actual - 1)}
+                    disabled={enviando}
+                  >
+                    Anterior
+                  </button>
+                )}
 
-            <button className={formulario.primario} type="submit" disabled={enviando}>
-              {textoDelBoton}
-            </button>
-          </div>
+                <button className={formulario.primario} type="submit" disabled={enviando}>
+                  {textoDelBoton}
+                </button>
+              </div>
 
-          {/* El botón nunca se deshabilita en silencio: si falta algo, se dice. */}
-          {pasoIncompleto && (
-            <p className={estilos.aviso} role="status">
-              Revisa los campos marcados antes de continuar.
-            </p>
+              {/* El botón nunca se deshabilita en silencio: si falta algo, se dice. */}
+              {pasoIncompleto && (
+                <p className={estilos.aviso} role="status">
+                  Revisa los campos marcados antes de continuar.
+                </p>
+              )}
+            </>
           )}
         </form>
 
-        <p className={formulario.pie}>
-          ¿Solo quieres opinar y contactar negocios? <Link to="/registro">Crea una cuenta</Link>.
-        </p>
+        {paso !== PASO_FOTOS && (
+          <p className={formulario.pie}>
+            ¿Solo quieres opinar y contactar negocios? <Link to="/registro">Crea una cuenta</Link>.
+          </p>
+        )}
       </div>
     </div>
   );

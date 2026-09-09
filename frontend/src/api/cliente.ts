@@ -112,6 +112,25 @@ export function enviar<T>(ruta: string, cuerpo: unknown, conSesion = false): Pro
 }
 
 /**
+ * Sube un `multipart/form-data`.
+ *
+ * No lleva `Content-Type`: lo pone el navegador con su `boundary`, y escribirlo
+ * a mano deja la petición sin él y el backend sin saber dónde acaba cada parte.
+ */
+export function enviarFormulario<T>(
+  ruta: string,
+  formulario: FormData,
+  conSesion = false,
+): Promise<T> {
+  return peticion<T>(ruta, { metodo: 'POST', formulario, conSesion });
+}
+
+/** El backend responde `204` sin cuerpo, que `peticion` ya contempla. */
+export function eliminar(ruta: string, conSesion = false): Promise<void> {
+  return peticion<void>(ruta, { metodo: 'DELETE', conSesion });
+}
+
+/**
  * Convierte los filtros en cadena de consulta. `URLSearchParams` codifica los
  * acentos, que es lo que evita el 400 de `?texto=café`.
  */
