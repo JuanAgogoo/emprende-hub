@@ -1,0 +1,100 @@
+.pagina {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--e-7);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  width: 100%;
+  max-width: 26rem;
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.titulo {
+  font-size: var(--texto-2xl);
+}
+
+.entrada {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.campo input {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  /* Un control se identifica por su borde: 3:1 como mínimo (WCAG 1.4.11). */
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+/* El grupo entero reacciona al foco y al error, sin clases condicionales. */
+.campo:has(input:focus-visible) label {
+  color: var(--color-acento);
+}
+
+.campo:has(input[aria-invalid='true']) input {
+  border-color: var(--color-error);
+}
+
+.error {
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+}
+
+.fallo {
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.primario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: none;
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.primario:hover:not(:disabled) {
+  background: var(--color-acento-fuerte);
+}
+
+.primario:disabled {
+  background: var(--color-apagado);
+  cursor: progress;
+}

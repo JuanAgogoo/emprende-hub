@@ -3,6 +3,7 @@ import { Cabecera } from './componentes/Cabecera';
 import { Pie } from './componentes/Pie';
 import { Directorio } from './paginas/Directorio';
 import { Inicio } from './paginas/Inicio';
+import { Login } from './paginas/Login';
 import { NoEncontrada } from './paginas/NoEncontrada';
 import { PerfilNegocio } from './paginas/PerfilNegocio';
 
@@ -29,6 +30,7 @@ export function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/directorio" element={<Directorio />} />
         <Route path="/negocios/:id" element={<PerfilNegocio />} />
+        <Route path="/entrar" element={<Login />} />
         <Route path="*" element={<NoEncontrada />} />
       </Route>
     </Routes>
