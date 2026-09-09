@@ -6,14 +6,22 @@ React + Vite + TypeScript. Consume la API del backend, que vive en
 ## Arrancar
 
 Necesita **el backend corriendo**, porque en desarrollo el servidor de Vite hace
-de proxy hacia él:
+de proxy hacia él. Lo más corto, desde la raíz del repositorio:
 
 ```bash
-docker compose up -d              # PostgreSQL, desde la raíz
+docker compose up -d              # base, API y web, con recarga en caliente
+```
+
+O en el host, si prefieres no pasar por Docker para el frontend:
+
+```bash
+docker compose up -d postgres     # solo la base, desde la raíz
 cd backend && ./gradlew bootRun   # API en el 8080
 cd frontend && npm install        # solo la primera vez
 npm run dev                       # http://localhost:5173
 ```
+
+Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 
 | Orden | Qué hace |
 |---|---|
@@ -61,6 +69,10 @@ desde el paso 4 no se puede volver atrás.
 El backend no lo configura, así que `vite.config.ts` reenvía `/api/v1` y
 `/fotos` al 8080 y todo sale del mismo origen. **Las fotos también**: sin
 proxearlas, las imágenes no cargan.
+
+A dónde reenvía sale de `VITE_PROXY_TARGET`, con `http://localhost:8080` por
+defecto. Dentro de Docker `localhost` sería el propio contenedor del frontend,
+así que docker-compose le pone el nombre del servicio: `http://backend:8080`.
 
 Esto vale en desarrollo. Si algún día el frontend se sirve compilado desde otro
 origen, habrá que añadir CORS en `SecurityConfig`.
