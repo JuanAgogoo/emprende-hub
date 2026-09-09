@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -97,5 +99,30 @@ class FotoControllerTest extends ControllerTestBase {
         mockMvc.perform(delete("/api/v1/negocios/mio/fotos/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @DisplayName("PATCH /orden devuelve la galería ya reordenada")
+    void reordenar_devuelve200() throws Exception {
+        when(fotoService.reordenar(any(), any())).thenReturn(List.of(
+                new FotoResponse(3L, "/fotos/c.jpg", 0, true, "APROBADA"),
+                new FotoResponse(1L, "/fotos/a.jpg", 1, false, "APROBADA")));
+
+        mockMvc.perform(patch("/api/v1/negocios/mio/fotos/orden")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orden\": [3, 1]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(3))
+                .andExpect(jsonPath("$[0].principal").value(true))
+                .andExpect(jsonPath("$[1].principal").value(false));
+    }
+
+    @Test
+    @DisplayName("PATCH /orden con la lista vacía devuelve 400")
+    void reordenar_listaVacia_devuelve400() throws Exception {
+        mockMvc.perform(patch("/api/v1/negocios/mio/fotos/orden")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"orden\": []}"))
+                .andExpect(status().isBadRequest());
     }
 }

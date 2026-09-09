@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /**
  * Único punto del sistema que decide códigos HTTP.
@@ -72,6 +73,26 @@ public class GlobalExceptionHandler {
         Map<String, Object> respuesta = cuerpo(HttpStatus.BAD_REQUEST, detalle);
         // Una clave por parámetro inválido, igual que en la validación de campos.
         respuesta.put(ex.getName(), detalle);
+        return ResponseEntity.badRequest().body(respuesta);
+    }
+
+    /**
+     * Una petición {@code multipart} a la que le falta una parte obligatoria.
+     *
+     * <p>Sin este manejador la respuesta seguía siendo 400, pero con el cuerpo
+     * por defecto de Spring —con {@code path} y sin {@code message}—, que no es
+     * el formato que documenta {@code docs/api.md}. Es el mismo motivo por el
+     * que existe el de arriba.
+     *
+     * <p>Además nombra la parte que falta, para que el formulario pueda señalar
+     * el campo en lugar de enseñar un cartel genérico.
+     */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, Object>> parteQueFalta(
+            MissingServletRequestPartException ex) {
+        String detalle = "Falta «%s» en la petición".formatted(ex.getRequestPartName());
+        Map<String, Object> respuesta = cuerpo(HttpStatus.BAD_REQUEST, detalle);
+        respuesta.put(ex.getRequestPartName(), detalle);
         return ResponseEntity.badRequest().body(respuesta);
     }
 

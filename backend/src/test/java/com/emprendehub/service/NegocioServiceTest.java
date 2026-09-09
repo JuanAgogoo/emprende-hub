@@ -1,6 +1,7 @@
 package com.emprendehub.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,10 +27,11 @@ import com.emprendehub.repository.CiudadRepository;
 import com.emprendehub.repository.NegocioRepository;
 import com.emprendehub.repository.UsuarioRepository;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -47,7 +49,18 @@ class NegocioServiceTest {
     @Mock private BarrioRepository barrioRepository;
     @Mock private com.emprendehub.repository.CambioPendienteRepository cambioRepository;
 
-    @InjectMocks private NegocioService service;
+    /** A mano: el constructor lleva el interruptor de moderación (un boolean). */
+    private NegocioService service;
+
+    @BeforeEach
+    void prepararConModeracion() {
+        service = servicioCon(false);
+    }
+
+    private NegocioService servicioCon(boolean moderacionAutomatica) {
+        return new NegocioService(negocioRepository, usuarioRepository, categoriaRepository,
+                ciudadRepository, barrioRepository, cambioRepository, moderacionAutomatica);
+    }
 
     private Usuario cliente() {
         Usuario u = new Usuario("María García", "maria@gmail.com", "hash", Rol.CLIENTE);
@@ -90,6 +103,27 @@ class NegocioServiceTest {
 
         assertEquals("PENDIENTE", respuesta.estado());
         assertEquals("Panadería La Tradicional", respuesta.nombre());
+    }
+
+    @Test
+    @DisplayName("Sin moderación el negocio nace publicado y con su fecha sellada")
+    void registrar_sinModeracion_naceAprobado() {
+        // El interruptor es provisional: la regla del dominio sigue siendo B6, y
+        // la prueba de arriba, que corre con moderación, es la que lo fija.
+        NegocioService sinModeracion = servicioCon(true);
+        prepararCatalogos();
+        when(negocioRepository.existsByUsuarioId(1L)).thenReturn(false);
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        NegocioResponse respuesta = sinModeracion.registrar(cliente(), peticion(null));
+
+        assertEquals("APROBADO", respuesta.estado());
+
+        // La fecha se comprueba sobre la entidad guardada porque la respuesta no
+        // la lleva; importa porque de ella depende el orden RECIENTES (G7).
+        ArgumentCaptor<Negocio> guardado = ArgumentCaptor.forClass(Negocio.class);
+        verify(negocioRepository).save(guardado.capture());
+        assertNotNull(guardado.getValue().getFechaAprobacion());
     }
 
     @Test

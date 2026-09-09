@@ -46,19 +46,56 @@
   color: var(--color-cuerpo);
 }
 
-.campo input {
-  min-height: var(--toque-min);
-  padding: var(--e-2) var(--e-3);
-  border: 1px solid var(--color-borde-control);
+/* El botón de elegir, centrado en su recuadro. Las mismas reglas que en el paso
+   del escaparate: los dos pasos del asistente se ven igual. */
+.zonaFoto {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
   border-radius: var(--radio-md);
-  background: var(--color-lienzo);
-  color: var(--color-tinta);
-  font-size: var(--texto-sm);
+  background: var(--color-lienzo-alt);
 }
 
-.campo input:disabled {
-  background: var(--color-lienzo-alt);
+.zonaFoto:has(input:focus-visible) {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.zonaFoto .botonArchivo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-acento);
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.zonaFoto .botonArchivo:hover {
+  background: var(--color-acento-suave);
+}
+
+/* Sin huecos libres el input está deshabilitado y la etiqueta lo dice. */
+.zonaFoto .botonArchivo[aria-disabled='true'] {
+  border-color: var(--color-borde-control);
   color: var(--color-apagado);
+  cursor: not-allowed;
+}
+
+/* Invisible pero no `display: none`: el tabulador tiene que alcanzarlo. */
+.archivoOculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ayuda {
@@ -129,6 +166,58 @@
 
 .pendiente {
   color: var(--color-aviso);
+}
+
+/* Las dos flechas, una al lado de otra y del mismo ancho. */
+.orden {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-2);
+}
+
+.mover {
+  min-height: var(--toque-min);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-size: var(--texto-md);
+  line-height: 1;
+  color: var(--color-cuerpo);
+  cursor: pointer;
+}
+
+.mover:hover:not(:disabled) {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+/* En los extremos no hay a dónde mover: se apaga, y se ve que está apagado. */
+.mover:disabled {
+  border-color: var(--color-borde);
+  color: var(--color-apagado);
+  cursor: not-allowed;
+}
+
+.hacerPortada {
+  min-height: var(--toque-min);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-acento);
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.hacerPortada:hover:not(:disabled) {
+  background: var(--color-acento-suave);
+}
+
+.hacerPortada:disabled {
+  border-color: var(--color-borde);
+  color: var(--color-apagado);
+  cursor: progress;
 }
 
 .quitar {

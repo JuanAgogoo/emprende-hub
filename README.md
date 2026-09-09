@@ -73,6 +73,7 @@ docker compose down -v        # borra también la base y las cachés
 | `API_PORT` | `8080` | Cambiar si ya tienes un backend corriendo |
 | `WEB_PORT` | `5173` | |
 | `HOST_UID` / `HOST_GID` | `1000` | El usuario con el que corren los contenedores |
+| `MODERACION_AUTOMATICA` | `false` | **Provisional.** A `true`, los negocios nacen publicados y sus fotos aprobadas |
 
 `HOST_UID` existe para que las fotos que suba el backend **no queden siendo de
 root** dentro del repositorio. Con un usuario 1000 —lo normal en Linux— no hay
@@ -84,6 +85,11 @@ HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose up -d
 
 No uses `UID` a secas: en bash es una variable de solo lectura y la asignación
 falla. Para no repetirlo, `echo "HOST_UID=$(id -u)" >> .env`.
+
+`MODERACION_AUTOMATICA` está puesta a `true` en `docker-compose.yml` **mientras se
+construye**, para no tener que aprobar cada negocio a mano. Se quita esa línea
+para volver a la moderación de verdad, que es lo que hay que enseñar el día de la
+sustentación: el negocio nace `PENDIENTE` (B6) y el administrador lo publica.
 
 Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
 mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus

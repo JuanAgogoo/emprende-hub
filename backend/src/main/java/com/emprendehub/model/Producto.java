@@ -50,15 +50,27 @@ public class Producto {
     @Column(length = 500)
     private String descripcion;
 
+    /**
+     * El nombre del fichero de su imagen, obligatorio.
+     *
+     * <p>Un escaparate con huecos no es un escaparate: cada artículo entra con
+     * su foto o no entra. Se guarda el nombre y no la URL, igual que en
+     * {@link Foto}, para que mover el sitio donde se sirven no obligue a
+     * reescribir la tabla.
+     */
+    @Column(nullable = false, length = 255)
+    private String foto;
+
     @Column(nullable = false)
     private boolean disponible;
 
     public Producto(Negocio negocio, String nombre, BigDecimal precio, String descripcion,
-                    boolean disponible) {
+                    boolean disponible, String foto) {
         this.negocio = negocio;
         this.nombre = nombre;
         this.precio = precio;
         this.descripcion = descripcion;
         this.disponible = disponible;
+        this.foto = foto;
     }
 }

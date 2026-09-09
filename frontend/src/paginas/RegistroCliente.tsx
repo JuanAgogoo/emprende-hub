@@ -1,19 +1,30 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
+import { CampoContrasena } from '../componentes/CampoContrasena';
+import { EnlaceLegal } from '../componentes/EnlaceLegal';
 import { useSesion } from '../estado/SesionContext';
 import estilos from './Formulario.module.css';
+import { useTitulo } from '../titulo';
 
 interface Valores {
   readonly nombre: string;
   readonly correo: string;
   readonly contrasena: string;
+  /** Solo vive en el navegador: no viaja en la petición, solo la comprueba. */
+  readonly confirmacion: string;
   readonly aceptaDatos: boolean;
 }
 
 type Errores = Partial<Record<keyof Valores, string>>;
 
-const VACIO: Valores = { nombre: '', correo: '', contrasena: '', aceptaDatos: false };
+const VACIO: Valores = {
+  nombre: '',
+  correo: '',
+  contrasena: '',
+  confirmacion: '',
+  aceptaDatos: false,
+};
 
 /**
  * Las mismas reglas que valida el backend, para que el 400 sea la excepción y
@@ -34,6 +45,12 @@ function validar(valores: Valores): Errores {
   else if (valores.contrasena.length < 8)
     errores.contrasena = 'La contraseña debe tener al menos 8 caracteres';
 
+  // Se compara con la contraseña ya escrita, no con una regla propia: el campo
+  // no tiene requisitos, solo tiene que coincidir.
+  if (valores.confirmacion === '') errores.confirmacion = 'Repite la contraseña';
+  else if (valores.confirmacion !== valores.contrasena)
+    errores.confirmacion = 'Las dos contraseñas no coinciden';
+
   if (!valores.aceptaDatos)
     errores.aceptaDatos = 'Hay que aceptar el tratamiento de datos para crear la cuenta';
 
@@ -41,9 +58,16 @@ function validar(valores: Valores): Errores {
 }
 
 /** El orden en que se recorre para llevar el foco al primer campo con error. */
-const ORDEN: readonly (keyof Valores)[] = ['nombre', 'correo', 'contrasena', 'aceptaDatos'];
+const ORDEN: readonly (keyof Valores)[] = [
+  'nombre',
+  'correo',
+  'contrasena',
+  'confirmacion',
+  'aceptaDatos',
+];
 
 export function RegistroCliente() {
+  useTitulo('Registro de cliente');
   const { registrar } = useSesion();
   const navegar = useNavigate();
   const formulario = useRef<HTMLFormElement>(null);
@@ -82,7 +106,9 @@ export function RegistroCliente() {
     setEnviando(true);
     try {
       await registrar(valores.nombre.trim(), valores.correo.trim(), valores.contrasena);
-      navegar('/', { replace: true });
+      // El mismo destino que el inicio de sesión: los dos caminos crean un
+      // cliente y tienen que dejarlo en el mismo sitio.
+      navegar('/directorio', { replace: true });
     } catch (error: unknown) {
       if (error instanceof ErrorApi) {
         // Los errores de forma traen una clave por campo; los de negocio, no.
@@ -163,17 +189,18 @@ export function RegistroCliente() {
 
           <div className={estilos.campo}>
             <label htmlFor="contrasena">Contraseña</label>
-            <input
+            <CampoContrasena
               id="contrasena"
               name="contrasena"
-              type="password"
+              valor={valores.contrasena}
               autoComplete="new-password"
-              value={valores.contrasena}
-              onChange={(evento) => cambiar('contrasena', evento.target.value)}
-              aria-invalid={enviado && errores.contrasena !== undefined}
-              aria-describedby={
-                enviado && errores.contrasena !== undefined ? 'error-contrasena' : 'ayuda-contrasena'
+              invalido={enviado && errores.contrasena !== undefined}
+              describedBy={
+                enviado && errores.contrasena !== undefined
+                  ? 'error-contrasena'
+                  : 'ayuda-contrasena'
               }
+              alCambiar={(valor) => cambiar('contrasena', valor)}
             />
             {enviado && errores.contrasena !== undefined ? (
               <small id="error-contrasena" className={estilos.error}>
@@ -182,6 +209,26 @@ export function RegistroCliente() {
             ) : (
               <small id="ayuda-contrasena" className={estilos.ayuda}>
                 Al menos 8 caracteres
+              </small>
+            )}
+          </div>
+
+          <div className={estilos.campo}>
+            <label htmlFor="confirmacion">Repite la contraseña</label>
+            <CampoContrasena
+              id="confirmacion"
+              name="confirmacion"
+              valor={valores.confirmacion}
+              autoComplete="new-password"
+              invalido={enviado && errores.confirmacion !== undefined}
+              describedBy={
+                enviado && errores.confirmacion !== undefined ? 'error-confirmacion' : undefined
+              }
+              alCambiar={(valor) => cambiar('confirmacion', valor)}
+            />
+            {enviado && errores.confirmacion !== undefined && (
+              <small id="error-confirmacion" className={estilos.error}>
+                {errores.confirmacion}
               </small>
             )}
           </div>
@@ -201,7 +248,7 @@ export function RegistroCliente() {
               />
               <span>
                 He leído y acepto el{' '}
-                <Link to="/tratamiento-de-datos">tratamiento de datos</Link>.
+                <EnlaceLegal a="/tratamiento-de-datos" texto="tratamiento de datos" />.
               </span>
             </label>
             {enviado && errores.aceptaDatos !== undefined && (

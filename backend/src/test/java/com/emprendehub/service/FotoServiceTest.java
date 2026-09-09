@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import com.emprendehub.config.AlmacenamientoFotos;
 import com.emprendehub.dto.FotoResponse;
+import com.emprendehub.dto.ReordenarFotosRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Barrio;
@@ -32,11 +33,11 @@ import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,8 +57,22 @@ class FotoServiceTest {
     @Mock
     private AlmacenamientoFotos almacenamiento;
 
-    @InjectMocks
+    /**
+     * Se construye a mano y no con {@code @InjectMocks} porque el constructor
+     * lleva un {@code boolean} —el interruptor de moderación— y Mockito no sabe
+     * qué poner en un primitivo. A cambio, cada prueba puede elegir el modo.
+     */
     private FotoService service;
+
+    @BeforeEach
+    void prepararConModeracion() {
+        service = servicioCon(false);
+    }
+
+    private FotoService servicioCon(boolean moderacionAutomatica) {
+        return new FotoService(fotoRepository, negocioRepository, cambioRepository,
+                almacenamiento, moderacionAutomatica);
+    }
 
     private final Usuario duena = duena();
 
@@ -130,6 +145,21 @@ class FotoServiceTest {
     }
 
     @Test
+    @DisplayName("Sin moderación la foto nace aprobada y no abre propuesta de cambio")
+    void subir_sinModeracion_naceAprobada() {
+        // Las dos mitades del interruptor van juntas: si el negocio nace
+        // publicado y la foto se quedara pendiente, el directorio enseñaría la
+        // ficha sin imagen, que es la trampa que esto evita.
+        FotoService sinModeracion = servicioCon(true);
+        conNegocio(EstadoNegocio.APROBADO);
+        when(fotoRepository.countByNegocioId(7L)).thenReturn(0L);
+        when(almacenamiento.guardar(any(), any())).thenReturn("nueva.jpg");
+
+        assertEquals("APROBADA", sinModeracion.subir(duena, archivo("image/png")).estado());
+        verify(cambioRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("La segunda foto va detrás y ya no es la principal")
     void subir_segundaFoto_noEsPrincipal() {
         conNegocio(EstadoNegocio.PENDIENTE);
@@ -193,12 +223,69 @@ class FotoServiceTest {
         conNegocio(EstadoNegocio.PENDIENTE);
         MultipartFile grande = mock(MultipartFile.class);
         when(grande.isEmpty()).thenReturn(false);
-        when(grande.getSize()).thenReturn(FotoService.TAMANO_MAXIMO_BYTES + 1);
+        when(grande.getSize()).thenReturn(AlmacenamientoFotos.TAMANO_MAXIMO_BYTES + 1);
 
         var error = assertThrows(ReglaDeNegocioException.class,
                 () -> service.subir(duena, grande));
 
         assertTrue(error.getMessage().contains("5 MB"));
+    }
+
+    // ---------- Reordenar (B9) ----------
+
+    @Test
+    @DisplayName("Reordenar cambia la portada: la primera de la lista queda la principal")
+    void reordenar_cambiaLaPortada() {
+        conNegocio(EstadoNegocio.APROBADO);
+        when(fotoRepository.findByNegocioIdOrderByOrdenAsc(7L))
+                .thenReturn(List.of(foto(1L, 0, EstadoFoto.APROBADA),
+                        foto(2L, 1, EstadoFoto.APROBADA),
+                        foto(3L, 2, EstadoFoto.APROBADA)));
+
+        List<FotoResponse> galeria =
+                service.reordenar(duena, new ReordenarFotosRequest(List.of(3L, 1L, 2L)));
+
+        // El repositorio devuelve la lista simulada, así que lo que se comprueba
+        // es el orden asignado a cada foto, no el de la respuesta.
+        assertEquals(3, galeria.size());
+        assertTrue(galeria.getFirst().principal());
+    }
+
+    @Test
+    @DisplayName("Una lista a la que le falta una foto se rechaza")
+    void reordenar_incompleta_lanza() {
+        conNegocio(EstadoNegocio.APROBADO);
+        when(fotoRepository.findByNegocioIdOrderByOrdenAsc(7L))
+                .thenReturn(List.of(foto(1L, 0, EstadoFoto.APROBADA),
+                        foto(2L, 1, EstadoFoto.APROBADA)));
+
+        var error = assertThrows(ReglaDeNegocioException.class,
+                () -> service.reordenar(duena, new ReordenarFotosRequest(List.of(1L))));
+
+        assertTrue(error.getMessage().contains("exactamente"));
+    }
+
+    @Test
+    @DisplayName("Una foto repetida en la lista se rechaza")
+    void reordenar_repetida_lanza() {
+        conNegocio(EstadoNegocio.APROBADO);
+        when(fotoRepository.findByNegocioIdOrderByOrdenAsc(7L))
+                .thenReturn(List.of(foto(1L, 0, EstadoFoto.APROBADA),
+                        foto(2L, 1, EstadoFoto.APROBADA)));
+
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.reordenar(duena, new ReordenarFotosRequest(List.of(1L, 1L))));
+    }
+
+    @Test
+    @DisplayName("Una foto de otro negocio en la lista se rechaza")
+    void reordenar_fotoAjena_lanza() {
+        conNegocio(EstadoNegocio.APROBADO);
+        when(fotoRepository.findByNegocioIdOrderByOrdenAsc(7L))
+                .thenReturn(List.of(foto(1L, 0, EstadoFoto.APROBADA)));
+
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.reordenar(duena, new ReordenarFotosRequest(List.of(99L))));
     }
 
     @Test
@@ -209,7 +296,7 @@ class FotoServiceTest {
         when(almacenamiento.guardar(any(), any())).thenReturn("justa.jpg");
         MultipartFile justa = mock(MultipartFile.class);
         when(justa.isEmpty()).thenReturn(false);
-        when(justa.getSize()).thenReturn(FotoService.TAMANO_MAXIMO_BYTES);
+        when(justa.getSize()).thenReturn(AlmacenamientoFotos.TAMANO_MAXIMO_BYTES);
         when(justa.getContentType()).thenReturn("image/jpeg");
 
         assertEquals("/fotos/justa.jpg", service.subir(duena, justa).url());

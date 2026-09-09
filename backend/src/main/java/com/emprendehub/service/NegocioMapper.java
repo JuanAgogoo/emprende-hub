@@ -98,6 +98,7 @@ final class NegocioMapper {
 
     static ProductoResponse aRespuestaDeProducto(Producto producto) {
         return new ProductoResponse(producto.getId(), producto.getNombre(),
-                producto.getPrecio(), producto.getDescripcion(), producto.isDisponible());
+                producto.getPrecio(), producto.getDescripcion(), producto.isDisponible(),
+                urlDe(producto.getFoto()));
     }
 }

@@ -2,6 +2,7 @@ package com.emprendehub.service;
 
 import com.emprendehub.config.AlmacenamientoFotos;
 import com.emprendehub.dto.FotoResponse;
+import com.emprendehub.dto.ReordenarFotosRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CambioPendiente;
@@ -13,8 +14,10 @@ import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.CambioPendienteRepository;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,28 +47,28 @@ public class FotoService {
     /** B9: seis como mucho. Es lo que enseña el prototipo, con seis huecos. */
     static final int MAXIMO_FOTOS = 6;
 
-    /** B9: cinco megas por imagen. */
-    static final long TAMANO_MAXIMO_BYTES = 5L * 1024 * 1024;
-
-    /**
-     * B9: solo JPG y PNG, con la extensión que le corresponde a cada uno.
-     *
-     * <p>El tipo sale de la cabecera, nunca del nombre del fichero: renombrar un
-     * ejecutable a {@code .jpg} es trivial.
-     */
-    private static final Map<String, String> EXTENSION_POR_TIPO = Map.of(
-            "image/jpeg", "jpg",
-            "image/png", "png");
-
     private final FotoRepository fotoRepository;
     private final NegocioRepository negocioRepository;
     private final CambioPendienteRepository cambioRepository;
     private final AlmacenamientoFotos almacenamiento;
 
+    /**
+     * El mismo interruptor provisional que usa {@code NegocioService}.
+     *
+     * <p>Tiene que aplicarse **también aquí**, y no solo al negocio: una foto
+     * subida a un negocio ya aprobado nace pendiente por B2 y el público no la
+     * ve, así que aprobar el negocio y dejar la foto esperando publicaría
+     * negocios sin imagen. O no hay moderación, o la hay para las dos cosas.
+     */
+    private final boolean moderacionAutomatica;
+
     public FotoService(FotoRepository fotoRepository,
                        NegocioRepository negocioRepository,
                        CambioPendienteRepository cambioRepository,
-                       AlmacenamientoFotos almacenamiento) {
+                       AlmacenamientoFotos almacenamiento,
+                       @Value("${emprendehub.moderacion.automatica:false}")
+                       boolean moderacionAutomatica) {
+        this.moderacionAutomatica = moderacionAutomatica;
         this.fotoRepository = fotoRepository;
         this.negocioRepository = negocioRepository;
         this.cambioRepository = cambioRepository;
@@ -94,7 +97,7 @@ public class FotoService {
     @Transactional
     public FotoResponse subir(Usuario solicitante, MultipartFile archivo) {
         Negocio negocio = buscarElMio(solicitante);
-        String extension = validar(archivo);
+        String extension = AlmacenamientoFotos.extensionDe(archivo);
 
         long cuantas = fotoRepository.countByNegocioId(negocio.getId());
         if (cuantas >= MAXIMO_FOTOS) {
@@ -104,9 +107,12 @@ public class FotoService {
         }
 
         Foto foto = new Foto(negocio, almacenamiento.guardar(archivo, extension), (int) cuantas);
+        if (moderacionAutomatica) {
+            foto.setEstado(EstadoFoto.APROBADA);
+        }
         fotoRepository.save(foto);
 
-        if (negocio.getEstado() == EstadoNegocio.APROBADO) {
+        if (!moderacionAutomatica && negocio.getEstado() == EstadoNegocio.APROBADO) {
             abrirPropuestaDeCambio(negocio);
         }
 
@@ -129,6 +135,50 @@ public class FotoService {
         fotoRepository.delete(foto);
         almacenamiento.borrar(foto.getNombreArchivo());
         recolocar(negocio.getId());
+    }
+
+    /**
+     * Cambia el orden de la galería, y con él la portada (B9).
+     *
+     * <p><strong>No pasa por revisión</strong>, por la misma razón que borrar:
+     * reordenar no publica ninguna imagen que no estuviera ya publicada, que es
+     * el riesgo que controla B2. Y si la que sube al primer puesto todavía
+     * espera revisión, el público sigue viendo como portada la primera de las
+     * aprobadas, porque el perfil solo recibe esas.
+     *
+     * <p>Se exige la lista <em>completa</em>: ni una foto de menos ni una de
+     * más. Aceptar una parcial obligaría a decidir dónde van las que faltan, y
+     * cualquier respuesta a eso sería una invención.
+     */
+    @Transactional
+    public List<FotoResponse> reordenar(Usuario solicitante, ReordenarFotosRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        List<Foto> galeria = fotoRepository.findByNegocioIdOrderByOrdenAsc(negocio.getId());
+
+        Map<Long, Foto> porId = new HashMap<>();
+        galeria.forEach(foto -> porId.put(foto.getId(), foto));
+
+        // El mapa hace las dos comprobaciones a la vez: que no sobre ninguna
+        // —cada id tiene que estar en la galería— y que no falte ni se repita
+        // —al final el mapa tiene que quedar vacío—.
+        for (int posicion = 0; posicion < peticion.orden().size(); posicion++) {
+            Foto foto = porId.remove(peticion.orden().get(posicion));
+            if (foto == null) {
+                throw new ReglaDeNegocioException(rechazo(galeria.size()));
+            }
+            foto.setOrden(posicion);
+        }
+        if (!porId.isEmpty()) {
+            throw new ReglaDeNegocioException(rechazo(galeria.size()));
+        }
+
+        return NegocioMapper.aRespuestasDeFoto(
+                fotoRepository.findByNegocioIdOrderByOrdenAsc(negocio.getId()));
+    }
+
+    private static String rechazo(int cuantas) {
+        return "El orden tiene que nombrar exactamente las " + cuantas
+                + " fotos de la galería, una sola vez cada una";
     }
 
     // ---------- Revisión, invocada por la moderación ----------
@@ -167,23 +217,6 @@ public class FotoService {
     }
 
     // ---------- Apoyo ----------
-
-    /** Devuelve la extensión que toca, o explica por qué el archivo no sirve. */
-    private String validar(MultipartFile archivo) {
-        if (archivo == null || archivo.isEmpty()) {
-            throw new ReglaDeNegocioException("No llegó ninguna imagen");
-        }
-        if (archivo.getSize() > TAMANO_MAXIMO_BYTES) {
-            throw new ReglaDeNegocioException("Cada imagen puede pesar 5 MB como mucho");
-        }
-
-        String tipo = archivo.getContentType();
-        String extension = tipo == null ? null : EXTENSION_POR_TIPO.get(tipo.toLowerCase());
-        if (extension == null) {
-            throw new ReglaDeNegocioException("La imagen tiene que ser JPG o PNG");
-        }
-        return extension;
-    }
 
     /**
      * Deja los órdenes en 0, 1, 2… sin huecos.

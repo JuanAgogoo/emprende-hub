@@ -63,7 +63,7 @@ class ProductoRepositoryTest extends PostgresTestBase {
     private Producto producto(Negocio negocio, String nombre, BigDecimal precio,
                               String descripcion, boolean disponible) {
         return entityManager.persistAndFlush(
-                new Producto(negocio, nombre, precio, descripcion, disponible));
+                new Producto(negocio, nombre, precio, descripcion, disponible, "producto.jpg"));
     }
 
     @Test

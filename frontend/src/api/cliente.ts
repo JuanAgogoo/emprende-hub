@@ -125,6 +125,11 @@ export function enviarFormulario<T>(
   return peticion<T>(ruta, { metodo: 'POST', formulario, conSesion });
 }
 
+/** Cambia una propiedad de algo que ya existe, sin sustituirlo entero. */
+export function parchear<T>(ruta: string, cuerpo: unknown, conSesion = false): Promise<T> {
+  return peticion<T>(ruta, { metodo: 'PATCH', cuerpo, conSesion });
+}
+
 /** El backend responde `204` sin cuerpo, que `peticion` ya contempla. */
 export function eliminar(ruta: string, conSesion = false): Promise<void> {
   return peticion<void>(ruta, { metodo: 'DELETE', conSesion });

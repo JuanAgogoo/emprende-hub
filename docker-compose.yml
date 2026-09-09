@@ -39,6 +39,10 @@ services:
       # puerto que se publica al host, y aquí no pinta nada.
       DB_URL: jdbc:postgresql://postgres:5432/emprendehub
       TZ: America/Bogota
+      # PROVISIONAL: los negocios nacen publicados y sus fotos aprobadas, sin
+      # pasar por el administrador. Se quita esta línea para volver a la
+      # moderación de verdad (B6 y B2), que es lo que dice el dominio.
+      MODERACION_AUTOMATICA: "true"
     ports:
       - "${API_PORT:-8080}:8080"
     volumes:

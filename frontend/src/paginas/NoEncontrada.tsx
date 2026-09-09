@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import estilos from './NoEncontrada.module.css';
+import { useTitulo } from '../titulo';
 
 export function NoEncontrada() {
+  useTitulo('Página no encontrada');
   return (
     <section className={`contenedor ${estilos.pagina}`}>
       <h1>Aquí no hay nada</h1>

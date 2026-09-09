@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type RefObject } from 'react';
-import { borrarFoto, subirFoto } from '../api/negocios';
+import { borrarFoto, reordenarFotos, subirFoto } from '../api/negocios';
 import type { FotoNegocio } from '../types/negocio';
 import estilos from './CargaDeFotos.module.css';
 
@@ -64,6 +64,7 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
   const [imagenes, setImagenes] = useState<readonly Imagen[]>([]);
   const [rechazados, setRechazados] = useState<readonly string[]>([]);
   const [subiendo, setSubiendo] = useState(false);
+  const [reordenando, setReordenando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
 
   const siguienteClave = useRef(1);
@@ -87,6 +88,10 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
   const porSubir = imagenes.filter((imagen) => imagen.estado === 'LOCAL');
   const subidas = imagenes.filter((imagen) => imagen.estado === 'SUBIDA');
   const huecos = MAXIMO_FOTOS - imagenes.length;
+  /** Mientras algo esté en marcha, ningún botón de la galería responde. */
+  const ocupado = subiendo || reordenando;
+  /** Con más de una foto y ninguna pendiente de subir, se puede ordenar. */
+  const puedeOrdenar = porSubir.length === 0 && imagenes.length > 1;
 
   function elegir(evento: ChangeEvent<HTMLInputElement>) {
     const elegidos = Array.from(evento.target.files ?? []);
@@ -145,6 +150,45 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
     } catch (error: unknown) {
       const mensaje = error instanceof Error ? error.message : 'No se pudo quitar la foto';
       setFallo(mensaje);
+    }
+  }
+
+  /**
+   * Mueve una foto a otra posición y guarda el orden entero.
+   *
+   * Solo se ofrece cuando no queda ninguna sin subir: mezclar una foto que ya
+   * tiene sitio en el servidor con otra que aún no existe haría que «la primera»
+   * no significara lo mismo en los dos lados.
+   *
+   * El backend devuelve la galería recolocada y se toma esa, en vez de adivinar
+   * el resultado aquí: si algo falla, la pantalla no se queda contando otra cosa.
+   */
+  async function mover(desde: number, hasta: number) {
+    const orden = imagenes.flatMap((imagen) =>
+      imagen.estado === 'SUBIDA' ? [imagen.foto.id] : [],
+    );
+    const movida = orden[desde];
+    if (movida === undefined) return;
+    orden.splice(desde, 1);
+    orden.splice(hasta, 0, movida);
+
+    setFallo(null);
+    setReordenando(true);
+    try {
+      const galeria = await reordenarFotos(orden);
+      setImagenes(
+        galeria.map((foto, posicion) => ({
+          estado: 'SUBIDA',
+          clave: posicion,
+          nombre: `Foto ${posicion + 1}`,
+          foto,
+        })),
+      );
+    } catch (error: unknown) {
+      const mensaje = error instanceof Error ? error.message : 'No se pudo cambiar el orden';
+      setFallo(mensaje);
+    } finally {
+      setReordenando(false);
     }
   }
 
@@ -210,16 +254,26 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
       )}
 
       <div className={estilos.campo}>
-        <label htmlFor="fotos">Elegir imágenes</label>
-        <input
-          id="fotos"
-          type="file"
-          accept="image/jpeg,image/png"
-          multiple
-          disabled={huecos === 0 || subiendo}
-          onChange={elegir}
-          aria-describedby="ayuda-fotos"
-        />
+        <label htmlFor="fotos">Fotos del negocio</label>
+
+        {/* Igual que en el escaparate: la etiqueta hace de botón y el input de
+            verdad se queda invisible pero enfocable con el tabulador. */}
+        <div className={estilos.zonaFoto}>
+          <label className={estilos.botonArchivo} htmlFor="fotos" aria-disabled={huecos === 0}>
+            {imagenes.length === 0 ? 'Elegir imágenes' : 'Añadir más imágenes'}
+          </label>
+          <input
+            id="fotos"
+            className={estilos.archivoOculto}
+            type="file"
+            accept="image/jpeg,image/png"
+            multiple
+            disabled={huecos === 0 || subiendo}
+            onChange={elegir}
+            aria-describedby="ayuda-fotos"
+          />
+        </div>
+
         <small id="ayuda-fotos" className={estilos.ayuda}>
           {huecos === 0
             ? `Ya tienes las ${MAXIMO_FOTOS} que caben`
@@ -233,11 +287,14 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
         </p>
       ) : (
         <ul className={estilos.galeria}>
-          {imagenes.map((imagen, posicion) => (
+          {imagenes.map((imagen, posicion) => {
+            const nombre = imagen.estado === 'LOCAL' ? imagen.archivo.name : imagen.nombre;
+
+            return (
             <li key={imagen.clave} className={estilos.miniatura}>
               <img
                 src={imagen.estado === 'LOCAL' ? imagen.vistaPrevia : imagen.foto.url}
-                alt={imagen.estado === 'LOCAL' ? imagen.archivo.name : imagen.nombre}
+                alt={nombre}
               />
 
               {/* La portada no se marca con un campo: es la primera por orden (B9). */}
@@ -247,10 +304,47 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
                 {imagen.estado === 'SUBIDA' ? 'Subida' : 'Sin subir'}
               </span>
 
+              {/* Ordenar solo cuando todas están subidas: hasta entonces «la
+                  primera» no significaría lo mismo aquí que en el servidor. */}
+              {puedeOrdenar && (
+                <div className={estilos.orden}>
+                  <button
+                    type="button"
+                    className={estilos.mover}
+                    disabled={posicion === 0 || ocupado}
+                    onClick={() => mover(posicion, posicion - 1)}
+                    aria-label={`Mover ${nombre} una posición antes`}
+                  >
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={estilos.mover}
+                    disabled={posicion === imagenes.length - 1 || ocupado}
+                    onClick={() => mover(posicion, posicion + 1)}
+                    aria-label={`Mover ${nombre} una posición después`}
+                  >
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              )}
+
+              {puedeOrdenar && posicion !== 0 && (
+                <button
+                  type="button"
+                  className={estilos.hacerPortada}
+                  disabled={ocupado}
+                  onClick={() => mover(posicion, 0)}
+                >
+                  Hacer portada
+                  <span className={estilos.oculto}> ({nombre})</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 className={estilos.quitar}
-                disabled={subiendo}
+                disabled={ocupado}
                 onClick={() =>
                   imagen.estado === 'LOCAL'
                     ? quitarLocal(imagen.clave)
@@ -258,13 +352,11 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
                 }
               >
                 Quitar
-                <span className={estilos.oculto}>
-                  {' '}
-                  {imagen.estado === 'LOCAL' ? imagen.archivo.name : imagen.nombre}
-                </span>
+                <span className={estilos.oculto}> {nombre}</span>
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 
@@ -294,7 +386,9 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
 
       {porSubir.length > 0 && (
         <p className={estilos.aviso} role="status">
-          Te quedan {porSubir.length} imágenes sin subir: si sales ahora, no se guardan.
+          Te quedan {porSubir.length === 1 ? '1 imagen' : `${porSubir.length} imágenes`} sin subir:
+          si sales ahora, no se guardan. Podrás ordenarlas y elegir la portada en cuanto estén
+          subidas.
         </p>
       )}
     </>

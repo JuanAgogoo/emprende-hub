@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { EnlaceLegal } from './EnlaceLegal';
 import estilos from './Pie.module.css';
 
 export function Pie() {
@@ -11,14 +11,18 @@ export function Pie() {
         <nav aria-label="Legal">
           <ul className={estilos.lista}>
             <li>
-              <Link to="/tratamiento-de-datos" className={estilos.enlace}>
-                Tratamiento de datos
-              </Link>
+              <EnlaceLegal
+                a="/tratamiento-de-datos"
+                texto="Tratamiento de datos"
+                className={estilos.enlace}
+              />
             </li>
             <li>
-              <Link to="/informacion-personal" className={estilos.enlace}>
-                Información personal
-              </Link>
+              <EnlaceLegal
+                a="/informacion-personal"
+                texto="Información personal"
+                className={estilos.enlace}
+              />
             </li>
           </ul>
         </nav>

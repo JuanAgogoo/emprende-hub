@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import estilos from './PaginaTexto.module.css';
+import { useTitulo } from '../titulo';
 
 /**
  * El aviso que se acepta al crear una cuenta.
@@ -8,6 +9,7 @@ import estilos from './PaginaTexto.module.css';
  * dato de la tabla corresponde a un campo que el backend guarda.
  */
 export function TratamientoDeDatos() {
+  useTitulo('Tratamiento de datos');
   return (
     <article className={`contenedor ${estilos.pagina}`}>
       <header className={estilos.encabezado}>

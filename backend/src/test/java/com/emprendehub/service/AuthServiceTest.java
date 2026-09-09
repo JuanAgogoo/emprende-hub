@@ -59,9 +59,6 @@ class AuthServiceTest {
     @Mock
     private NegocioService negocioService;
 
-    @Mock
-    private ProductoService productoService;
-
     @InjectMocks
     private AuthService service;
 
@@ -213,10 +210,9 @@ class AuthServiceTest {
                 "3105551234", 1L, 1L, null, NivelPrecio.BAJO);
     }
 
-    private RegistroEmprendedorRequest registroEmprendedorDePrueba(
-            List<CrearProductoRequest> productos) {
+    private RegistroEmprendedorRequest registroEmprendedorDePrueba() {
         return new RegistroEmprendedorRequest("Lucía Restrepo", "lucia@emprendehub.co",
-                "contrasena123", negocioDePrueba(), null, productos);
+                "contrasena123", negocioDePrueba(), null);
     }
 
     private NegocioResponse negocioCreado() {
@@ -236,7 +232,7 @@ class AuthServiceTest {
         when(jwtService.getDuracionMillis()).thenReturn(3600000L);
 
         RegistroEmprendedorResponse respuesta =
-                service.registrarEmprendedor(registroEmprendedorDePrueba(List.of()));
+                service.registrarEmprendedor(registroEmprendedorDePrueba());
 
         assertEquals("token-generado", respuesta.token());
         assertEquals("EMPRENDEDOR", respuesta.rol());
@@ -256,7 +252,7 @@ class AuthServiceTest {
         when(negocioService.registrar(any(), any())).thenReturn(negocioCreado());
         when(jwtService.generarToken(any())).thenReturn("token");
 
-        service.registrarEmprendedor(registroEmprendedorDePrueba(List.of()));
+        service.registrarEmprendedor(registroEmprendedorDePrueba());
 
         ArgumentCaptor<Usuario> capturado = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarioRepository).save(capturado.capture());
@@ -270,11 +266,10 @@ class AuthServiceTest {
         when(usuarioRepository.existsByCorreo("lucia@emprendehub.co")).thenReturn(true);
 
         assertThrows(ReglaDeNegocioException.class,
-                () -> service.registrarEmprendedor(registroEmprendedorDePrueba(List.of())));
+                () -> service.registrarEmprendedor(registroEmprendedorDePrueba()));
 
         verify(usuarioRepository, never()).save(any());
         verify(negocioService, never()).registrar(any(), any());
-        verify(productoService, never()).crear(any(), any());
     }
 
     @Test
@@ -287,44 +282,12 @@ class AuthServiceTest {
                 .thenThrow(new ReglaDeNegocioException("El barrio no pertenece a la ciudad"));
 
         assertThrows(ReglaDeNegocioException.class,
-                () -> service.registrarEmprendedor(registroEmprendedorDePrueba(List.of())));
+                () -> service.registrarEmprendedor(registroEmprendedorDePrueba()));
 
         // El usuario llegó a guardarse, pero la excepción sale del método
         // @Transactional: es Spring quien revierte, y por eso no puede quedar
         // una cuenta creada sin su negocio.
-        verify(productoService, never()).crear(any(), any());
-    }
-
-    @Test
-    @DisplayName("registrarEmprendedor: crea un producto por cada uno de la lista")
-    void registrarEmprendedor_conProductos_losCrea() {
-        when(usuarioRepository.existsByCorreo(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("hash");
-        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(i -> i.getArgument(0));
-        when(negocioService.registrar(any(), any())).thenReturn(negocioCreado());
-        when(jwtService.generarToken(any())).thenReturn("token");
-
-        List<CrearProductoRequest> productos = List.of(
-                new CrearProductoRequest("Pan de masa madre", new BigDecimal("12000"), null, true),
-                new CrearProductoRequest("Croissant", new BigDecimal("4500"), null, true));
-
-        service.registrarEmprendedor(registroEmprendedorDePrueba(productos));
-
-        verify(productoService, times(2)).crear(any(), any());
-    }
-
-    @Test
-    @DisplayName("registrarEmprendedor: la lista de productos nula es válida y no crea ninguno")
-    void registrarEmprendedor_sinProductos_noCreaNinguno() {
-        when(usuarioRepository.existsByCorreo(anyString())).thenReturn(false);
-        when(passwordEncoder.encode(anyString())).thenReturn("hash");
-        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(i -> i.getArgument(0));
-        when(negocioService.registrar(any(), any())).thenReturn(negocioCreado());
-        when(jwtService.generarToken(any())).thenReturn("token");
-
-        service.registrarEmprendedor(registroEmprendedorDePrueba(null));
-
-        verify(productoService, never()).crear(any(), any());
+        verify(usuarioRepository).save(any(Usuario.class));
     }
 
     @Test
@@ -338,7 +301,7 @@ class AuthServiceTest {
 
         RegistroEmprendedorRequest peticion = new RegistroEmprendedorRequest(
                 "Lucía Restrepo", "  LUCIA@EmprendeHub.CO  ", "contrasena123",
-                negocioDePrueba(), null, List.of());
+                negocioDePrueba(), null);
 
         service.registrarEmprendedor(peticion);
 
@@ -360,7 +323,7 @@ class AuthServiceTest {
                 "https://instagram.com/laespiga", "https://linkedin.com/company/laespiga");
         RegistroEmprendedorRequest peticion = new RegistroEmprendedorRequest(
                 "Lucía Restrepo", "lucia@emprendehub.co", "contrasena123",
-                negocioDePrueba(), redes, List.of());
+                negocioDePrueba(), redes);
 
         service.registrarEmprendedor(peticion);
 
@@ -376,7 +339,7 @@ class AuthServiceTest {
         when(negocioService.registrar(any(), any())).thenReturn(negocioCreado());
         when(jwtService.generarToken(any())).thenReturn("token");
 
-        service.registrarEmprendedor(registroEmprendedorDePrueba(List.of()));
+        service.registrarEmprendedor(registroEmprendedorDePrueba());
 
         verify(negocioService, never()).actualizarRedes(any(), any());
     }

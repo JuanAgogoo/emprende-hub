@@ -53,13 +53,20 @@ export interface FotoNegocio {
   readonly estado: string;
 }
 
-/** Un artículo del escaparate (F1). El precio llega como número, en pesos. */
+/**
+ * Un artículo del escaparate (F1). El precio llega como número, en pesos.
+ *
+ * `foto` **no es opcional**: un producto sin imagen dejaría un hueco en el
+ * escaparate, y el backend no deja crearlo. Por eso las vistas no necesitan
+ * marcador de posición como sí lo necesitan los negocios.
+ */
 export interface Producto {
   readonly id: number;
   readonly nombre: string;
   readonly precio: number;
   readonly descripcion: string | null;
   readonly disponible: boolean;
+  readonly foto: string;
 }
 
 /**

@@ -44,6 +44,18 @@ jwt:
   expiration: ${JWT_EXPIRATION:3600000}
 
 emprendehub:
+  moderacion:
+    # PROVISIONAL, y por eso el valor por defecto es `false`: la regla del
+    # dominio sigue siendo que el negocio nace PENDIENTE (B6) y que una foto
+    # nueva espera revisión (B2).
+    #
+    # Con MODERACION_AUTOMATICA=true el negocio nace publicado y sus fotos
+    # nacen aprobadas. Tiene que ser lo uno y lo otro: aprobar solo el negocio
+    # dejaría las fotos esperando y el directorio enseñaría fichas sin imagen.
+    #
+    # Para volver a la moderación real, quitar la variable del entorno.
+    automatica: ${MODERACION_AUTOMATICA:false}
+
   fotos:
     # Las imágenes se guardan en disco y en la base de datos solo queda el
     # nombre del fichero. El directorio se publica en /fotos/**.

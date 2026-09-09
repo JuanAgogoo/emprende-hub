@@ -125,17 +125,20 @@ curl -X POST localhost:8080/api/v1/auth/registro-emprendedor \
     "categoriaId": 1, "ciudadId": 3, "barrioId": 1,
     "nivelPrecio": "BAJO"
   },
-  "redes":     { "instagram": "https://instagram.com/laespiga" },
-  "productos": [ { "nombre": "Pan de masa madre", "precio": 12000, "disponible": true } ]
+  "redes":     { "instagram": "https://instagram.com/laespiga" }
 }'
 ```
+
+**El escaparate no entra aquí**, por lo mismo que las fotos: cada producto lleva
+una imagen obligatoria y esta ruta es pública, sin sesión con la que subir
+binarios. Se montan justo después, uno a uno, con el token que devuelve esta
+llamada.
 
 | Parte | Regla |
 |---|---|
 | La cuenta | Las mismas que A1: correo único, contraseña de 8 caracteres |
 | `negocio` | **Obligatorio.** Las mismas validaciones que `POST /negocios` |
 | `redes` | Opcional. Se validan contra su dominio, igual que en B8 |
-| `productos` | Opcional. Una lista vacía o ausente es válida |
 
 **Todo entra en una sola transacción.** Si el negocio o un producto no pasan la
 validación, no queda ni cuenta ni negocio: quien lo reintente encontrará su
@@ -143,7 +146,14 @@ correo libre. Es la razón de que esto sea un endpoint y no tres llamadas
 encadenadas desde el navegador.
 
 La cuenta **nace ya como `EMPRENDEDOR`**, sin pasar por cliente, y el negocio
-nace `PENDIENTE` de revisión (B6). La respuesta añade `negocioId` al cuerpo
+nace `PENDIENTE` de revisión (B6).
+
+> **Interruptor provisional de desarrollo.** Con `MODERACION_AUTOMATICA=true` el
+> negocio nace `APROBADO` y las fotos que se suban nacen `APROBADA`, sin pasar
+> por el administrador. Es para trabajar sin moderar a mano; **el valor por
+> defecto es `false`** y la regla del dominio sigue siendo B6. Las dos mitades
+> van juntas a propósito: aprobar solo el negocio dejaría sus fotos esperando
+> revisión y el directorio enseñaría fichas sin imagen. La respuesta añade `negocioId` al cuerpo
 habitual, para que quien acaba de registrarse pueda subir sus fotos sin pedir
 antes `GET /negocios/mio`.
 
@@ -256,7 +266,8 @@ por eso ya no devuelve la misma forma que la tarjeta:
 {
   "nombre": "Floristería Girasol", "instagram": "https://instagram.com/girasol",
   "fotos":     [ { "url": "/fotos/a1b2.png", "orden": 0, "principal": true } ],
-  "productos": [ { "nombre": "Ramo de girasoles", "precio": 45000, "disponible": true } ]
+  "productos": [ { "nombre": "Ramo de girasoles", "precio": 45000, "disponible": true,
+                   "foto": "/fotos/c3d4.jpg" } ]
 }
 ```
 
@@ -321,6 +332,7 @@ Solo el **dueño**, y siempre sobre su propio negocio.
 |---|---|---|
 | `GET` | `/negocios/mio/fotos` | Su galería, revisadas y sin revisar |
 | `POST` | `/negocios/mio/fotos` | Sube una imagen (`201`). **`multipart/form-data`** |
+| `PATCH` | `/negocios/mio/fotos/orden` | Reordena la galería y con ella la portada |
 | `DELETE` | `/negocios/mio/fotos/{id}` | La quita al momento (`204`) |
 
 ```bash
@@ -338,6 +350,28 @@ Las tres reglas de B9, todas en el servicio y todas con su prueba:
 
 **La principal es la primera por orden** (B9), sin campo que la marque. Al borrar
 una, las demás se recolocan y la portada pasa a ser la siguiente.
+
+**Elegir portada es reordenar**, por lo mismo: se manda la galería entera en el
+orden deseado y la primera queda de portada.
+
+```bash
+curl -X PATCH $A/negocios/mio/fotos/orden -H "Authorization: Bearer $T" \
+  -H 'Content-Type: application/json' -d '{"orden": [20, 18, 19]}'
+```
+
+Viaja la **lista completa** y no un movimiento suelto —«sube esta una
+posición»—: el orden es el estado, no la acción. Así el servidor no reconstruye
+de dónde venía nada y dos pestañas abiertas no lo dejan a medias. Devuelve la
+galería ya recolocada.
+
+Se exige que nombre **exactamente** las fotos del negocio, una sola vez cada una:
+ni de menos, ni repetidas, ni ajenas. Cualquier otra cosa es `400`, porque
+aceptar una lista parcial obligaría a inventar dónde van las que faltan.
+
+**Reordenar no pasa por revisión**, igual que borrar: no publica ninguna imagen
+que no estuviera ya publicada, que es el riesgo que controla B2. Si la que sube
+al primer puesto todavía espera revisión, el público sigue viendo como portada la
+primera de las **aprobadas**, porque el perfil solo recibe esas.
 
 **Una foto nueva nace `PENDIENTE`.** B2 manda a revisión los cambios sobre campos
 públicos y nombra las fotos expresamente, pero B2-bis prohíbe que el negocio
@@ -367,10 +401,17 @@ Solo el **dueño**. Es un **escaparate**: no se vende nada (F1).
 | Método | Ruta | Hace |
 |---|---|---|
 | `GET` | `/negocios/mio/productos` | Su escaparate |
-| `POST` | `/negocios/mio/productos` | Crea (`201`) |
+| `POST` | `/negocios/mio/productos` | Crea (`201`). **`multipart/form-data`** |
 | `PUT` | `/negocios/mio/productos/{id}` | Edita |
 | `PATCH` | `/negocios/mio/productos/{id}/disponibilidad?disponible=false` | El interruptor de F3 |
 | `DELETE` | `/negocios/mio/productos/{id}` | Elimina (`204`) |
+
+```bash
+curl -X POST $A/negocios/mio/productos -H "Authorization: Bearer $T" \
+  -F "nombre=Pan de masa madre" -F "precio=12000" \
+  -F "descripcion=Fermentado 24 horas" -F "disponible=true" \
+  -F "foto=@pan.jpg"
+```
 
 | Campo | Regla |
 |---|---|
@@ -378,9 +419,29 @@ Solo el **dueño**. Es un **escaparate**: no se vende nada (F1).
 | `precio` | Obligatorio, no negativo, dos decimales como mucho |
 | `descripcion` | **Opcional** (F2). En blanco se guarda como ausente |
 | `disponible` | El único estado que hay: **no existe inventario** (F3) |
+| `foto` | **Obligatoria.** JPG o PNG, 5 MB como mucho, igual que la galería (B9) |
+
+**El alta va en `multipart` y no en JSON** porque la imagen es obligatoria y es
+un binario. Los campos viajan sueltos, que es lo que manda un formulario con un
+`<input type="file">`; no hay una parte JSON aparte que componer.
+
+Un escaparate con huecos no es un escaparate: por eso la foto entra en la misma
+petición y no en una segunda. Crear el producto primero y completarlo después es
+justo lo que permitiría que el hueco existiera.
+
+`ProductoResponse` devuelve `foto` con la URL pública, que **nunca es nula**. Se
+descarga de `/fotos/{archivo}`, sin token, igual que las de la galería. Al borrar
+el producto se borra también su fichero.
+
+Si falta la parte `foto`, la respuesta es `400` con el formato de siempre y una
+clave `foto` que nombra lo que falta.
 
 Un producto no disponible **sigue saliendo** en el perfil, marcado. Esconderlo
 haría del interruptor un borrado con otro nombre.
+
+> **`PUT` no cambia la imagen.** Edita los campos de texto y el precio; sustituir
+> la foto no está en el contrato entregado y ninguna pantalla de esta fase lo
+> pide.
 
 El producto de otro negocio responde `404`, no `403`: la consulta busca por
 producto **y** negocio a la vez, así que el ajeno sencillamente no aparece.
@@ -676,8 +737,8 @@ curl -X PATCH $A/admin/moderacion/negocios/1/cambio/aprobar -H "Authorization: B
 # 7-bis. Sube fotos y monta el escaparate
 curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TC" -F "archivo=@local.jpg"
 curl -X POST $A/negocios/mio/productos -H "Authorization: Bearer $TC" \
-  -H 'Content-Type: application/json' \
-  -d '{"nombre":"Pan de masa madre","precio":12000,"disponible":true}'
+  -F "nombre=Pan de masa madre" -F "precio=12000" -F "disponible=true" \
+  -F "foto=@pan.jpg"
 curl -X PATCH $A/negocios/mio/redes -H "Authorization: Bearer $TC" \
   -H 'Content-Type: application/json' \
   -d '{"instagram":"https://instagram.com/panaderia"}'

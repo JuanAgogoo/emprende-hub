@@ -140,10 +140,7 @@ class AuthControllerTest extends ControllerTestBase {
                 "categoriaId": 1,
                 "ciudadId": 1,
                 "nivelPrecio": "BAJO"
-              },
-              "productos": [
-                { "nombre": "Pan de masa madre", "precio": 12000, "disponible": true }
-              ]
+              }
             }
             """;
 
@@ -199,14 +196,23 @@ class AuthControllerTest extends ControllerTestBase {
     }
 
     @Test
-    @DisplayName("POST /registro-emprendedor con un precio negativo devuelve 400")
-    void registroEmprendedor_precioNegativo_devuelve400() throws Exception {
-        String negativo = REGISTRO_EMPRENDEDOR.replace("\"precio\": 12000", "\"precio\": -1");
+    @DisplayName("POST /registro-emprendedor ignora el escaparate: ya no viaja en el alta")
+    void registroEmprendedor_conProductos_losIgnora() throws Exception {
+        when(authService.registrarEmprendedor(any())).thenReturn(respuestaDeEmprendedor());
+
+        // Desde que cada producto necesita su imagen obligatoria, el escaparate
+        // se monta después con la sesión que devuelve esta llamada. Un cliente
+        // viejo que siga mandándolo no rompe: Jackson descarta lo que el DTO no
+        // declara, y esta prueba deja constancia de que es a propósito.
+        String conProductos = REGISTRO_EMPRENDEDOR.replace("\"nivelPrecio\": \"BAJO\"\n              }",
+                "\"nivelPrecio\": \"BAJO\"\n              },\n"
+                        + "              \"productos\": [{ \"nombre\": \"Pan\", \"precio\": -1 }]");
 
         mockMvc.perform(post("/api/v1/auth/registro-emprendedor")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(negativo))
-                .andExpect(status().isBadRequest());
+                        .content(conProductos))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.negocioId").value(7));
     }
 
     @Test

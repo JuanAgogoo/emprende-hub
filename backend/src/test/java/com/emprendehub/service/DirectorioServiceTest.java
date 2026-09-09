@@ -328,7 +328,7 @@ class DirectorioServiceTest {
                 .thenReturn(List.of(foto(negocio, "portada.jpg", 0)));
         when(productoRepository.findByNegocioIdOrderByNombreAsc(7L))
                 .thenReturn(List.of(new Producto(negocio, "Pan de masa madre",
-                        new BigDecimal("12000"), null, true)));
+                        new BigDecimal("12000"), null, true, "pan.jpg")));
 
         PerfilNegocioResponse perfil = service.obtenerPerfilPublico(7L);
 

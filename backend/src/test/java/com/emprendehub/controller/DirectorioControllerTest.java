@@ -59,7 +59,8 @@ class DirectorioControllerTest extends ControllerTestBase {
                 "https://instagram.com/panaderia", null,
                 List.of(new FotoResponse(1L, "/fotos/portada.jpg", 0, true, "APROBADA")),
                 List.of(new ProductoResponse(1L, "Pan de masa madre",
-                        new BigDecimal("12000"), "Fermentado 24 horas", true)));
+                        new BigDecimal("12000"), "Fermentado 24 horas", true,
+                        "/fotos/pan.jpg")));
     }
 
     @Test

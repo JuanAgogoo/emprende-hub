@@ -16,5 +16,7 @@ public record ProductoResponse(
         String nombre,
         BigDecimal precio,
         String descripcion,
-        boolean disponible) {
+        boolean disponible,
+        /** URL pública de su imagen. Nunca nula: sin foto no hay producto. */
+        String foto) {
 }
