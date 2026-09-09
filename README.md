@@ -1,9 +1,12 @@
-# EmprendeHub — API REST
+# EmprendeHub
 
-Backend del portal de emprendimiento local EmprendeHub. Proyecto de la asignatura
-Plataformas de Programación Empresarial.
+Portal de emprendimiento local. Proyecto de la asignatura Plataformas de
+Programación Empresarial.
 
-**Java 25 · Spring Boot 4.1.1 · Gradle · PostgreSQL · Spring Data JPA · Spring Security**
+| Mitad | Dónde | Stack |
+|---|---|---|
+| **API REST** | [`backend/`](backend) | Java 25 · Spring Boot 4.1.1 · Gradle · PostgreSQL · Spring Data JPA · Spring Security |
+| **Interfaz web** | [`frontend/`](frontend) | React · Vite · TypeScript |
 
 ## Arrancar
 
@@ -11,9 +14,15 @@ Hace falta Docker. **No hace falta tener instalado ni Gradle ni el JDK 25**: el
 wrapper descarga Gradle y el toolchain descarga el JDK.
 
 ```bash
-docker compose up -d          # levanta PostgreSQL en el puerto 5433
-./gradlew bootRun             # arranca la API en http://localhost:8080
+docker compose up -d              # levanta PostgreSQL en el puerto 5433
+cd backend && ./gradlew bootRun   # arranca la API en http://localhost:8080
+cd frontend && npm install        # solo la primera vez
+npm run dev                       # la web en http://localhost:5173
 ```
+
+El servidor de Vite hace de proxy hacia el 8080, así que **el backend tiene que
+estar arriba** para que la web muestre algo. El detalle está en el
+[README del frontend](frontend/README.md).
 
 Para parar la base de datos:
 
@@ -22,35 +31,30 @@ docker compose down           # conserva los datos
 docker compose down -v        # los borra
 ```
 
-Al arrancar por primera vez se siembran los datos de la demostración: los
-catálogos, la cuenta de administrador, los 8 cursos y los 12 negocios del
-prototipo con sus opiniones, su escaparate, su buzón y **dos meses de histórico
-de visitas**. Sin ellos el directorio sale vacío y la gráfica del panel, plana.
-
-**La carga es idempotente**: si ya hay datos no toca nada, así que reiniciar no
+Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
+mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
+barrios y los catálogos de formación—, la cuenta de administrador y los 8 cursos.
+La carga es idempotente: si ya hay datos no toca nada, así que reiniciar no
 duplica. Para empezar de cero, `docker compose down -v`.
 
-### Cuentas sembradas
+**Los negocios no se siembran.** Antes había doce generados por código y se
+retiraron: la vitrina es parte del entregable y un catálogo escrito por un bucle
+se nota. Se crean uno a uno, con sus fotos y sus precios, desde la colección de
+Postman o desde el registro de emprendedor del frontend.
+
+Consecuencia al arrancar de cero: el directorio sale vacío y la portada muestra
+ceros con la calificación media nula. **Es lo correcto, no un fallo** — las
+cifras se calculan (H4) y todavía no hay nada que contar.
+
+### La única cuenta sembrada
 
 | Cuenta | Correo | Contraseña | Para qué sirve |
 |---|---|---|---|
 | Administrador | `admin@emprendehub.co` | `admin12345` | Moderación y cursos |
-| Emprendedora | `napolitana@emprendehub.co` | `contrasena123` | Panel con visitas, buzón y avisos |
-| Emprendedora | `handmade@emprendehub.co` | `contrasena123` | Negocio **rechazado**: lee su motivo |
-| Emprendedora | `yogaintegral@emprendehub.co` | `contrasena123` | Negocio **pendiente** de revisión |
-| Clienta | `maria.garcia@gmail.com` | `contrasena123` | Opina, denuncia y escribe al buzón |
 
-Los otros nueve emprendedores siguen el mismo patrón (`<negocio>@emprendehub.co`)
-y los otros siete clientes son `nombre.apellido@gmail.com`. Todos con
-`contrasena123`.
-
-### Qué queda listo para enseñar
-
-- **10 negocios publicados**, uno pendiente y uno rechazado con su motivo.
-- **Destacados** con cuatro negocios: los que pasan de cinco opiniones (C7).
-- Dos negocios **sin ninguna opinión**, que salen como «Nuevo» y sin calificación (C5).
-- **Dos meses de visitas** por negocio, con la variación semanal y mensual en positivo.
-- Consultas sin leer y avisos pendientes en los primeros buzones.
+Las demás se crean al registrarse. La carpeta **1 · Acceso y datos de partida**
+de la colección de Postman las crea en orden —una clienta, una emprendedora y su
+negocio— y guarda cada token en su variable.
 
 ## Probar la API
 
@@ -127,13 +131,14 @@ La variable `base` apunta a `http://localhost:8080/api/v1`.
 ## Pruebas
 
 ```bash
+cd backend
 ./gradlew build               # compila, prueba y verifica la cobertura
 ```
 
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**427 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**429 pruebas en verde y 98,1% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |
@@ -172,7 +177,15 @@ los datos iniciales los carga un `CommandLineRunner` al arrancar.
 ## Estructura
 
 ```
-src/main/java/com/emprendehub
+backend/     API REST. Gradle, código, pruebas y colección de Postman
+frontend/    Interfaz web. React + Vite + TypeScript
+docs/        Documentación del proyecto
+```
+
+Dentro del backend:
+
+```
+backend/src/main/java/com/emprendehub
 ├── controller/   @RestController — rutas /api/v1/<recurso>
 ├── service/      @Service — lógica de negocio (aquí se mide la cobertura)
 ├── repository/   interfaces JpaRepository
@@ -194,4 +207,6 @@ Cada paquete lleva un `package-info.java` que explica qué entra y qué no.
 | [docs/arquitectura.md](docs/arquitectura.md) | Capas, stack, seguridad y decisiones técnicas |
 | [docs/pruebas.md](docs/pruebas.md) | Los tres niveles de prueba y sus trampas |
 | [docs/flujo-de-trabajo.md](docs/flujo-de-trabajo.md) | Ramas, commits, PRs y release |
-| [docs/plan-de-entrega.md](docs/plan-de-entrega.md) | Los 14 incrementos de la entrega |
+| [docs/plan-de-entrega.md](docs/plan-de-entrega.md) | Los 14 incrementos del backend |
+| [docs/diseno.md](docs/diseno.md) | Paleta, tipografía y accesibilidad del frontend |
+| [docs/plan-de-entrega-frontend-fase-1.md](docs/plan-de-entrega-frontend-fase-1.md) | Los 13 incrementos de la fase 1 del frontend |

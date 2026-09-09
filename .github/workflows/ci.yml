@@ -16,7 +16,7 @@ jobs:
     name: Compilar y probar
     runs-on: ubuntu-latest
 
-    # El backend vive en backend/. El frontend tendra su propio job cuando exista.
+    # El backend vive en backend/; el frontend tiene su propio job, más abajo.
     defaults:
       run:
         working-directory: backend
@@ -71,9 +71,42 @@ jobs:
           path: backend/build/reports/tests/test
           if-no-files-found: warn
 
+  frontend:
+    name: Compilar el frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v5
+
+      - name: Preparar Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar las dependencias
+        run: npm ci
+
+      - name: Comprobar el contraste de la paleta
+        run: npm run contraste
+
+      - name: Compilar
+        # `npm run build` es `tsc -b && vite build`: falla con cualquier error
+        # de tipos, que es la verificación que de verdad importa aquí.
+        run: npm run build
+
   release:
     name: Publicar versión
-    needs: build
+    # Los dos lados tienen que estar en verde para versionar. No se filtran por
+    # `paths`: un job saltado deja este `needs` sin satisfacer y no se publicaría
+    # nada. Esperar dos minutos de más es más barato que una release fantasma.
+    needs: [build, frontend]
     # Solo al integrar en main. En los Pull Request no se versiona nada.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

@@ -24,16 +24,12 @@
     {
       "key": "negocioId",
       "value": "1"
-    },
-    {
-      "key": "tokenNegocioRechazado",
-      "value": ""
     }
   ],
   "item": [
     {
-      "name": "1 · Acceso",
-      "description": "Empieza por aquí: cada login guarda su token.",
+      "name": "1 · Acceso y datos de partida",
+      "description": "Empieza por aquí y **en orden**. Ya no hay negocios sembrados: estas peticiones crean las cuentas y el negocio con los que trabaja el resto de la colección, y guardan cada token en su variable.",
       "item": [
         {
           "name": "Entrar como administrador",
@@ -78,7 +74,7 @@
           ]
         },
         {
-          "name": "Entrar como emprendedor",
+          "name": "Registrar a la emprendedora",
           "request": {
             "method": "POST",
             "header": [
@@ -88,19 +84,19 @@
               }
             ],
             "url": {
-              "raw": "{{base}}/auth/login",
+              "raw": "{{base}}/auth/registro",
               "host": [
                 "{{base}}"
               ],
               "path": [
                 "auth",
-                "login"
+                "registro"
               ]
             },
-            "description": "Lucía Restrepo, de la Pizzería Napolitana. Guarda {{tokenEmprendedor}}.",
+            "description": "Lucía Restrepo. Nace CLIENTE; pasa a EMPRENDEDOR al registrar su negocio (A1-bis). Guarda {{tokenEmprendedor}}.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"correo\": \"napolitana@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
+              "raw": "{\n  \"nombre\": \"Lucía Restrepo\",\n  \"correo\": \"lucia@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
             }
           },
           "event": [
@@ -120,29 +116,32 @@
           ]
         },
         {
-          "name": "Entrar como emprendedor con negocio rechazado",
+          "name": "Registrar su negocio",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenEmprendedor}}"
               }
             ],
             "url": {
-              "raw": "{{base}}/auth/login",
+              "raw": "{{base}}/negocios",
               "host": [
                 "{{base}}"
               ],
               "path": [
-                "auth",
-                "login"
+                "negocios"
               ]
             },
-            "description": "Isabel Correa, de Accesorios Handmade. Lo RECHAZADO es su negocio, no su cuenta: entra con total normalidad. Guarda {{tokenNegocioRechazado}} y es la única cuenta con la que se puede probar el reenvío tras rechazo (B1).",
+            "description": "El negocio nace PENDIENTE y no sale en el directorio hasta que el administrador lo apruebe, en la carpeta 5. Se necesita una descripción de al menos 80 caracteres, y esta los tiene de sobra para pasar la validación. Guarda {{negocioId}}.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"correo\": \"handmade@emprendehub.co\",\n  \"contrasena\": \"contrasena123\"\n}"
+              "raw": "{\n  \"nombre\": \"Pizzería Napolitana\",\n  \"descripcion\": \"Pizza napolitana de masa madre con fermentación de 48 horas, horneada en horno de leña a 450 grados. Ingredientes de la región y una carta corta que cambia cada temporada.\",\n  \"telefono\": \"3105551234\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
             }
           },
           "event": [
@@ -151,10 +150,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Guarda el token para que el resto de peticiones lo hereden.",
-                  "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    pm.collectionVariables.set('tokenNegocioRechazado', pm.response.json().token);",
-                  "    pm.test('Token de tokenNegocioRechazado guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
+                  "// El resto de la colección trabaja sobre este negocio.",
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('negocioId', pm.response.json().id);",
+                  "    pm.test('Nace PENDIENTE', () => pm.expect(pm.response.json().estado).to.eql('PENDIENTE'));",
                   "}"
                 ]
               }
@@ -162,49 +161,7 @@
           ]
         },
         {
-          "name": "Entrar como cliente",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{base}}/auth/login",
-              "host": [
-                "{{base}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            },
-            "description": "Guarda {{tokenCliente}}.",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"correo\": \"maria.garcia@gmail.com\",\n  \"contrasena\": \"contrasena123\"\n}"
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// Guarda el token para que el resto de peticiones lo hereden.",
-                  "if (pm.response.code === 200 || pm.response.code === 201) {",
-                  "    pm.collectionVariables.set('tokenCliente', pm.response.json().token);",
-                  "    pm.test('Token de tokenCliente guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Registrar un cliente nuevo",
+          "name": "Registrar a la clienta",
           "request": {
             "method": "POST",
             "header": [
@@ -223,9 +180,10 @@
                 "registro"
               ]
             },
+            "description": "María García: opina, denuncia y escribe al buzón. Guarda {{tokenCliente}}.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Nueva Clienta\",\n  \"correo\": \"nueva@gmail.com\",\n  \"contrasena\": \"contrasena123\"\n}"
+              "raw": "{\n  \"nombre\": \"María García\",\n  \"correo\": \"maria.garcia@gmail.com\",\n  \"contrasena\": \"contrasena123\"\n}"
             }
           },
           "event": [
@@ -853,19 +811,19 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Accesorios Handmade\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\"\n}"
+              "raw": "{\n  \"nombre\": \"Pizzería Napolitana\",\n  \"descripcion\": \"Pizza napolitana de masa madre con fermentación de 48 horas, horneada en horno de leña. Corregimos la descripción con el motivo que indicó la moderación y volvemos a enviarla a revisión.\"\n}"
             },
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{tokenNegocioRechazado}}",
+                  "value": "{{tokenEmprendedor}}",
                   "type": "string"
                 }
               ]
             },
-            "description": "Usa {{tokenNegocioRechazado}}, no el token del emprendedor principal: su negocio está aprobado y el servicio solo reenvía los rechazados. Ejecuta antes «Entrar como emprendedor con negocio rechazado»."
+            "description": "Solo funciona sobre un negocio RECHAZADO: ejecuta antes «Rechazar un negocio» en la carpeta 5. El dueño corrige y el negocio vuelve a PENDIENTE (B1). Lo rechazado es el negocio, nunca la cuenta."
           }
         },
         {

@@ -1,0 +1,146 @@
+/**
+ * Reinicio y estilos base. Mobile first: aquí no hay ni una media query.
+ * Lo que dependa del ancho se resuelve con clamp() o con container queries.
+ */
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('/fuentes/manrope-variable.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-display: swap;
+  /* Latín básico: cubre acentos, eñe y diéresis del español. */
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('/fuentes/manrope-variable-ext.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+1E00-1E9F, U+2020, U+20A0-20AB, U+2C60-2C7F;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--fuente);
+  font-size: var(--texto-md);
+  line-height: var(--alto-comodo);
+  color: var(--color-cuerpo);
+  background: var(--color-lienzo);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-tinta);
+  line-height: var(--alto-apretado);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--texto-3xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  line-height: var(--alto-normal);
+  letter-spacing: -0.01em;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* 16px como mínimo o Safari en iOS hace zoom al enfocar y descoloca la vista. */
+input,
+textarea,
+select {
+  font-size: max(1rem, var(--texto-md));
+}
+
+a {
+  color: var(--color-acento);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+/* Se ve siempre y con contraste suficiente: es lo primero que se rompe. */
+:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+
+.contenedor {
+  width: 100%;
+  max-width: var(--ancho-max);
+  margin-inline: auto;
+  padding-inline: var(--e-4);
+}
+
+/* El enlace que solo ve quien navega con teclado. */
+.saltar-al-contenido {
+  position: absolute;
+  left: var(--e-4);
+  top: calc(-1 * var(--e-8));
+  z-index: 10;
+  padding: var(--e-2) var(--e-4);
+  background: var(--color-lienzo);
+  border-radius: var(--radio-md);
+  box-shadow: var(--sombra-md);
+  transition: top var(--dur-rapida) var(--curva);
+}
+
+.saltar-al-contenido:focus-visible {
+  top: var(--e-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

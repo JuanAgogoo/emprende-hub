@@ -1,0 +1,63 @@
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: color-mix(in srgb, var(--color-lienzo) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.interior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  min-height: 60px;
+}
+
+.marca {
+  font-size: var(--texto-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-tinta);
+  text-decoration: none;
+}
+
+.marcaAcento {
+  color: var(--color-acento);
+}
+
+.lista {
+  display: flex;
+  align-items: center;
+  gap: var(--e-1);
+  list-style: none;
+  padding: 0;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  /* 44px de área táctil: la cifra no se negocia por composición. */
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+  text-decoration: none;
+  transition:
+    color var(--dur-rapida) var(--curva),
+    background-color var(--dur-rapida) var(--curva);
+}
+
+.enlace:hover {
+  color: var(--color-tinta);
+  background: var(--color-lienzo-alt);
+}
+
+.enlaceActivo,
+.enlaceActivo:hover {
+  color: var(--color-acento);
+  background: var(--color-acento-suave);
+}

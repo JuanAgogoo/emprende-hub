@@ -660,14 +660,20 @@ curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 
 ## Datos de la demostración
 
-La aplicación arranca con datos sembrados: 12 negocios, 8 cursos, 20 cuentas,
-opiniones, consultas y dos meses de histórico de visitas. Están descritos en el
-[README](../README.md#cuentas-sembradas), junto a las credenciales.
+La aplicación arranca solo con lo que no tiene sentido escribir a mano: los
+catálogos, la cuenta de administrador y los 8 cursos. **Los negocios no se
+siembran**, se crean, y por eso el recorrido de arriba empieza por crearlos.
+
+Con la base recién levantada, `GET /directorio` devuelve una página vacía y
+`/estadisticas/portada` devuelve ceros con `calificacionPromedio` nulo. Es lo
+correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**59 endpoints** en 71 peticiones, agrupadas por quién las usa. El login guarda
-el token en una variable y el resto lo hereda. La carpeta **6 · Seguridad** cubre
-aparte los casos que tienen que fallar: 401, 403 y 400.
+**59 endpoints** en 71 peticiones, agrupadas por quién las usa. Su primera
+carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
+negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
+La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
+403 y 400.
 
 ---
 
