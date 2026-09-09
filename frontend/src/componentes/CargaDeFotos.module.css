@@ -1,0 +1,220 @@
+.titulo {
+  font-size: var(--texto-xl);
+}
+
+.titulo:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 4px;
+}
+
+.entrada {
+  margin-top: calc(-1 * var(--e-2));
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.fallo {
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+/* Lo que no se admitió, con el nombre del fichero y el motivo. */
+.rechazados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding-left: var(--e-5);
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.campo input {
+  min-height: var(--toque-min);
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  font-size: var(--texto-sm);
+}
+
+.campo input:disabled {
+  background: var(--color-lienzo-alt);
+  color: var(--color-apagado);
+}
+
+.ayuda {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.vacio {
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+  text-align: center;
+}
+
+/* ── La galería ──────────────────────────────────────────────────────── */
+
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--e-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.miniatura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  position: relative;
+  padding: var(--e-2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+.miniatura img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radio-sm);
+  object-fit: cover;
+}
+
+.portada {
+  position: absolute;
+  top: var(--e-3);
+  left: var(--e-3);
+  padding: var(--e-1) var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-acento);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-sobre-senal);
+}
+
+/* El estado va escrito, no solo en el color. */
+.subida,
+.pendiente {
+  font-size: var(--texto-xs);
+  text-align: center;
+}
+
+.subida {
+  color: var(--color-exito);
+}
+
+.pendiente {
+  color: var(--color-aviso);
+}
+
+.quitar {
+  min-height: var(--toque-min);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+  cursor: pointer;
+}
+
+.quitar:hover:not(:disabled) {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.quitar:disabled {
+  color: var(--color-apagado);
+  cursor: not-allowed;
+}
+
+/* Para el lector de pantalla: «Quitar» a secas no dice cuál. */
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Los botones del paso ────────────────────────────────────────────── */
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.acciones > :last-child {
+  margin-left: auto;
+}
+
+.primario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: none;
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.primario:hover:not(:disabled) {
+  background: var(--color-acento-fuerte);
+}
+
+.primario:disabled {
+  background: var(--color-apagado);
+  cursor: progress;
+}
+
+.secundario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.secundario:disabled {
+  color: var(--color-apagado);
+  cursor: progress;
+}
+
+.aviso {
+  font-size: var(--texto-sm);
+  color: var(--color-aviso);
+}
