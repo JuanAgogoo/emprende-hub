@@ -14,9 +14,10 @@ existía. El resto consume el contrato ya entregado sin tocarlo.
 Cada incremento de frontend es una **rebanada vertical**: tipo, llamada a la API,
 estado y vista, algo que se abre en el navegador y se ve funcionando. Por eso
 cada uno lleva su **hito de verificación** escrito como algo observable, y no se
-da por terminado sin comprobarlo con los ojos. El criterio está en
-`agent-docs/estilo/01-frontend-react.md`, y las reglas visuales —paleta,
-tipografía, mobile first y accesibilidad— en [diseno.md](diseno.md).
+da por terminado sin comprobarlo con los ojos. Las decisiones técnicas del
+frontend están en [arquitectura.md](arquitectura.md#el-frontend), cómo se
+verifica en [pruebas.md](pruebas.md), y las reglas visuales —paleta, tipografía,
+mobile first y accesibilidad— en [diseno.md](diseno.md).
 
 Cada incremento indica el mensaje de commit exacto, para pegarlo sin redactarlo.
 
@@ -49,8 +50,10 @@ por supuesto:
   escriben, ni se denuncian.
 - **Recuperar la contraseña.** No existe en el backend (I1) y no se dibuja un
   enlace que no lleve a ninguna parte.
-- Todo lo del §9 de `agent-docs/estilo/01-frontend-react.md`: Redux, react-query,
-  axios, Zod, React Hook Form, Tailwind, i18n, Storybook, E2E.
+- **Ninguna dependencia más allá de `react-router-dom`**: ni Redux, ni
+  react-query, ni axios, ni Zod, ni React Hook Form, ni Tailwind, ni i18n, ni
+  Storybook, ni pruebas de extremo a extremo. El porqué, en
+  [arquitectura.md](arquitectura.md#qué-no-entra-y-por-qué).
 
 La fase consume **15 endpoints**: 14 de los 59 entregados, más el que añade el
 PR 10.
@@ -86,6 +89,10 @@ correo y contraseña; el emprendedor da además el negocio entero: nombre,
 descripción, contacto, ubicación, nivel de precio, redes y escaparate. Que eso
 entre por `POST /auth/registro` sería forzar un formulario dentro de otro.
 
+**Las redes van en su propio campo `redes`, no dentro del negocio.** El alta de
+A1-bis tampoco las pide, así que meterlas ahí se ignoraba en silencio: la
+petición devolvía `201` y el dato se perdía. Costó un rato descubrirlo.
+
 Se añade `POST /api/v1/auth/registro-emprendedor`, que crea cuenta y negocio
 **en una sola transacción** y devuelve el token con el rol ya en `EMPRENDEDOR`:
 
@@ -96,8 +103,8 @@ Content-Type: application/json
 { "nombre": "...", "correo": "...", "contrasena": "...",
   "negocio": { "nombre": "...", "descripcion": "...", "telefono": "3...",
                "categoriaId": 1, "ciudadId": 2, "barrioId": 5,
-               "nivelPrecio": "MEDIO",
-               "instagram": "...", "linkedin": "..." },
+               "nivelPrecio": "MEDIO" },
+  "redes":     { "instagram": "...", "linkedin": "..." },
   "productos": [ { "nombre": "...", "precio": 45000, "disponible": true } ] }
 
 201 -> { token, tipo, expiraEnMillis, nombre, correo, rol: "EMPRENDEDOR", negocioId }
@@ -589,8 +596,8 @@ siguientes lo consumen: no hay asistente sin endpoint, ni fotos sin negocio.
 Añade `POST /api/v1/auth/registro-emprendedor` con la forma de la decisión 2:
 cuenta, negocio y productos en una transacción.
 
-Sigue las guardas de `agent-docs/estilo/02-backend.md`, que se resumen en que
-**el ajuste imita al código que ya existe alrededor**:
+La regla que lo gobierna es que **el ajuste imita al código que ya existe
+alrededor**: no es la ocasión de introducir un patrón mejor.
 
 - DTO `RegistroEmprendedorRequest` como `record`, con `@Valid` en cascada sobre
   el negocio anidado y sobre cada producto. **Se reutilizan las validaciones ya
@@ -711,8 +718,9 @@ docs: documentar el arranque del frontend y el recorrido de la fase 1
 
 ## Antes de dar cualquier incremento por terminado
 
-**En los once de frontend**, los cinco del §10 de
-`agent-docs/estilo/01-frontend-react.md`, sin excepción:
+**En los once de frontend**, los de
+[pruebas.md](pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito),
+sin excepción:
 
 1. `cd frontend && npm run build` con **0 errores y 0 advertencias de tipos**.
 2. Abrir el navegador y comprobar el hito del incremento. En el backend la regla
@@ -726,10 +734,9 @@ contraste` en verde, ningún color fuera de `tokens.css`, revisado a 360px,
 recorrido entero con el tabulador, y los tres estados —cargando, vacío y error—
 vistos de verdad y no supuestos.
 
-**En los PR 1 y 10, que son de backend**, lo que ya exige
-`agent-docs/estilo/02-backend.md`: `./gradlew build` en verde con su cobertura,
-el endpoint probado con `curl` con la aplicación arrancada, y `docs/api.md`
-actualizado en el mismo commit que cambia el contrato.
+**En los PR 1 y 10, que son de backend**: `./gradlew build` en verde con su
+cobertura, el endpoint probado con `curl` con la aplicación arrancada, y
+[api.md](api.md) actualizado en el mismo commit que cambia el contrato.
 
 Y el paso que gobierna el repositorio entero: verificar por script que la
 partición de commits cubre cada fichero exactamente una vez, con
