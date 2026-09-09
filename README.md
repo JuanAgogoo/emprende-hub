@@ -210,6 +210,7 @@ publicó.
 | Las fichas salen sin foto | Se subieron **después** de aprobar y esperan revisión | Aprobar el cambio pendiente |
 | El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto | Aprobarlo con el administrador |
 | Un puerto ya está ocupado | Hay otro backend o otro Vite corriendo en el equipo | Pararlo, o `API_PORT=8081 docker compose up -d` |
+| Tras un fallo de puerto, sigue sin ir | El contenedor quedó creado **sin red**: ni publica puertos ni resuelve `postgres` | `docker compose up -d --force-recreate backend`. Un `up -d` a secas solo lo arranca |
 | Todas las fotos rotas | La base apunta a ficheros que no están en `backend/uploads/` | Recuperar el directorio; la base y el disco van por separado |
 | Caen ~30 pruebas del backend | Se paró el contenedor de la base | `docker compose up -d postgres` y repetir |
 
