@@ -11,13 +11,18 @@ el docente y quien sustente. Va versionada en Git y se entrega con el repositori
   con su código (`B2-bis`, `G7`, `C7`…). Se citan desde el código y los PRs.
 - [arquitectura.md](arquitectura.md) — Stack, capas, seguridad y decisiones técnicas.
 - [api.md](api.md) — El contrato de los endpoints, con un recorrido de demostración.
+- [diseno.md](diseno.md) — El sistema de diseño del frontend: paleta, tipografía,
+  mobile first y accesibilidad. Manda sobre cualquier criterio estético suelto.
 
 **Cómo lo construimos**
 
 - [pruebas.md](pruebas.md) — Los tres niveles, la cobertura y las trampas que ya
   costaron tiempo.
 - [flujo-de-trabajo.md](flujo-de-trabajo.md) — Ramas, commits, Pull Requests y release.
-- [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos, uno por rama y PR.
+- [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos del backend, uno
+  por rama y PR.
+- [plan-de-entrega-frontend-fase-1.md](plan-de-entrega-frontend-fase-1.md) — Los
+  13 de la primera fase del frontend.
 
 ## Material del curso
 

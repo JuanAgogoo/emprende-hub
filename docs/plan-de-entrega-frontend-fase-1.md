@@ -1,0 +1,593 @@
+# Plan de entrega — Frontend, fase 1
+
+Trece incrementos, cada uno una rama y un Pull Request, igual que en
+[plan-de-entrega.md](plan-de-entrega.md). El orden es de dependencia: cada rama
+sale de `main` con el anterior ya fusionado.
+
+La numeración es del frontend y empieza de nuevo en 1. Los números de PR en
+GitHub siguen la cuenta del repositorio, que va por el #18.
+
+Once incrementos son de frontend y **dos son de backend**: el PR 1 retira la
+siembra de demostración y el PR 10 añade el registro de emprendedor, que no
+existía. El resto consume el contrato ya entregado sin tocarlo.
+
+Cada incremento de frontend es una **rebanada vertical**: tipo, llamada a la API,
+estado y vista, algo que se abre en el navegador y se ve funcionando. Por eso
+cada uno lleva su **hito de verificación** escrito como algo observable, y no se
+da por terminado sin comprobarlo con los ojos. El criterio está en
+`agent-docs/estilo/01-frontend-react.md`, y las reglas visuales —paleta,
+tipografía, mobile first y accesibilidad— en [diseno.md](diseno.md).
+
+Cada incremento indica el mensaje de commit exacto, para pegarlo sin redactarlo.
+
+---
+
+## Alcance de la fase 1
+
+Lo que se construye:
+
+| | |
+|---|---|
+| Portada | Las cuatro cifras, destacados y buscador |
+| Directorio | Búsqueda, filtros, ordenación y paginación |
+| Perfil público | Galería, escaparate con precios y redes |
+| Acceso | Un único login que deriva por rol |
+| Registro de cliente | Formulario corto |
+| Registro de emprendedor | Endpoint nuevo y asistente con la **carga inicial** |
+| Páginas informativas | Tratamiento de datos e información personal |
+
+Lo que **no** entra, y conviene tenerlo por escrito antes de que alguien lo dé
+por supuesto:
+
+- **El dashboard de gestión.** Editar el negocio, el buzón de consultas, las
+  métricas de visitas y las notificaciones son fase 2. Aquí solo hay una vista
+  de **solo lectura** del negocio recién creado.
+- **El panel de administración**: moderación, denuncias, gestión de cursos.
+- **Los cursos**, en cualquier forma.
+- **Las opiniones.** El perfil público muestra la calificación y el número de
+  opiniones porque vienen en la misma respuesta, pero no se listan, ni se
+  escriben, ni se denuncian.
+- **Recuperar la contraseña.** No existe en el backend (I1) y no se dibuja un
+  enlace que no lleve a ninguna parte.
+- Todo lo del §9 de `agent-docs/estilo/01-frontend-react.md`: Redux, react-query,
+  axios, Zod, React Hook Form, Tailwind, i18n, Storybook, E2E.
+
+La fase consume **13 endpoints**: 12 de los 59 entregados, más el que añade el
+PR 10.
+
+---
+
+## Decisiones que gobiernan el plan
+
+Ocho cosas se resolvieron antes de escribir los incrementos. Están aquí porque
+cambian lo que hay que construir, y porque son las preguntas que va a hacer quien
+lea el plan.
+
+### 1. Los datos de demostración se crean a mano
+
+`CargaInicialDemo` se retira en el PR 1. Los negocios, sus fotos y sus productos
+se crean **uno a uno y con detalle**, no por siembra: doce negocios generados por
+código se notan, y esta vez la vitrina es el entregable.
+
+Consecuencia que hay que asumir, y no es menor: **desde el PR 1 la base arranca
+vacía de negocios**. Quedan los catálogos, los cursos y la cuenta de
+administrador, que sí se siembran. Hasta que exista el asistente de registro —PR
+11— la única forma de crear un negocio es la colección de Postman, que ya tiene
+las peticiones y el token en una variable.
+
+Por eso los hitos de los PR 3 a 6 dicen «un negocio creado a mano» donde antes
+habrían dicho «un negocio de la siembra». Es un paso más al verificar, a cambio
+de que lo que se enseñe el día de la sustentación sea real.
+
+### 2. El registro de emprendedor es un endpoint nuevo
+
+El alta de emprendedor **no es el alta de cliente con más campos**. El cliente da
+correo y contraseña; el emprendedor da además el negocio entero: nombre,
+descripción, contacto, ubicación, nivel de precio, redes y escaparate. Que eso
+entre por `POST /auth/registro` sería forzar un formulario dentro de otro.
+
+Se añade `POST /api/v1/auth/registro-emprendedor`, que crea cuenta y negocio
+**en una sola transacción** y devuelve el token con el rol ya en `EMPRENDEDOR`:
+
+```
+POST /api/v1/auth/registro-emprendedor
+Content-Type: application/json
+
+{ "nombre": "...", "correo": "...", "contrasena": "...",
+  "negocio": { "nombre": "...", "descripcion": "...", "telefono": "3...",
+               "categoriaId": 1, "ciudadId": 2, "barrioId": 5,
+               "nivelPrecio": "MEDIO",
+               "instagram": "...", "linkedin": "..." },
+  "productos": [ { "nombre": "...", "precio": 45000, "disponible": true } ] }
+
+201 -> { token, tipo, expiraEnMillis, nombre, correo, rol: "EMPRENDEDOR", negocioId }
+```
+
+Una transacción y no tres llamadas encadenadas porque el fallo intermedio es el
+caso que peor se explica: una cuenta creada, un negocio a medias y alguien que ya
+no puede repetir el registro porque su correo está cogido. O entra todo, o no
+entra nada.
+
+### 3. Las fotos no van en ese endpoint
+
+Es la única parte del negocio que se queda fuera, y por una razón concreta: son
+binarios. Meterlas dentro obliga a un `multipart/form-data` que mezcle una parte
+JSON con N ficheros —se puede hacer en Spring, pero es la pieza más difícil de
+defender de todo el proyecto— y a duplicar la validación de tipo, tamaño y máximo
+que `FotoService` ya hace y ya tiene probada.
+
+Van justo después, por `POST /api/v1/negocios/mio/fotos`, con la sesión que
+acaba de devolver el registro. Para quien lo usa es el paso siguiente del mismo
+asistente; por dentro son dos peticiones en lugar de una.
+
+**Si esta decisión se revierte**, el cambio queda acotado al PR 10 y al PR 12: el
+resto del plan no depende de ella.
+
+### 4. A1-bis se mantiene: hay dos caminos y es a propósito
+
+`POST /negocios` sigue existiendo. Un cliente que ya tiene cuenta y opiniones
+puede ascender a emprendedor sin abrir una segunda cuenta, que es exactamente lo
+que dice A1-bis.
+
+Son dos entradas al mismo estado y hay que saber decir por qué: quien llega
+sabiendo que tiene un negocio se registra como emprendedor de una vez; quien se
+anima después no pierde su cuenta. Retirar `POST /negocios` habría obligado a
+reescribir A1-bis, sus pruebas y la colección de Postman, para dejar peor al
+usuario que ya estaba dentro.
+
+`docs/decisiones-dominio.md` recoge la razón en el PR 10, junto a A1 y A1-bis.
+
+### 5. El negocio nace PENDIENTE, y eso se ve
+
+Al terminar el asistente el negocio está en revisión (B6): no sale en el
+directorio y su identificador responde `404` hasta que el administrador lo
+apruebe. La vista de cierre lo dice con todas las letras. **No es un fallo del
+frontend**, y hay que saber explicarlo en la sustentación.
+
+Las fotos siguen la misma lógica: el dueño las ve con su estado, el público solo
+las aprobadas.
+
+### 6. El tratamiento de datos no se persiste
+
+Casilla obligatoria que bloquea el envío, más una página con el texto. **No se
+guarda en ninguna parte**: no hay campo en `Usuario` y no se abre por esto un PR
+de backend. El texto es genérico y no pretende tener validez legal.
+
+Se exige en los dos registros. El requisito lo ató al emprendedor; ponerlo
+también en el de cliente cuesta una línea y evita explicar por qué uno sí y el
+otro no.
+
+### 7. CORS no existe en el backend: se resuelve con el proxy de Vite
+
+El backend entregado **no configura CORS por ninguna parte**. Un `fetch` desde
+`localhost:5173` a `localhost:8080` lo bloquearía el navegador.
+
+Se resuelve en el PR 2 con `server.proxy` de Vite, que es la herramienta que Vite
+trae para esto, y que hay que proxear **para `/api/v1` y también para `/fotos`**,
+o las imágenes no cargan. En desarrollo todo sale del mismo origen.
+
+**Límite conocido:** si en la sustentación el frontend se sirve compilado desde
+un origen distinto al del backend, el proxy ya no está y hace falta añadir CORS
+en `SecurityConfig`. Es un ajuste de una clase, pero más vale decidirlo antes del
+día de la entrega que ese día.
+
+### 8. Las ramas llevan `frontend-`, los commits llevan el dominio
+
+`semantic-release` está configurado sobre el repositorio entero y lee el tipo del
+commit, no la carpeta. Los mensajes siguen la convención del backend
+(`feat(portada): …`) y son las **ramas** las que llevan el prefijo `frontend-`,
+salvo las de los PR 1 y 10, que son de backend. Conviene saber que un `feat` del
+frontend sube la versión del proyecto completo: es un repositorio con una sola
+versión, y así se queda.
+
+---
+
+## Fase 0 — Preparar el terreno (PR 1–2)
+
+### PR 1 · `chore/retirar-siembra-demo` — **backend**
+
+Se retira `CargaInicialDemo` y con él los 12 negocios, las 20 cuentas, las
+opiniones, las consultas y los 60 días de visitas. **Se quedan** los otros tres
+cargadores, que siguen siendo necesarios: catálogos, administrador y cursos, en
+ese orden y con sus `@Order`.
+
+Hay que revisar lo que dependía de esos datos y no dejarlo mintiendo:
+
+- Las pruebas que contaran con negocios sembrados. Las de servicio y repositorio
+  crean los suyos, pero **hay que ejecutar el build completo para saberlo**, no
+  suponerlo.
+- La colección de Postman, si alguna petición usa un identificador sembrado.
+- El README y `docs/api.md`, donde el recorrido de demostración parte de datos
+  que ya no existen: pasa a empezar creando el negocio.
+- La sección «Datos de la demostración» de `api.md`.
+
+```
+chore: retirar la siembra de demostración y dejar solo los catálogos
+```
+
+> **Hito:** con `docker compose down -v` y la aplicación arrancada de cero,
+> `GET /directorio` devuelve una página vacía y `GET /estadisticas/portada`
+> devuelve ceros con `calificacionPromedio` nulo —que es lo correcto, no un
+> fallo—. `cd backend && ./gradlew build` en verde, con la cobertura intacta.
+
+### PR 2 · `chore/frontend-andamiaje`
+
+Proyecto creado con `npm create vite@latest frontend -- --template react-ts`.
+`tsconfig.json` con `strict`, `noImplicitAny`, `strictNullChecks` y
+`forceConsistentCasingInFileNames`. Única dependencia añadida:
+**`react-router-dom`**. Carpetas `types/`, `api/`, `estado/`, `componentes/`,
+`paginas/`.
+
+`api/cliente.ts` concentra la URL base, la cabecera `Authorization` y la lectura
+del error del `GlobalExceptionHandler` —que trae `message`, y una clave por campo
+cuando la validación falla—. Es el único sitio del proyecto donde se escribe
+`fetch`. Proxy de Vite para `/api/v1` y `/fotos`, según la decisión 7.
+
+**Incluye el sistema de diseño de [diseno.md](diseno.md) entero**, porque es lo
+que impide que cada incremento invente sus propios valores: `estilos/tokens.css`
+con los 17 tokens de color, la escala tipográfica y el espaciado; Manrope
+Variable autoalojada en `public/fuentes/` —un `.woff2` de 25 KB que cubre de 400
+a 800—; el reinicio de estilos; y `scripts/contraste.mjs` con su
+`npm run contraste`, que es la prueba de visibilidad que verifica las 21
+combinaciones.
+
+**Incluye además el job de CI del frontend**, sin el cual los once incrementos
+que vienen pasarían la verificación sin que nadie los compile. `ci.yml` tiene hoy
+un solo job con `working-directory: backend`: se le añade otro con `npm ci`,
+`npm run build` y `npm run contraste`, y se filtran los dos por `paths` para que
+un PR de frontend no espere a Gradle ni al revés.
+
+Layout con cabecera y pie, dos rutas y `<Link>`. README del frontend con el
+arranque.
+
+```
+chore(frontend): crear el andamiaje con React, TypeScript y el sistema de diseño
+```
+
+> **Hito:** `npm run dev` levanta en el 5173. La cabecera y el pie se ven, y
+> pasar de una ruta a otra no recarga la página. `npm run build` termina con 0
+> errores y 0 advertencias, y `npm run contraste` con 21 de 21. A 360px de ancho
+> no hay desbordamiento horizontal. En la CI, un cambio que solo toque
+> `frontend/` ejecuta el job de frontend y no el de Gradle.
+
+---
+
+## Fase 1 — Vitrina pública (PR 3–5)
+
+Los tres se verifican contra negocios creados a mano con Postman, según la
+decisión 1. **El estado vacío deja de ser un caso raro y pasa a ser el primero
+que se ve**, así que se construye antes que el lleno, no después.
+
+### PR 3 · `feat/portada`
+La portada: hero, la barra de cuatro cifras de `GET /estadisticas/portada` y los
+destacados de `GET /directorio/destacados`, con los siete bloques que fija
+[diseno.md](diseno.md#la-portada).
+
+Aparece la unión discriminada `EstadoCarga<T>` con `CARGANDO`, `EXITO` y `ERROR`,
+que gobierna todas las vistas que cargan datos a partir de aquí. Componente
+`TarjetaNegocio` con su `key={negocio.id}`, reutilizado luego por el directorio.
+
+Dos cosas que con la base vacía dejan de ser hipotéticas: `calificacionPromedio`
+**llega nula mientras no haya ninguna opinión**, y se resuelve con `??` y nunca
+con `||`, o un promedio de `0` legítimo se convertiría en el texto por defecto; y
+**sin destacados no se enseña una rejilla vacía**, sino el bloque con su mensaje.
+
+```
+feat(portada): mostrar las estadísticas y los negocios destacados
+```
+
+> **Hito:** con la base recién creada, las cuatro cifras salen a cero y el bloque
+> de destacados explica que todavía no hay ninguno. Tras crear dos negocios y
+> aprobarlos con Postman, las cifras suben y las tarjetas aparecen. Parar el
+> backend y recargar muestra el mensaje de error, no una pantalla en blanco.
+
+### PR 4 · `feat/directorio`
+Listado con los seis filtros combinables (`texto`, `categoriaId`, `ciudadId`,
+`barrioId`, `calificacionMinima`, `nivelPrecio`), la ordenación de lista cerrada
+(`CALIFICACION`, `NOMBRE`, `RECIENTES`) y la paginación. En móvil los filtros son
+una hoja que sube desde abajo, no una barra lateral encogida.
+
+`api/catalogos.ts` trae las 12 categorías y las ciudades **con sus barrios
+anidados**, así que el selector de barrio se repuebla desde la ciudad elegida sin
+una segunda petición. El buscador de la portada entra aquí con el texto puesto.
+
+Dos avisos del contrato: el directorio **ignora `sort`** y ordena con su propio
+parámetro; y la consulta se arma con `URLSearchParams`, que codifica los acentos
+—un `texto=café` sin codificar devuelve `400`, la misma trampa que ya mordió con
+`curl`—.
+
+```
+feat(directorio): añadir búsqueda, filtros, ordenación y paginación de negocios
+```
+
+> **Hito:** filtrar por categoría reduce la lista; cambiar de ciudad repuebla los
+> barrios; buscar «café» funciona; y una combinación sin resultados muestra el
+> estado vacío con un botón para limpiar los filtros. Con más de 12 negocios
+> creados, la página 2 trae otros distintos.
+
+### PR 5 · `feat/perfil-publico`
+Perfil de `GET /directorio/{id}`: galería de fotos aprobadas, escaparate con
+precios formateados en pesos con `Intl.NumberFormat`, disponibilidad, teléfono y
+enlaces a Instagram y LinkedIn cuando existen. La calificación y el número de
+opiniones se muestran; el listado de opiniones no es de esta fase.
+
+Un identificador que no existe —o un negocio pendiente, que responde `404` y no
+`403` a propósito (B6)— lleva a una página de «no encontrado» y no a un error
+crudo.
+
+Aquí entra la transición de vista entre la tarjeta y el perfil: la foto crece
+hasta ser la del detalle, con `view-transition-name` y su `@supports`.
+
+```
+feat(directorio): añadir el perfil público del negocio con galería y escaparate
+```
+
+> **Hito:** desde el directorio se entra a un negocio y se ven sus fotos, sus
+> productos con el precio en pesos y sus redes. Un negocio sin fotos muestra el
+> marcador de posición, no una imagen rota. Pedir un `id` inventado muestra «no
+> encontrado». Con esto la parte pública está cerrada y se recorre entera sin
+> iniciar sesión, que es lo que promete la portada.
+
+---
+
+## Fase 2 — Acceso (PR 6–9)
+
+### PR 6 · `feat/login`
+Una sola pantalla de acceso. `POST /api/v1/auth/login` devuelve el token **y el
+rol**, así que no hay que descodificar nada para saber a quién se ha autenticado:
+la respuesta decide a dónde va cada quien.
+
+`estado/SesionContext.tsx` es el primer contexto por dominio: expone la sesión y
+las acciones `entrar` y `salir`, **nunca el `setState`**. El token se guarda en
+`localStorage` y se recupera al arrancar, para que recargar no eche a nadie.
+`api/cliente.ts` lo añade como `Authorization: Bearer …` en su único sitio.
+
+La cabecera cambia con la sesión iniciada. Un `401` dice «credenciales
+incorrectas» sin sacar a nadie del formulario.
+
+```
+feat(auth): añadir el inicio de sesión con derivación por rol
+```
+
+> **Hito:** entrar con una cuenta creada por Postman deja su nombre en la
+> cabecera; recargar la página mantiene la sesión; «Salir» la limpia; y una
+> contraseña mala muestra el mensaje sin vaciar el correo escrito.
+
+### PR 7 · `feat/paginas-informativas`
+Tratamiento de datos e información personal, con texto genérico. Enlazadas desde
+el pie y, en los PR siguientes, desde la casilla de los dos registros. Son
+públicas y se leen sin sesión.
+
+Van antes que los registros a propósito: la casilla que exige aceptarlas necesita
+un enlace que ya funcione.
+
+```
+feat(legal): añadir las páginas de tratamiento de datos e información personal
+```
+
+> **Hito:** los dos enlaces del pie abren su página, se leen sin sesión y se
+> vuelve atrás sin perder nada. El texto no baja de 17px ni se sale a 360px.
+
+### PR 8 · `feat/registro-cliente`
+El registro corto de A1: nombre, correo y contraseña de mínimo 8 caracteres, más
+la casilla de tratamiento de datos. Formulario controlado con una función pura
+`validar()` fuera del componente; los mensajes aparecen **solo tras intentar
+enviar**, que es el `markAllAsTouched()` del curso traducido.
+
+`POST /api/v1/auth/registro` devuelve `201` con el token, así que quien se
+registra queda dentro sin pasar por el login.
+
+Un correo repetido responde `400` con el mensaje del backend: se muestra tal
+cual, junto al campo, no en un cartel genérico.
+
+```
+feat(auth): añadir el registro de clientes con su validación
+```
+
+> **Hito:** un registro válido termina con el nombre en la cabecera; repetir el
+> correo devuelve el mensaje del backend junto al campo; y sin marcar la casilla
+> el envío no sale. El foco salta al primer campo inválido.
+
+### PR 9 · `feat/mi-negocio`
+La vista de aterrizaje, **de solo lectura**, con `GET /api/v1/negocios/mio`: los
+datos del negocio, su galería, su escaparate y su estado. Si está `PENDIENTE`, lo
+explica; si está `RECHAZADO`, muestra el motivo que escribió el administrador
+(B1). Ruta `/mi-negocio`, para `EMPRENDEDOR`.
+
+**Esto no es el dashboard.** No edita, no sube, no borra. Es el destino que el
+asistente necesita para no terminar en el vacío, y el germen de la fase 2.
+
+**Incluye además** cambiar la derivación del PR 6: hasta ahora todos los roles
+caían en la portada, y a partir de aquí `EMPRENDEDOR` cae en `/mi-negocio`.
+Volver sobre el PR 6 está contemplado, igual que el PR 5 del backend volvió sobre
+el 4; no es un descuido.
+
+```
+feat(negocios): añadir la vista del negocio propio y la derivación del emprendedor
+```
+
+> **Hito:** entrar con un emprendedor creado por Postman aterriza directo en su
+> negocio, con su estado a la vista. Entrar con un cliente sigue llevando a la
+> portada, y escribir `/mi-negocio` a mano no le enseña nada.
+
+---
+
+## Fase 3 — Alta del emprendedor (PR 10–12)
+
+Los tres incrementos de las decisiones 2 y 3. El primero es de backend y los dos
+siguientes lo consumen: no hay asistente sin endpoint, ni fotos sin negocio.
+
+### PR 10 · `feat/registro-emprendedor` — **backend**
+
+Añade `POST /api/v1/auth/registro-emprendedor` con la forma de la decisión 2:
+cuenta, negocio y productos en una transacción.
+
+Sigue las guardas de `agent-docs/estilo/02-backend.md`, que se resumen en que
+**el ajuste imita al código que ya existe alrededor**:
+
+- DTO `RegistroEmprendedorRequest` como `record`, con `@Valid` en cascada sobre
+  el negocio anidado y sobre cada producto. **Se reutilizan las validaciones ya
+  escritas**: mínimo 80 caracteres de descripción, teléfono `3XXXXXXXXX` o
+  `60XXXXXXXX` (G8), nivel de precio de lista cerrada (G4), barrio que debe
+  pertenecer a la ciudad, precio no negativo y los dominios de Instagram y
+  LinkedIn (B8). No se reescribe ninguna regla: se compone lo que hay.
+- El método vive en `AuthService`, es `@Transactional` y orquesta los servicios
+  que ya existen. Sin capa nueva, sin interfaz con una sola implementación, sin
+  mapeador.
+- El negocio nace `PENDIENTE` y el usuario nace `EMPRENDEDOR`, sin pasar por
+  `CLIENTE`. La ruta es pública en `SecurityConfig`, como las otras dos de
+  `/auth`.
+- **Los tres niveles de prueba**, con el patrón AAA y los comentarios
+  `//arrange`, `//act`, `//assert`, `//verify` escritos tal cual. Casos que no
+  pueden faltar: correo repetido, negocio inválido con la cuenta ya validada
+  —que **no debe dejar usuario creado**—, y lista de productos vacía, que es
+  válida.
+- `docs/api.md` y `docs/decisiones-dominio.md` **en el mismo PR**: el contrato
+  del endpoint, y la razón de los dos caminos junto a A1-bis. La colección de
+  Postman suma su petición.
+- Las cifras envejecen mal y hay tres sitios que las repiten: **60 endpoints** en
+  `api.md`, en el README y en la tabla final de `plan-de-entrega.md`, más el
+  recuento de pruebas.
+
+```
+feat(auth): añadir el registro de emprendedores con su negocio en una transacción
+```
+
+> **Hito:** `cd backend && ./gradlew build` en verde con la cobertura de
+> `service/**` por encima del 80%. Con la aplicación arrancada, un `curl` al
+> endpoint devuelve `201` con rol `EMPRENDEDOR`; el mismo correo repetido
+> devuelve `400`; y una descripción de 79 caracteres devuelve `400` **sin haber
+> creado la cuenta** —comprobado intentando el login después—.
+
+### PR 11 · `feat/registro-emprendedor` — **frontend**
+El asistente, con su propia ruta y su recorrido, separado del registro de
+cliente: paso 1 la cuenta, paso 2 el negocio, paso 3 el escaparate. Los tres
+recogen datos en el navegador y **se envían juntos** en la única petición del PR
+10. Barra de progreso de cuatro pasos —«Paso 2 de 4» en móvil, según
+[diseno.md](diseno.md#asistente-de-pasos)—, con el cuarto llegando en el PR
+siguiente.
+
+Se valida en el navegador lo mismo que valida el backend, con la función pura
+`validar()` de siempre: el contador de la descripción a la vista, el formato del
+teléfono, el barrio dependiente de la ciudad. Que el `400` sea la excepción y no
+la forma normal de descubrir un error.
+
+Los productos se añaden uno detrás de otro con la lista creciendo a la vista, y
+el paso se puede dejar vacío. El precio se escribe en pesos y viaja como número:
+nada de máscaras ni de librerías de moneda.
+
+Cuando el backend responde `201`, el token ya viene dentro: se abre la sesión sin
+pasar por el login y se aterriza en `/mi-negocio`.
+
+Si el `400` trae una clave por campo, se pinta en su campo y el asistente vuelve
+al paso que lo contiene. Con una transacción detrás, no hay estado a medias que
+recomponer.
+
+```
+feat(auth): añadir el asistente de registro de emprendedores
+```
+
+> **Hito:** un recorrido desde cero crea la cuenta, el negocio y dos productos, y
+> aterriza en `/mi-negocio` con el aviso de que está en revisión. Una descripción
+> de 79 caracteres no deja avanzar del paso 2. Un correo ya usado devuelve al
+> paso 1 con el mensaje en su campo, y **no deja nada creado**: reintentar con
+> otro correo funciona.
+
+### PR 12 · `feat/carga-inicial-fotos`
+El cuarto paso, ya con la sesión abierta: subida de imágenes contra
+`POST /api/v1/negocios/mio/fotos`, previsualización antes de enviar, la primera
+marcada como portada (B9), quitar una recién subida y saltar el paso.
+
+El tamaño y el tipo se comprueban **antes** de enviar, porque el límite de Tomcat
+está a 6 MB y la regla del dominio a 5: un fichero de 5,5 MB llega al backend
+solo para que lo rechace con el mensaje del dominio, y uno de 7 lo corta la
+infraestructura. Avisar antes ahorra las dos.
+
+Con esto el asistente está entero y la fase cumple lo que pedía: **el emprendedor
+llega a su negocio con las fotos, el nombre y los precios ya puestos.**
+
+```
+feat(negocios): añadir la carga inicial de fotos al registro del emprendedor
+```
+
+> **Hito:** el recorrido completo, con base limpia, crea la cuenta, el negocio,
+> dos productos y tres fotos, y termina en `/mi-negocio` enseñándolos, la primera
+> foto como portada. Una imagen de más de 5 MB se rechaza en el navegador con su
+> mensaje. Saltar el paso también completa el registro. Cerrar sesión, entrar de
+> nuevo y seguir viéndolo todo.
+
+---
+
+## Cierre — Documentación (PR 13)
+
+### PR 13 · `docs/frontend-fase-1`
+No añade funcionalidad. README de la raíz explicando cómo se levantan las dos
+mitades, y el guion del recorrido de la sustentación: base limpia, backend
+arriba, frontend arriba, registro de emprendedor de punta a punta, aprobación
+desde Postman y el negocio apareciendo en el directorio.
+
+Como ya no hay siembra de demostración, el guion **incluye qué negocios crear**
+para que la portada no se enseñe vacía el día de la sustentación. Es la parte que
+antes hacía `CargaInicialDemo` y que ahora se prepara a mano.
+
+Se hace al final, con los doce incrementos entregados, por la misma razón que el
+PR 8 del backend: antes no hay nada estable que documentar.
+
+```
+docs: documentar el arranque del frontend y el recorrido de la fase 1
+```
+
+> **Hito:** alguien que no ha tocado el proyecto lo levanta entero siguiendo solo
+> el README, y completa el recorrido sin preguntar nada.
+
+---
+
+## Antes de dar cualquier incremento por terminado
+
+**En los once de frontend**, los cinco del §10 de
+`agent-docs/estilo/01-frontend-react.md`, sin excepción:
+
+1. `cd frontend && npm run build` con **0 errores y 0 advertencias de tipos**.
+2. Abrir el navegador y comprobar el hito del incremento. En el backend la regla
+   era probar con `curl` y no fiarse de las pruebas; aquí es mirar la pantalla.
+3. `grep -rn ': any\|as any' frontend/src/` vacío.
+4. Todas las listas con `key` estable: el `id`, nunca el índice.
+5. Ninguna llamada a `fetch` fuera de `frontend/src/api/`.
+
+Y los cinco de la parte visual, que están en [diseno.md](diseno.md): `npm run
+contraste` en verde, ningún color fuera de `tokens.css`, revisado a 360px,
+recorrido entero con el tabulador, y los tres estados —cargando, vacío y error—
+vistos de verdad y no supuestos.
+
+**En los PR 1 y 10, que son de backend**, lo que ya exige
+`agent-docs/estilo/02-backend.md`: `./gradlew build` en verde con su cobertura,
+el endpoint probado con `curl` con la aplicación arrancada, y `docs/api.md`
+actualizado en el mismo commit que cambia el contrato.
+
+Y el paso que gobierna el repositorio entero: verificar por script que la
+partición de commits cubre cada fichero exactamente una vez, con
+`git status --porcelain -uall`.
+
+## Endpoints que consume la fase
+
+Trece: doce ya entregados y documentados en [api.md](api.md), y uno nuevo.
+
+| Recurso | Endpoints | PR |
+|---|---|---|
+| Estadísticas | `GET /estadisticas/portada` | 3 |
+| Directorio | `GET /directorio`, `/directorio/destacados`, `/directorio/{id}` | 3, 4, 5 |
+| Catálogos | `GET /catalogos/categorias-negocio`, `/catalogos/ciudades` | 4 |
+| Acceso | `POST /auth/login`, `/auth/registro` | 6, 8 |
+| Acceso | **`POST /auth/registro-emprendedor`** — nuevo | 10, 11 |
+| Negocios | `GET /negocios/mio` | 9 |
+| Fotos | `GET`, `POST`, `DELETE /negocios/mio/fotos` | 12 |
+
+No aparecen los endpoints de productos: en el asistente se recogen en el
+navegador y viajan dentro del registro, y en `/mi-negocio` llegan dentro de
+`GET /negocios/mio`. `POST /negocios` y los de productos siguen existiendo y
+siguen probados —son el camino de A1-bis, decisión 4—, pero esta fase no los
+llama.
+
+**Si un incremento necesitara un endpoint que no está en esta tabla, hay que
+pararse a mirar**: o se ha salido del alcance de la fase, o hace falta otro PR de
+backend como el 10. Lo que no vale es descubrirlo a mitad de una rebanada.
