@@ -183,6 +183,26 @@ ninguna otra entidad del sistema.
     Pantalla y endpoint nuevos.
   - El panel es el único canal de avisos. Las notificaciones de H2 dejan de ser
     decorativas y pasan a ser el sistema de avisos.
+- **I1-bis** **Se reabre I1 para la recuperación de contraseña, y solo para eso.**
+  El backlog de la segunda entrega la pidió, y no existía en ninguna de las dos
+  mitades. Lo que cambia y lo que no:
+  - **Sí hay correo**, con `spring-boot-starter-mail` contra un **SMTP local**:
+    [Mailpit](https://github.com/axllent/mailpit), un servicio más de
+    `docker-compose.yml`. Funciona sin internet y sin cuenta de correo de nadie,
+    y el mensaje **se ve llegar** en su bandeja web del 8025, que es enseñable.
+    El correo no sale al mundo real; para que saliera se cambian tres
+    propiedades de `application.yml` y nada más.
+  - **Vuelve el enlace «¿Olvidaste tu contraseña?»** que I1 mandó retirar.
+  - **Sigue sin haber verificación del correo al registrarse.** Ampliarlo
+    cambiaría los dos registros y nadie lo pidió.
+  - **El panel sigue siendo el canal de avisos** (H2): el motivo del rechazo y
+    las notificaciones no se mandan por correo.
+  - El token es **aleatorio, de un solo uso y caduca a los 30 minutos**. Se
+    guarda sin cifrar, y es una simplificación consciente: quien pueda leer esa
+    tabla ya tiene la de usuarios. **Sale solo por correo** —devolverlo en la
+    respuesta dejaría cambiar la contraseña de cualquiera sabiendo su
+    dirección— y **pedirlo responde igual exista la cuenta o no**, para que el
+    formulario no sirva de lista de qué correos están registrados.
 
 ## J. Datos personales
 
@@ -219,12 +239,14 @@ Explícito, para que nadie los espere en la entrega. Ninguno está en el prototi
 - Responder a una opinión desde el negocio.
 - Eliminar o pausar un negocio (existe la suspensión por el admin, B4).
 - Borrado de cuenta a petición del usuario (J2).
-- Verificación del correo al registrarse y recuperación de contraseña (I1).
+- Verificación del correo al registrarse (I1). La recuperación de contraseña sí
+  entra, desde I1-bis.
 - Carrito, pagos y pasarela, ni siquiera simulada (E1, F1).
 - Inscripciones, progreso y certificados de cursos (E2).
 
 ## Puntos abiertos
 
-Ninguno. El dominio queda cerrado el 23 de agosto de 2026.
+Ninguno. El dominio quedó cerrado el 23 de agosto de 2026, y la única decisión
+reabierta desde entonces es I1, con I1-bis.
 
 Cualquier decisión nueva se añade a la sección que le corresponda, no aquí.

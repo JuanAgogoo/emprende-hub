@@ -1,15 +1,23 @@
 package com.emprendehub.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.emprendehub.dto.AuthResponse;
 import com.emprendehub.dto.RegistroEmprendedorResponse;
+import com.emprendehub.exception.EnlaceCaducadoException;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.service.AuthService;
+import com.emprendehub.service.RecuperacionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -23,6 +31,9 @@ class AuthControllerTest extends ControllerTestBase {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private RecuperacionService recuperacionService;
 
     private static final String REGISTRO_VALIDO = """
             {
@@ -237,5 +248,146 @@ class AuthControllerTest extends ControllerTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(REGISTRO_EMPRENDEDOR))
                 .andExpect(status().isCreated());
+    }
+
+    // ---------- Recuperación de contraseña ----------
+
+    private static final String SOLICITUD = """
+            { "correo": "maria@gmail.com" }
+            """;
+
+    private static final String CONTRASENA_NUEVA = """
+            { "contrasena": "contrasenaNueva" }
+            """;
+
+    @Test
+    @DisplayName("POST /recuperacion devuelve 200 y no enseña el token")
+    void recuperacion_correoValido_devuelve200SinCuerpo() throws Exception {
+        //arrange
+        doNothing().when(recuperacionService).solicitar(any());
+
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(SOLICITUD))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("POST /recuperacion de un correo sin cuenta devuelve 200 igual")
+    void recuperacion_correoDesconocido_devuelve200() throws Exception {
+        //arrange
+        // El servicio no lanza nada con un correo que no existe: esa es la
+        // decisión 3, y aquí se comprueba que el controlador la respeta.
+        doNothing().when(recuperacionService).solicitar(any());
+
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(SOLICITUD.replace("maria@gmail.com", "nadie@gmail.com")))
+                .andExpect(status().isOk());
+
+        //verify
+        verify(recuperacionService).solicitar(any());
+    }
+
+    @Test
+    @DisplayName("POST /recuperacion con un correo mal formado devuelve 400")
+    void recuperacion_correoInvalido_devuelve400() throws Exception {
+        //arrange
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(SOLICITUD.replace("maria@gmail.com", "no-es-un-correo")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.correo").exists());
+    }
+
+    @Test
+    @DisplayName("GET /recuperacion/{token} con un enlace vivo devuelve 200")
+    void comprobarEnlace_valido_devuelve200() throws Exception {
+        //arrange
+        doNothing().when(recuperacionService).comprobar("token-vivo");
+
+        //act
+        //assert
+        mockMvc.perform(get("/api/v1/auth/recuperacion/token-vivo"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("GET /recuperacion/{token} con un enlace que ya no vale devuelve 410")
+    void comprobarEnlace_caducado_devuelve410() throws Exception {
+        //arrange
+        doThrow(new EnlaceCaducadoException("Este enlace de recuperación ya no es válido."))
+                .when(recuperacionService).comprobar("token-caducado");
+
+        //act
+        //assert
+        // 410 y no 404: el enlace existió y ha dejado de servir.
+        mockMvc.perform(get("/api/v1/auth/recuperacion/token-caducado"))
+                .andExpect(status().isGone())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    @DisplayName("POST /recuperacion/{token} cambia la contraseña y devuelve 204")
+    void restablecer_valido_devuelve204() throws Exception {
+        //arrange
+        doNothing().when(recuperacionService).restablecer(any(), any());
+
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion/token-vivo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CONTRASENA_NUEVA))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("POST /recuperacion/{token} con contraseña de 7 caracteres devuelve 400")
+    void restablecer_contrasenaCorta_devuelve400() throws Exception {
+        //arrange
+        //act
+        //assert
+        // El mínimo de A6 no se rebaja por recuperar la cuenta.
+        mockMvc.perform(post("/api/v1/auth/recuperacion/token-vivo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CONTRASENA_NUEVA.replace("contrasenaNueva", "1234567")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.contrasena").exists());
+    }
+
+    @Test
+    @DisplayName("POST /recuperacion/{token} con un enlace ya usado devuelve 410")
+    void restablecer_enlaceUsado_devuelve410() throws Exception {
+        //arrange
+        doThrow(new EnlaceCaducadoException("Este enlace de recuperación ya no es válido."))
+                .when(recuperacionService).restablecer(eq("token-usado"), any());
+
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion/token-usado")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CONTRASENA_NUEVA))
+                .andExpect(status().isGone());
+    }
+
+    @Test
+    @DisplayName("los tres endpoints de recuperación son públicos: no exigen token")
+    void recuperacion_sinToken_noDevuelve401() throws Exception {
+        //arrange
+        doNothing().when(recuperacionService).solicitar(any());
+
+        //act
+        //assert
+        mockMvc.perform(post("/api/v1/auth/recuperacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(SOLICITUD))
+                .andExpect(status().isOk());
     }
 }

@@ -24,6 +24,10 @@
 		{
 			"key": "negocioId",
 			"value": "1"
+		},
+		{
+			"key": "tokenRecuperacion",
+			"value": ""
 		}
 	],
 	"item": [
@@ -241,6 +245,116 @@
 									"    pm.collectionVariables.set('tokenCliente', pm.response.json().token);",
 									"    pm.test('Token de tokenCliente guardado', () => pm.expect(pm.response.json().token).to.be.a('string'));",
 									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Pedir el enlace de recuperación",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base}}/auth/recuperacion",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"auth",
+								"recuperacion"
+							]
+						},
+						"description": "Devuelve 200 exista la cuenta o no, y **sin el token**: ese sale solo por correo. Ábrelo en Mailpit (http://localhost:8025), copia el trozo final del enlace y pégalo en la variable {{tokenRecuperacion}}.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"correo\": \"maria@gmail.com\"\n}"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Responde 200', () => pm.response.to.have.status(200));",
+									"// El token no puede venir aquí: si apareciera, cualquiera podría",
+									"// cambiar la contraseña de cualquiera sabiendo solo su correo.",
+									"pm.test('La respuesta no lleva el token', () => pm.expect(pm.response.text()).to.equal(''));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Comprobar que el enlace vale",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/auth/recuperacion/{{tokenRecuperacion}}",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"auth",
+								"recuperacion",
+								"{{tokenRecuperacion}}"
+							]
+						},
+						"description": "200 si el enlace sirve; 410 si ya se usó, caducó o es inventado. La pantalla lo llama al abrirse, para no pedir una contraseña nueva que no se va a poder guardar."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Responde 200', () => pm.response.to.have.status(200));"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Restablecer la contraseña",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base}}/auth/recuperacion/{{tokenRecuperacion}}",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"auth",
+								"recuperacion",
+								"{{tokenRecuperacion}}"
+							]
+						},
+						"description": "Cambia la contraseña y gasta el enlace: repetir esta misma petición devuelve 410. El mínimo de 8 caracteres es el de A6.",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contrasena\": \"contrasenaNueva\"\n}"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Responde 204', () => pm.response.to.have.status(204));"
 								]
 							}
 						}

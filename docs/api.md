@@ -63,6 +63,7 @@ cuando es de lista cerrada **enumera los valores admitidos**:
 | `401` | Sin token, token corrupto o caducado, o credenciales incorrectas |
 | `403` | Rol insuficiente, o cuenta suspendida |
 | `404` | No existe, **o no es visible para quien pregunta** |
+| `410` | El enlace de un solo uso ya no vale: caducado, usado o inventado |
 
 Un negocio pendiente o un curso en borrador devuelven **404, no 403**: no se
 filtra información sobre lo que existe sin publicar.
@@ -102,8 +103,51 @@ curl -X POST localhost:8080/api/v1/auth/registro \
 Contraseña de **mínimo 8 caracteres** (A6). El correo identifica la cuenta, es
 único y **nunca se muestra en público**.
 
-No hay verificación de correo ni recuperación de contraseña (I1): quien la olvide
-tiene que pedírsela al administrador.
+**Sí hay recuperación de contraseña**, y va aquí abajo. Lo que sigue sin haber
+es verificación del correo al registrarse: I1 se reabrió solo para lo primero.
+
+### Recuperar la contraseña
+
+Tres endpoints públicos, como el resto de `/auth/**`. **Reabren I1**, que había
+cerrado el dominio sin correos; la decisión y su porqué están en
+[decisiones-dominio.md](decisiones-dominio.md).
+
+| Método | Ruta | Devuelve |
+|---|---|---|
+| `POST` | `/auth/recuperacion` | `200` **siempre**, sin cuerpo |
+| `GET` | `/auth/recuperacion/{token}` | `200` si el enlace vale, `410` si no |
+| `POST` | `/auth/recuperacion/{token}` | `204` |
+
+```bash
+curl -X POST localhost:8080/api/v1/auth/recuperacion \
+  -H 'Content-Type: application/json' -d '{"correo":"maria@gmail.com"}'
+
+curl -X POST localhost:8080/api/v1/auth/recuperacion/$TOKEN \
+  -H 'Content-Type: application/json' -d '{"contrasena":"contrasenaNueva"}'
+```
+
+Las dos reglas que hacen que esto sea una recuperación y no un agujero:
+
+- **El token sale solo por correo**, nunca en la respuesta. Devolverlo aquí
+  encadenaría bien las pantallas y de paso dejaría cambiar la contraseña de
+  cualquiera sabiendo únicamente su dirección.
+- **Pedirlo responde `200` exista la cuenta o no.** Un `404` para un correo
+  desconocido convertiría el formulario en una forma de averiguar qué
+  direcciones están registradas.
+
+El token es **aleatorio, de un solo uso y caduca a los 30 minutos**. El `GET`
+existe para que la pantalla pueda decir «este enlace ya no vale» **antes** de que
+alguien escriba una contraseña nueva dos veces, y responde `410` y no `404`: el
+enlace existió, lo que pasa es que ya no sirve. Caducado, usado e inventado dan
+la misma respuesta, para no confirmar cuáles fueron reales.
+
+La contraseña nueva exige los **mismos 8 caracteres mínimos de A6**: recuperar la
+cuenta no rebaja la regla del alta.
+
+**El correo sale a un SMTP local**, Mailpit, que es un servicio más de
+`docker-compose.yml`. Se ve llegar en su bandeja web del **8025**. Si el servidor
+de correo no contesta, la petición sigue devolviendo `200` y el fallo queda en el
+registro: un `500` ahí delataría que esa cuenta existe.
 
 ### Alta de emprendedor con su negocio
 
@@ -799,7 +843,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**61 endpoints** en 72 peticiones, agrupadas por quién las usa. Su primera
+**64 endpoints** en 75 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
