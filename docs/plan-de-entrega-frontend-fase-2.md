@@ -207,7 +207,7 @@ backlog.
 Se verifican contra un negocio aprobado y **al menos dos cuentas de cliente**,
 porque una sola no deja ver la lista con opiniones de otros ni la regla de A4.
 
-### PR 1 · `feat/frontend-opiniones-listado`
+### PR 1 · `feat/frontend-opiniones-listado` · **TERMINADO**
 
 El listado de reseñas en el perfil público, que es lo único que le faltaba al
 perfil para estar completo. `GET /api/v1/negocios/{id}/opiniones` devuelve una

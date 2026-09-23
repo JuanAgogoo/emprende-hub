@@ -35,6 +35,22 @@ export function precio(valor: number): string {
   return PRECIO.format(valor);
 }
 
+const FECHA = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/**
+ * Una fecha de la API —ISO-8601 con zona— escrita en letra.
+ *
+ * `Intl` la pasa a la zona de quien mira, que es lo que se quiere: una opinión
+ * publicada anoche no puede salir con la fecha de mañana.
+ */
+export function fecha(valor: string): string {
+  return FECHA.format(new Date(valor));
+}
+
 /** Los tres niveles de precio de G4, tal como se enseñan. */
 export function nivelPrecio(nivel: 'BAJO' | 'MEDIO' | 'ALTO'): string {
   switch (nivel) {

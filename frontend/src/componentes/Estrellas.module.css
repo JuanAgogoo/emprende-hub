@@ -1,0 +1,18 @@
+.estrellas {
+  display: inline-flex;
+  gap: var(--e-1);
+  line-height: 1;
+  /* Sin esto las estrellas heredan el tamaño del texto que las rodea y en la
+     ficha del negocio quedan más pequeñas que el número. */
+  font-size: var(--texto-md);
+}
+
+.llena {
+  color: var(--color-aviso);
+}
+
+/* La hueca es la misma estrella descolorida, no un carácter distinto: así la
+   fila mantiene el ancho y se ve de un vistazo que son cinco. */
+.vacia {
+  color: color-mix(in srgb, var(--color-aviso) 25%, var(--color-lienzo));
+}

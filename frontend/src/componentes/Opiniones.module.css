@@ -1,0 +1,126 @@
+/* La misma forma que los bloques del perfil, repetida aquí porque las clases
+   de CSS Modules hashean por fichero: `.bloque` del perfil no llega hasta
+   este componente. */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-3);
+  font-size: var(--texto-xl);
+}
+
+.contador {
+  font-size: var(--texto-xs);
+  font-weight: 500;
+  color: var(--color-apagado);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  list-style: none;
+  padding: 0;
+}
+
+.opinion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-2);
+}
+
+.autor {
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.fecha {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.nota {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.cifra {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Que el texto no es el original se dice, no se insinúa. */
+.editada {
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-lienzo-alt);
+  color: var(--color-apagado);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.comentario {
+  max-width: var(--ancho-lectura);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.vacio {
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  color: var(--color-error);
+}
+
+.reintentar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.reintentar:hover {
+  background: var(--color-lienzo-alt);
+}

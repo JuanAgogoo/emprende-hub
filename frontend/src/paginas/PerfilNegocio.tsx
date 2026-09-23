@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { obtenerPerfil } from '../api/directorio';
 import { ErrorApi } from '../api/cliente';
+import { Estrellas } from '../componentes/Estrellas';
 import { Galeria } from '../componentes/Galeria';
+import { Opiniones } from '../componentes/Opiniones';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { PerfilNegocio as Perfil } from '../types/negocio';
@@ -157,6 +159,8 @@ function Contenido({ negocio }: { readonly negocio: Perfil }) {
               </ul>
             )}
           </section>
+
+          <Opiniones negocioId={negocio.id} />
         </div>
 
         <aside className={estilos.ficha}>
@@ -170,13 +174,11 @@ function Contenido({ negocio }: { readonly negocio: Perfil }) {
             </span>
           </p>
 
-          {nota === null ? (
+          {negocio.calificacionPromedio === null ? (
             <p className={estilos.sinNota}>Sin opiniones todavía</p>
           ) : (
             <p className={estilos.nota}>
-              <span className={estilos.estrella} aria-hidden="true">
-                ★
-              </span>
+              <Estrellas valor={negocio.calificacionPromedio} />
               <strong>{nota}</strong>
               <span className={estilos.opiniones}>
                 {numero(negocio.numeroOpiniones)}{' '}
