@@ -1,4 +1,4 @@
-import { enviar } from './cliente';
+import { enviar, obtener } from './cliente';
 import type {
   RegistroEmprendedor,
   RespuestaRegistroEmprendedor,
@@ -43,4 +43,33 @@ export function registrarEmprendedor(
   peticion: RegistroEmprendedor,
 ): Promise<RespuestaRegistroEmprendedor> {
   return enviar<RespuestaRegistroEmprendedor>('/auth/registro-emprendedor', peticion);
+}
+
+/**
+ * Pide un enlace para recuperar la contraseña.
+ *
+ * **Responde 200 exista la cuenta o no**, y sin el token: ese sale solo por
+ * correo. La pantalla tiene que respetar esa decisión igual que el endpoint, y
+ * enseñar el mismo mensaje en los dos casos.
+ */
+export function solicitarRecuperacion(correo: string): Promise<void> {
+  return enviar<void>('/auth/recuperacion', { correo });
+}
+
+/**
+ * Comprueba si un enlace todavía vale, antes de pedir la contraseña nueva.
+ *
+ * Un enlace caducado, ya usado o inventado responde **410**, no 404: existió y
+ * ha dejado de servir. Sin esta llamada habría que escribir la contraseña dos
+ * veces para descubrirlo.
+ */
+export function comprobarEnlaceDeRecuperacion(token: string): Promise<void> {
+  // El token viaja dentro de la ruta, así que se codifica: llega de la barra
+  // de direcciones y no tiene por qué ser lo que esperamos.
+  return obtener<void>(`/auth/recuperacion/${encodeURIComponent(token)}`);
+}
+
+/** Cambia la contraseña y gasta el enlace. Responde 204, sin cuerpo. */
+export function restablecerContrasena(token: string, contrasena: string): Promise<void> {
+  return enviar<void>(`/auth/recuperacion/${encodeURIComponent(token)}`, { contrasena });
 }
