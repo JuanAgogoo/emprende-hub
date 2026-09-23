@@ -25,6 +25,19 @@ services:
       timeout: 5s
       retries: 10
 
+  # Servidor SMTP de mentira con interfaz web: recoge los correos que manda la
+  # API —hoy solo el de recuperar la contraseña— y los enseña en el 8025, sin
+  # internet y sin cuenta de correo de nadie.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: emprendehub-correo
+    environment:
+      TZ: America/Bogota
+    ports:
+      # 1025 el SMTP, 8025 la bandeja que se abre en el navegador.
+      - "${SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_PORT:-8025}:8025"
+
   backend:
     build: ./backend
     container_name: emprendehub-api
@@ -34,6 +47,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     environment:
       # Dentro de la red de compose la base es `postgres:5432`. El 5433 es el
       # puerto que se publica al host, y aquí no pinta nada.
@@ -43,6 +58,10 @@ services:
       # pasar por el administrador. Se quita esta línea para volver a la
       # moderación de verdad (B6 y B2), que es lo que dice el dominio.
       MODERACION_AUTOMATICA: "true"
+      # Dentro de la red de compose el correo es `mailpit:1025`, igual que la
+      # base es `postgres:5432`.
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
     ports:
       - "${API_PORT:-8080}:8080"
     volumes:

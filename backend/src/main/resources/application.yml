@@ -26,6 +26,20 @@ spring:
   jackson:
     time-zone: America/Bogota
 
+  mail:
+    # Mailpit, un servicio más de docker-compose.yml: recoge los correos y los
+    # enseña en su interfaz web del 8025, sin internet y sin cuenta de nadie.
+    # Para salir al mundo real se cambian estas tres propiedades y nada más.
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail:
+        smtp:
+          # Mailpit escucha en claro y no pide credenciales.
+          auth: false
+          starttls:
+            enable: false
+
   servlet:
     multipart:
       # B9 permite 5 MB por imagen y la regla vive en FotoService, que es donde
@@ -55,6 +69,18 @@ emprendehub:
     #
     # Para volver a la moderación real, quitar la variable del entorno.
     automatica: ${MODERACION_AUTOMATICA:false}
+
+  correo:
+    # El remitente no tiene que existir: Mailpit acepta cualquiera.
+    remitente: ${MAIL_FROM:no-responder@emprendehub.co}
+    # Dónde vive el frontend, que es quien abre el enlace del correo. En Docker
+    # y fuera de Docker es el mismo 5173 del host.
+    url-base: ${APP_URL:http://localhost:5173}
+
+  recuperacion:
+    # Treinta minutos: suficiente para ir al correo, corto para lo que vale un
+    # enlace que cambia una contraseña.
+    minutos: ${RECUPERACION_MINUTOS:30}
 
   fotos:
     # Las imágenes se guardan en disco y en la base de datos solo queda el
