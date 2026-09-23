@@ -257,13 +257,13 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 60 endpoints y un recorrido de demostración de
+**El contrato completo, con los 61 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`backend/postman/EmprendeHub.postman_collection.json`, con **71 peticiones que cubren los
-60 endpoints**.
+`backend/postman/EmprendeHub.postman_collection.json`, con **72 peticiones que cubren los
+61 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
 2. Ejecutar las cuatro primeras peticiones de **1 · Acceso**. Cada una guarda su
@@ -302,7 +302,7 @@ cd backend
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**444 pruebas en verde y 98,1% de cobertura sobre `service/**`**, muy por encima
+**453 pruebas en verde y 98,2% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |

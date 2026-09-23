@@ -194,9 +194,16 @@ final para no volver a arrastrarla:
 
 | | |
 |---|---|
-| Endpoints | **60**, todos en [api.md](api.md) y en la colección de Postman |
-| Pruebas | **444** en verde, en los tres niveles |
-| Cobertura de `service/**` | **98,1%**, sobre el 80% que exige la rúbrica |
+| Endpoints | **61**, todos en [api.md](api.md) y en la colección de Postman |
+| Pruebas | **453** en verde, en los tres niveles |
+| Cobertura de `service/**` | **98,2%**, sobre el 80% que exige la rúbrica |
+
+Al cerrarse los catorce incrementos eran 60 endpoints y 444 pruebas. Lo que hay
+de más son las **ampliaciones acordadas** que vinieron después, ya con el backend
+entregado: el alta de emprendedor, la foto obligatoria por producto y el
+reordenado de la galería. Cada una se acordó antes de tocar nada; las reglas
+están en `agent-docs/estilo/02-backend.md`.
 
 **Al cambiar el código, actualizar estas cifras aquí y en el README.** Un número
-en un documento entregable envejece peor que no ponerlo.
+en un documento entregable envejece peor que no ponerlo. `./scripts/cifras.sh`
+las cuenta y dice cuáles se quedaron atrás; sale con código 1 si alguna falla.

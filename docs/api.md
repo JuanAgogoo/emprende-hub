@@ -799,7 +799,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**60 endpoints** en 71 peticiones, agrupadas por quién las usa. Su primera
+**61 endpoints** en 72 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
