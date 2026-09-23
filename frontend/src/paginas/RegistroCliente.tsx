@@ -105,10 +105,14 @@ export function RegistroCliente() {
 
     setEnviando(true);
     try {
-      await registrar(valores.nombre.trim(), valores.correo.trim(), valores.contrasena);
-      // El mismo destino que el inicio de sesión: los dos caminos crean un
-      // cliente y tienen que dejarlo en el mismo sitio.
-      navegar('/directorio', { replace: true });
+      const correo = valores.correo.trim();
+      await registrar(valores.nombre.trim(), correo, valores.contrasena);
+
+      // El alta no deja la sesión abierta: se pasa por el login y se entra con
+      // las credenciales recién elegidas. Se manda el correo para no obligar a
+      // escribirlo otra vez, y `replace` evita que «atrás» devuelva a un
+      // formulario que ya no se puede reenviar.
+      navegar('/entrar', { replace: true, state: { registrado: correo } });
     } catch (error: unknown) {
       if (error instanceof ErrorApi) {
         // Los errores de forma traen una clave por campo; los de negocio, no.

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { CampoContrasena } from '../componentes/CampoContrasena';
 import { useSesion } from '../estado/SesionContext';
@@ -27,6 +27,19 @@ function validar(valores: Valores): Partial<Record<keyof Valores, string>> {
   return errores;
 }
 
+/**
+ * El correo con el que se acaba de registrar, si viene del alta.
+ *
+ * `location.state` es dato externo —lo pone quien navega, y sobrevive a una
+ * recarga—, así que se comprueba la forma antes de usarlo en vez de confiar en
+ * que sea lo que esperamos.
+ */
+function correoRecienRegistrado(estado: unknown): string | null {
+  if (typeof estado !== 'object' || estado === null) return null;
+  const traspaso = estado as Record<string, unknown>;
+  return typeof traspaso.registrado === 'string' ? traspaso.registrado : null;
+}
+
 /** A dónde va cada quien según su rol. */
 function destino(rol: Rol): string {
   switch (rol) {
@@ -47,7 +60,12 @@ export function Login() {
   const { entrar } = useSesion();
   const navegar = useNavigate();
 
-  const [valores, setValores] = useState<Valores>({ correo: '', contrasena: '' });
+  const recienRegistrado = correoRecienRegistrado(useLocation().state);
+
+  const [valores, setValores] = useState<Valores>({
+    correo: recienRegistrado ?? '',
+    contrasena: '',
+  });
   const [enviado, setEnviado] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
@@ -91,6 +109,14 @@ export function Login() {
         </p>
 
         <form className={estilos.formulario} onSubmit={alEnviar} noValidate>
+          {/* El fallo manda sobre el aviso: si el intento acaba de fallar, lo
+              último que pasó no es que la cuenta se creara. */}
+          {fallo === null && recienRegistrado !== null && (
+            <p className={estilos.aviso} role="status">
+              Tu cuenta está creada. Entra con el correo y la contraseña que acabas de elegir.
+            </p>
+          )}
+
           {fallo !== null && (
             <p className={estilos.fallo} role="alert">
               {fallo}
