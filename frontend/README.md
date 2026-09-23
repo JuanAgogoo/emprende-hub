@@ -9,17 +9,20 @@ Necesita **el backend corriendo**, porque en desarrollo el servidor de Vite hace
 de proxy hacia él. Lo más corto, desde la raíz del repositorio:
 
 ```bash
-docker compose up -d              # base, API y web, con recarga en caliente
+docker compose up -d              # base, API, correo y web, con recarga en caliente
 ```
 
 O en el host, si prefieres no pasar por Docker para el frontend:
 
 ```bash
-docker compose up -d postgres     # solo la base, desde la raíz
-cd backend && ./gradlew bootRun   # API en el 8080
-cd frontend && npm install        # solo la primera vez
-npm run dev                       # http://localhost:5173
+docker compose up -d postgres mailpit   # base y correo, desde la raíz
+cd backend && ./gradlew bootRun         # API en el 8080
+cd frontend && npm install              # solo la primera vez
+npm run dev                             # http://localhost:5173
 ```
+
+Mailpit recoge los correos de la recuperación de contraseña y los enseña en
+<http://localhost:8025>. Sin él, el enlace no llega a ninguna parte.
 
 Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 
@@ -32,7 +35,8 @@ Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 
 ## Las pantallas
 
-Las nueve rutas de la fase 1, todas declaradas en `src/App.tsx`:
+Las once rutas, todas declaradas en `src/App.tsx`: las nueve de la fase 1 más
+las dos que añade la recuperación de contraseña.
 
 | Ruta | Pantalla | Quién entra |
 |---|---|---|
@@ -42,13 +46,20 @@ Las nueve rutas de la fase 1, todas declaradas en `src/App.tsx`:
 | `/entrar` | Un solo acceso que deriva según el rol | Cualquiera |
 | `/registro` | Alta de cliente: el formulario corto | Cualquiera |
 | `/registro-emprendedor` | El asistente de cuatro pasos | Cualquiera |
+| `/recuperar` | Pide el correo y manda el enlace | Cualquiera |
+| `/recuperar/:token` | Elegir la contraseña nueva, desde el enlace del correo | Quien tenga el enlace |
 | `/mi-negocio` | El negocio propio, **solo de consulta** | `EMPRENDEDOR` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 
-Lo que **no** entra en esta fase, para que nadie lo busque: el panel de
-administración, el dashboard de gestión —editar, buzón, visitas—, los cursos, el
-listado de opiniones y recuperar la contraseña, que no existe en el backend.
+El perfil público lleva además **las opiniones**: se leen sin sesión, y con
+sesión se califica con estrellas, se escribe la reseña y se edita o se borra la
+propia. No son una ruta aparte porque viven dentro de `/negocios/:id`.
+
+Lo que **no** entra todavía, para que nadie lo busque: el panel de
+administración, el dashboard de gestión —editar, buzón, visitas—, los cursos y
+denunciar una opinión, que existe en el backend pero se queda fuera hasta que
+haya quien resuelva las denuncias.
 
 > `/mi-negocio` comprueba el rol **por comodidad de la interfaz, no por
 > seguridad**. Quien mande la petición a mano se topa igual con el backend, que
@@ -90,8 +101,10 @@ src/
 ```
 
 Las reglas de estilo visual están en [`../docs/diseno.md`](../docs/diseno.md) y
-el plan de incrementos en
-[`../docs/plan-de-entrega-frontend-fase-1.md`](../docs/plan-de-entrega-frontend-fase-1.md).
+los planes de incrementos en
+[`../docs/plan-de-entrega-frontend-fase-1.md`](../docs/plan-de-entrega-frontend-fase-1.md)
+y
+[`../docs/plan-de-entrega-frontend-fase-2.md`](../docs/plan-de-entrega-frontend-fase-2.md).
 
 ## Antes de dar un incremento por terminado
 
