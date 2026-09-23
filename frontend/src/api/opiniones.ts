@@ -1,4 +1,4 @@
-import { consulta, enviar, obtener } from './cliente';
+import { actualizar, consulta, eliminar, enviar, obtener } from './cliente';
 import type { DatosDeOpinion, Opinion } from '../types/opinion';
 import type { Pagina } from '../types/pagina';
 
@@ -39,4 +39,25 @@ export function obtenerMiOpinion(negocioId: number): Promise<Opinion> {
  */
 export function publicarOpinion(negocioId: number, datos: DatosDeOpinion): Promise<Opinion> {
   return enviar<Opinion>(`/negocios/${negocioId}/opiniones`, datos, true);
+}
+
+/**
+ * Cambia la opinión propia sobre un negocio. La deja marcada como editada.
+ *
+ * La ruta **no lleva identificador de opinión**: cada persona tiene como mucho
+ * una por negocio (C2), así que `/mia` la identifica sin ambigüedad y sin dar
+ * pie a probar con el número de otra.
+ */
+export function editarOpinion(negocioId: number, datos: DatosDeOpinion): Promise<Opinion> {
+  return actualizar<Opinion>(`/negocios/${negocioId}/opiniones/mia`, datos, true);
+}
+
+/**
+ * Borra la opinión propia. Responde `204`, sin cuerpo.
+ *
+ * El backend recalcula el promedio del negocio, y si era la única vuelve a ser
+ * **nulo y no cero** (C5). Después de esto, volver a opinar es posible.
+ */
+export function borrarOpinion(negocioId: number): Promise<void> {
+  return eliminar(`/negocios/${negocioId}/opiniones/mia`, true);
 }
