@@ -205,25 +205,21 @@
   gap: var(--e-2);
 }
 
-.red {
+/* Los logotipos van sin recuadro: encerrar un cuadrado de marca en una píldora
+   son dos cajas para una sola cosa. La caja sigue estando para el dedo, que
+   necesita sus 44px aunque el dibujo mida 28. */
+.redIcono {
   display: inline-flex;
   align-items: center;
-  min-height: var(--toque-min);
-  padding-inline: var(--e-4);
-  border: 1px solid var(--color-borde-control);
-  border-radius: var(--radio-full);
-  font-size: var(--texto-sm);
-  font-weight: 600;
-  color: var(--color-cuerpo);
-  text-decoration: none;
-  transition:
-    border-color var(--dur-rapida) var(--curva),
-    color var(--dur-rapida) var(--curva);
+  justify-content: center;
+  width: var(--toque-min);
+  height: var(--toque-min);
+  border-radius: var(--radio-md);
+  transition: opacity var(--dur-rapida) var(--curva);
 }
 
-.red:hover {
-  border-color: var(--color-acento);
-  color: var(--color-acento);
+.redIcono:hover {
+  opacity: 0.8;
 }
 
 .primario {
