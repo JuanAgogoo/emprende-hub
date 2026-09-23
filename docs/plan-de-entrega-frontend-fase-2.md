@@ -275,7 +275,7 @@ feat(opiniones): añadir la publicación de reseñas con calificación por estre
 > dueño del negocio no ve el formulario, y si manda la petición a mano el backend
 > le responde. Intentar publicar sin elegir estrellas no envía nada.
 
-### PR 3 · `feat/frontend-editar-opinion` · **TERMINADO**
+### PR 3 · `feat/frontend-editar-opinion` · **TERMINADO** · [#37](https://github.com/JuanAgogoo/emprende-hub/pull/37)
 
 Editar y borrar la propia, con `PUT` y `DELETE /opiniones/mia`. Sin esto, C2 deja
 atrapado a quien se equivoque al puntuar: no puede corregirlo y la segunda
@@ -310,7 +310,7 @@ feat(opiniones): permitir editar y borrar la reseña propia
 El incremento de las decisiones 2 y 3. El primero es de backend y el segundo lo
 consume: no hay pantalla sin endpoint, ni correo sin servidor que lo reciba.
 
-### PR 4 · `feat/recuperar-contrasena` — backend
+### PR 4 · `feat/recuperar-contrasena` — backend · **TERMINADO**
 
 El más grande de la fase, y el único que toca las dos mitades del repositorio.
 **Reabre I1**, así que `docs/decisiones-dominio.md` entra en el mismo PR.
@@ -413,7 +413,7 @@ PR 13 de la fase 1: antes no hay nada estable que documentar.
 docs: documentar las opiniones y la recuperación de contraseña
 ```
 
-> **Hito:** alguien que no ha tocado el proyecto levanta las tres piezas
+> **Hito:** alguien que no ha tocado el proyecto levanta las cuatro piezas
 > siguiendo solo el README, opina sobre un negocio y recupera una contraseña
 > viendo el correo en Mailpit, sin preguntar nada.
 

@@ -17,8 +17,10 @@ imágenes.
 docker compose up -d
 ```
 
-Eso levanta las tres piezas y deja la web en <http://localhost:5173> y la API en
-<http://localhost:8080>. **La primera vez tarda varios minutos**: Gradle se
+Eso levanta las cuatro piezas y deja la web en <http://localhost:5173>, la API
+en <http://localhost:8080> y la bandeja de correo de
+[Mailpit](https://github.com/axllent/mailpit) en <http://localhost:8025>, que es
+donde se ven los correos que manda la aplicación. **La primera vez tarda varios minutos**: Gradle se
 descarga sus dependencias. Las siguientes son segundos, porque la caché vive en
 un volumen.
 
@@ -43,11 +45,15 @@ Si prefieres el bucle de siempre —`bootRun` y `npm run dev` en el host—, arr
 solo la base:
 
 ```bash
-docker compose up -d postgres     # solo PostgreSQL, en el 5433
-cd backend && ./gradlew bootRun   # la API en el 8080
-cd frontend && npm install        # solo la primera vez
-npm run dev                       # la web en el 5173
+docker compose up -d postgres mailpit   # la base en el 5433 y el correo en el 1025
+cd backend && ./gradlew bootRun         # la API en el 8080
+cd frontend && npm install              # solo la primera vez
+npm run dev                             # la web en el 5173
 ```
+
+Mailpit entra también aquí: sin un SMTP escuchando, el correo de recuperación no
+sale. La aplicación no falla por eso —la petición sigue devolviendo `200`—, pero
+el enlace no llega a ninguna parte.
 
 **No mezcles los dos modos a la vez**: los dos quieren el 8080 y el 5173, y el
 segundo en arrancar falla. Para cambiar de uno a otro, `docker compose stop
@@ -72,6 +78,8 @@ docker compose down -v        # borra también la base y las cachés
 | `DB_PORT` | `5433` | El 5432 suele estar ocupado por otro PostgreSQL |
 | `API_PORT` | `8080` | Cambiar si ya tienes un backend corriendo |
 | `WEB_PORT` | `5173` | |
+| `SMTP_PORT` | `1025` | El SMTP de Mailpit, al que manda el backend |
+| `MAILPIT_PORT` | `8025` | La bandeja de Mailpit, que se abre en el navegador |
 | `HOST_UID` / `HOST_GID` | `1000` | El usuario con el que corren los contenedores |
 | `MODERACION_AUTOMATICA` | `false` | **Provisional.** A `true`, los negocios nacen publicados y sus fotos aprobadas |
 
@@ -257,13 +265,13 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 61 endpoints y un recorrido de demostración de
+**El contrato completo, con los 64 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`backend/postman/EmprendeHub.postman_collection.json`, con **72 peticiones que cubren los
-61 endpoints**.
+`backend/postman/EmprendeHub.postman_collection.json`, con **75 peticiones que cubren los
+64 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
 2. Ejecutar las cuatro primeras peticiones de **1 · Acceso**. Cada una guarda su
@@ -302,12 +310,12 @@ cd backend
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**453 pruebas en verde y 98,2% de cobertura sobre `service/**`**, muy por encima
+**480 pruebas en verde y 98,3% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |
 |---|---|---|
-| Unitario | Mockito | Los 15 servicios, con el repositorio simulado |
+| Unitario | Mockito | Los 17 servicios, con el repositorio simulado |
 | Repositorio | `@DataJpaTest` + Testcontainers | Las consultas contra PostgreSQL real |
 | Controlador | `@WebMvcTest` + MockMvc | Rutas, códigos y forma del JSON |
 
@@ -353,6 +361,10 @@ por variables de entorno:
 | `JWT_SECRET` | Clave de desarrollo, sustituir en cualquier despliegue |
 | `JWT_EXPIRATION` | `3600000` (una hora) |
 | `ADMIN_CORREO` / `ADMIN_CONTRASENA` | `admin@emprendehub.co` / `admin12345` |
+| `MAIL_HOST` / `MAIL_PORT` | `localhost` / `1025` (Mailpit) |
+| `MAIL_FROM` | `no-responder@emprendehub.co` |
+| `APP_URL` | `http://localhost:5173`, que es lo que lleva el enlace del correo |
+| `RECUPERACION_MINUTOS` | `30`, lo que vive un enlace de recuperación |
 
 El esquema lo genera Hibernate a partir de las entidades (`ddl-auto: update`), y
 los datos iniciales los carga un `CommandLineRunner` al arrancar.
