@@ -5,16 +5,26 @@ import formulario from '../paginas/Formulario.module.css';
 import estilos from './FormularioOpinion.module.css';
 
 interface Props {
+  /** Los valores de partida. Con ellos, el formulario edita en vez de publicar. */
+  readonly inicial?: DatosDeOpinion;
   readonly enviando: boolean;
   /** El fallo que devolvió la API, si el último intento no salió. */
   readonly fallo: string | null;
   readonly alEnviar: (datos: DatosDeOpinion) => void;
+  /** Solo al editar: dejar los cambios sin guardar. */
+  readonly alCancelar?: () => void;
 }
 
 interface Valores {
   /** 0 mientras no se ha elegido estrella. La API solo acepta de 1 a 5. */
   readonly calificacion: number;
   readonly comentario: string;
+}
+
+/** Lo que dice el botón de enviar, que es lo único que cambia al editar. */
+function textoDelBoton(editando: boolean, enviando: boolean): string {
+  if (editando) return enviando ? 'Guardando…' : 'Guardar cambios';
+  return enviando ? 'Publicando…' : 'Publicar opinión';
 }
 
 /**
@@ -38,9 +48,17 @@ function validar(valores: Valores): Partial<Record<keyof Valores, string>> {
 /**
  * Calificar y escribir la reseña. Es una sola pieza porque no hay forma de
  * publicar sin nota: `calificacion` es obligatoria y el comentario no.
+ *
+ * **El mismo formulario publica y edita.** Con `inicial` empieza con la reseña
+ * puesta y guarda los cambios; sin él, empieza vacío y publica. Es lo único que
+ * cambia entre los dos casos, así que no hay dos formularios que mantener.
  */
-export function FormularioOpinion({ enviando, fallo, alEnviar }: Props) {
-  const [valores, setValores] = useState<Valores>({ calificacion: 0, comentario: '' });
+export function FormularioOpinion({ inicial, enviando, fallo, alEnviar, alCancelar }: Props) {
+  const editando = inicial !== undefined;
+  const [valores, setValores] = useState<Valores>({
+    calificacion: inicial?.calificacion ?? 0,
+    comentario: inicial?.comentario ?? '',
+  });
   const [enviado, setEnviado] = useState(false);
 
   const errores = validar(valores);
@@ -101,10 +119,23 @@ export function FormularioOpinion({ enviando, fallo, alEnviar }: Props) {
         </small>
       </div>
 
-      {/* Deshabilitado mientras se envía: sin esto se pulsa dos veces. */}
-      <button className={formulario.primario} type="submit" disabled={enviando}>
-        {enviando ? 'Publicando…' : 'Publicar opinión'}
-      </button>
+      <div className={estilos.acciones}>
+        {/* Deshabilitado mientras se envía: sin esto se pulsa dos veces. */}
+        <button className={formulario.primario} type="submit" disabled={enviando}>
+          {textoDelBoton(editando, enviando)}
+        </button>
+
+        {alCancelar !== undefined && (
+          <button
+            className={estilos.secundario}
+            type="button"
+            onClick={alCancelar}
+            disabled={enviando}
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   );
 }

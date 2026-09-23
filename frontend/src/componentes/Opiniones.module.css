@@ -43,6 +43,58 @@
   font-weight: 600;
 }
 
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.secundario,
+.peligro {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.secundario:hover:not(:disabled),
+.peligro:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.secundario:disabled,
+.peligro:disabled {
+  color: var(--color-apagado);
+  cursor: progress;
+}
+
+/* Borrar no se deshace, así que el botón no se disfraza de uno más. */
+.peligro {
+  border-color: color-mix(in srgb, var(--color-error) 50%, var(--color-borde));
+  color: var(--color-error);
+}
+
+.confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.falloBorrado {
+  color: var(--color-error);
+}
+
 .lista {
   display: flex;
   flex-direction: column;

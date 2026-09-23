@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { obtenerMiNegocio } from '../api/negocios';
-import { listarOpiniones, obtenerMiOpinion, publicarOpinion } from '../api/opiniones';
+import {
+  borrarOpinion,
+  editarOpinion,
+  listarOpiniones,
+  obtenerMiOpinion,
+  publicarOpinion,
+} from '../api/opiniones';
 import { useSesion } from '../estado/SesionContext';
 import { EsqueletoOpiniones } from './Esqueleto';
 import { Estrellas } from './Estrellas';
@@ -17,8 +23,11 @@ import estilos from './Opiniones.module.css';
 
 interface Props {
   readonly negocioId: number;
-  /** Se llama al publicar: el perfil relee su promedio y su recuento (C4). */
-  readonly alPublicar: () => void;
+  /**
+   * Se llama cuando las opiniones cambian —al publicar, al editar y al
+   * borrar—: el perfil relee su promedio y su recuento (C4, C5).
+   */
+  readonly alCambiarOpiniones: () => void;
 }
 
 /**
@@ -40,6 +49,12 @@ type Participacion =
   | { readonly estado: 'ES_DUENO' }
   | { readonly estado: 'PUEDE_OPINAR' }
   | { readonly estado: 'YA_OPINO'; readonly mia: Opinion };
+
+/**
+ * Qué se está haciendo con la opinión propia. El borrado pide confirmación
+ * porque es destructivo y no se deshace.
+ */
+type ModoPropia = 'LECTURA' | 'EDITANDO' | 'CONFIRMANDO_BORRADO';
 
 /** Un 404 aquí no es un error: es que esa cuenta no tiene negocio. */
 async function negocioPropio(): Promise<number | null> {
@@ -78,14 +93,16 @@ async function averiguarParticipacion(negocioId: number, rol: Rol): Promise<Part
  * Pide su propia página porque no viene dentro del perfil: son dos endpoints
  * distintos y paginar aquí no tiene por qué recargar el negocio entero.
  */
-export function Opiniones({ negocioId, alPublicar }: Props) {
+export function Opiniones({ negocioId, alCambiarOpiniones }: Props) {
   const { sesion } = useSesion();
   const [carga, setCarga] = useState<EstadoCarga<Pagina<Opinion>>>({ estado: 'CARGANDO' });
   const [pagina, setPagina] = useState(0);
-  // Cambiarlo es lo que vuelve a disparar el efecto: lo usan «Reintentar» y la
-  // publicación, que tiene que enseñar la nueva opinión sin recargar (C4).
+  // Cambiarlo es lo que vuelve a disparar el efecto: lo usan «Reintentar» y los
+  // tres cambios de la opinión propia, que tienen que verse en la lista sin
+  // recargar la página (C4).
   const [intento, setIntento] = useState(0);
   const [participacion, setParticipacion] = useState<Participacion>({ estado: 'COMPROBANDO' });
+  const [modo, setModo] = useState<ModoPropia>('LECTURA');
   const [enviando, setEnviando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
 
@@ -134,6 +151,13 @@ export function Opiniones({ negocioId, alPublicar }: Props) {
     };
   }, [negocioId, sesion]);
 
+  /** Vuelve a pedir la lista y deja que el perfil ponga al día su ficha. */
+  function refrescar(volverAlPrincipio: boolean) {
+    if (volverAlPrincipio) setPagina(0);
+    setIntento((valor) => valor + 1);
+    alCambiarOpiniones();
+  }
+
   async function publicar(datos: DatosDeOpinion) {
     setEnviando(true);
     setFallo(null);
@@ -142,15 +166,56 @@ export function Opiniones({ negocioId, alPublicar }: Props) {
       const mia = await publicarOpinion(negocioId, datos);
       setParticipacion({ estado: 'YA_OPINO', mia });
       // La suya es la más reciente, así que entra arriba de la primera página.
-      setPagina(0);
-      setIntento((valor) => valor + 1);
-      alPublicar();
+      refrescar(true);
     } catch (error: unknown) {
       const mensaje = error instanceof Error ? error.message : 'No se pudo publicar tu opinión';
       setFallo(mensaje);
     } finally {
       setEnviando(false);
     }
+  }
+
+  async function editar(datos: DatosDeOpinion) {
+    setEnviando(true);
+    setFallo(null);
+
+    try {
+      const mia = await editarOpinion(negocioId, datos);
+      setParticipacion({ estado: 'YA_OPINO', mia });
+      setModo('LECTURA');
+      // Editar no cambia el orden —la fecha de creación no se toca—, así que se
+      // rehace la página que se está viendo y no la primera.
+      refrescar(false);
+    } catch (error: unknown) {
+      const mensaje = error instanceof Error ? error.message : 'No se pudo guardar tu opinión';
+      setFallo(mensaje);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function borrar() {
+    setEnviando(true);
+    setFallo(null);
+
+    try {
+      await borrarOpinion(negocioId);
+      // Volver a opinar pasa a ser posible, así que vuelve el formulario.
+      setParticipacion({ estado: 'PUEDE_OPINAR' });
+      setModo('LECTURA');
+      refrescar(true);
+    } catch (error: unknown) {
+      const mensaje = error instanceof Error ? error.message : 'No se pudo borrar tu opinión';
+      setFallo(mensaje);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  /** Cambiar de modo descarta el fallo del intento anterior. */
+  function cambiarModo(siguiente: ModoPropia) {
+    setFallo(null);
+    setModo(siguiente);
   }
 
   const total = carga.estado === 'EXITO' ? carga.datos.totalElements : 0;
@@ -168,9 +233,13 @@ export function Opiniones({ negocioId, alPublicar }: Props) {
 
       <TuParte
         participacion={participacion}
+        modo={modo}
         enviando={enviando}
         fallo={fallo}
         alPublicar={publicar}
+        alEditar={editar}
+        alBorrar={borrar}
+        alCambiarModo={cambiarModo}
       />
 
       <Listado
@@ -184,13 +253,26 @@ export function Opiniones({ negocioId, alPublicar }: Props) {
 
 interface PropsTuParte {
   readonly participacion: Participacion;
+  readonly modo: ModoPropia;
   readonly enviando: boolean;
   readonly fallo: string | null;
   readonly alPublicar: (datos: DatosDeOpinion) => void;
+  readonly alEditar: (datos: DatosDeOpinion) => void;
+  readonly alBorrar: () => void;
+  readonly alCambiarModo: (modo: ModoPropia) => void;
 }
 
 /** Lo que se le ofrece a quien mira, según quién sea. */
-function TuParte({ participacion, enviando, fallo, alPublicar }: PropsTuParte) {
+function TuParte({
+  participacion,
+  modo,
+  enviando,
+  fallo,
+  alPublicar,
+  alEditar,
+  alBorrar,
+  alCambiarModo,
+}: PropsTuParte) {
   // Volver aquí después de entrar: el login lo lee de `state`.
   const { pathname } = useLocation();
 
@@ -225,17 +307,130 @@ function TuParte({ participacion, enviando, fallo, alPublicar }: PropsTuParte) {
     // páginas podría estar en cualquiera.
     case 'YA_OPINO':
       return (
-        <div className={estilos.tuya}>
-          <h3 className={estilos.subtitulo}>Tu opinión</h3>
-          <ul className={estilos.lista}>
-            <OpinionPublicada opinion={participacion.mia} />
-          </ul>
-        </div>
+        <TuOpinion
+          mia={participacion.mia}
+          modo={modo}
+          enviando={enviando}
+          fallo={fallo}
+          alEditar={alEditar}
+          alBorrar={alBorrar}
+          alCambiarModo={alCambiarModo}
+        />
       );
 
     default:
       return casoImposible(participacion);
   }
+}
+
+interface PropsTuOpinion {
+  readonly mia: Opinion;
+  readonly modo: ModoPropia;
+  readonly enviando: boolean;
+  readonly fallo: string | null;
+  readonly alEditar: (datos: DatosDeOpinion) => void;
+  readonly alBorrar: () => void;
+  readonly alCambiarModo: (modo: ModoPropia) => void;
+}
+
+/** La opinión propia: leerla, cambiarla o borrarla. */
+function TuOpinion({
+  mia,
+  modo,
+  enviando,
+  fallo,
+  alEditar,
+  alBorrar,
+  alCambiarModo,
+}: PropsTuOpinion) {
+  const titulo = useRef<HTMLHeadingElement>(null);
+  const modoAnterior = useRef<ModoPropia>(modo);
+
+  // El botón que se acaba de pulsar desaparece con el cambio de modo, y con él
+  // se iría el foco al principio de la página. Se lleva al título del bloque,
+  // que además dice en voz alta qué acaba de aparecer. En el primer dibujo no
+  // se toca el foco: ahí nadie ha pulsado nada.
+  useEffect(() => {
+    if (modoAnterior.current !== modo) {
+      modoAnterior.current = modo;
+      titulo.current?.focus();
+    }
+  }, [modo]);
+
+  return (
+    <div className={estilos.tuya}>
+      <h3 className={estilos.subtitulo} tabIndex={-1} ref={titulo}>
+        {modo === 'EDITANDO' ? 'Cambiar tu opinión' : 'Tu opinión'}
+      </h3>
+
+      {modo === 'EDITANDO' ? (
+        /* El mismo formulario que publica, con los valores puestos. */
+        <FormularioOpinion
+          inicial={{ calificacion: mia.calificacion, comentario: mia.comentario ?? undefined }}
+          enviando={enviando}
+          fallo={fallo}
+          alEnviar={alEditar}
+          alCancelar={() => alCambiarModo('LECTURA')}
+        />
+      ) : (
+        <>
+          <ul className={estilos.lista}>
+            <OpinionPublicada opinion={mia} />
+          </ul>
+
+          {modo === 'CONFIRMANDO_BORRADO' ? (
+            <div className={estilos.confirmacion}>
+              <p id="aviso-borrado">
+                Se borra para siempre y el negocio deja de contarla en su nota.
+              </p>
+              {fallo !== null && (
+                <p className={estilos.falloBorrado} role="alert">
+                  {fallo}
+                </p>
+              )}
+              <div className={estilos.acciones}>
+                <button
+                  type="button"
+                  className={estilos.peligro}
+                  onClick={alBorrar}
+                  disabled={enviando}
+                  aria-describedby="aviso-borrado"
+                >
+                  {enviando ? 'Borrando…' : 'Sí, borrarla'}
+                </button>
+                {/* Cancelar no borra nada: la deja como estaba. */}
+                <button
+                  type="button"
+                  className={estilos.secundario}
+                  onClick={() => alCambiarModo('LECTURA')}
+                  disabled={enviando}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={estilos.acciones}>
+              <button
+                type="button"
+                className={estilos.secundario}
+                onClick={() => alCambiarModo('EDITANDO')}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                className={estilos.secundario}
+                onClick={() => alCambiarModo('CONFIRMANDO_BORRADO')}
+              >
+                Borrar
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 interface PropsListado {

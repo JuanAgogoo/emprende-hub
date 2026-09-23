@@ -50,8 +50,9 @@ export function PerfilNegocio() {
   }, [id]);
 
   /**
-   * Vuelve a pedir el negocio **sin pasar por CARGANDO**: se usa al publicar
-   * una opinión, que cambia el promedio y el recuento de la ficha (C4).
+   * Vuelve a pedir el negocio **sin pasar por CARGANDO**: se usa cuando una
+   * opinión se publica, se edita o se borra, porque las tres cambian el
+   * promedio y el recuento de la ficha (C4, C5).
    *
    * Si pasara por CARGANDO, el bloque de opiniones se desmontaría y volvería a
    * empezar de cero justo después de publicar. Un fallo aquí se ignora a
@@ -100,7 +101,7 @@ export function PerfilNegocio() {
       );
 
     case 'EXITO':
-      return <Contenido negocio={carga.datos} alPublicarOpinion={refrescarNegocio} />;
+      return <Contenido negocio={carga.datos} alCambiarOpiniones={refrescarNegocio} />;
 
     default:
       return casoImposible(carga);
@@ -109,10 +110,10 @@ export function PerfilNegocio() {
 
 interface PropsContenido {
   readonly negocio: Perfil;
-  readonly alPublicarOpinion: () => void;
+  readonly alCambiarOpiniones: () => void;
 }
 
-function Contenido({ negocio, alPublicarOpinion }: PropsContenido) {
+function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
   const nota = calificacion(negocio.calificacionPromedio);
   const ubicacion = negocio.barrio === null ? negocio.ciudad : `${negocio.barrio}, ${negocio.ciudad}`;
   const disponibles = negocio.productos.filter((producto) => producto.disponible).length;
@@ -183,7 +184,7 @@ function Contenido({ negocio, alPublicarOpinion }: PropsContenido) {
             )}
           </section>
 
-          <Opiniones negocioId={negocio.id} alPublicar={alPublicarOpinion} />
+          <Opiniones negocioId={negocio.id} alCambiarOpiniones={alCambiarOpiniones} />
         </div>
 
         <aside className={estilos.ficha}>
