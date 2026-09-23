@@ -40,6 +40,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Un enlace de un solo uso que ya no sirve (410 Gone).
+     *
+     * <p>El 404 diría que nunca existió, y no es eso: el enlace existió y ha
+     * dejado de valer, o alguien se lo ha inventado. Los tres casos responden
+     * igual para no confirmar cuáles fueron reales.
+     */
+    @ExceptionHandler(EnlaceCaducadoException.class)
+    public ResponseEntity<Map<String, Object>> enlaceCaducado(EnlaceCaducadoException ex) {
+        return ResponseEntity.status(HttpStatus.GONE)
+                .body(cuerpo(HttpStatus.GONE, ex.getMessage()));
+    }
+
+    /**
      * Errores de Bean Validation.
      *
      * <p>Además del cuerpo común, añade una clave por cada campo inválido con su
