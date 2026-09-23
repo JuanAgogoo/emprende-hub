@@ -16,3 +16,18 @@ export interface Opinion {
   /** Cierto si su autor la cambió después de publicarla. */
   readonly editada: boolean;
 }
+
+/**
+ * Lo que se manda al publicar o al editar una opinión.
+ *
+ * La calificación es obligatoria porque es lo único que entra en el promedio
+ * del negocio; el comentario no se manda cuando está vacío, que es como el
+ * backend distingue «sin comentario» de «comentario en blanco».
+ */
+export interface DatosDeOpinion {
+  readonly calificacion: number;
+  readonly comentario?: string;
+}
+
+/** El máximo que admite el comentario. El contador del formulario lo enseña. */
+export const MAXIMO_COMENTARIO = 300;
