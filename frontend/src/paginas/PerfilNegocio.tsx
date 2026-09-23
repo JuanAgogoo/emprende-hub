@@ -49,6 +49,24 @@ export function PerfilNegocio() {
     };
   }, [id]);
 
+  /**
+   * Vuelve a pedir el negocio **sin pasar por CARGANDO**: se usa al publicar
+   * una opinión, que cambia el promedio y el recuento de la ficha (C4).
+   *
+   * Si pasara por CARGANDO, el bloque de opiniones se desmontaría y volvería a
+   * empezar de cero justo después de publicar. Un fallo aquí se ignora a
+   * propósito: la opinión ya está publicada y la ficha se pondrá al día en la
+   * siguiente carga.
+   */
+  function refrescarNegocio() {
+    const identificador = Number(id);
+    if (!Number.isInteger(identificador) || identificador <= 0) return;
+
+    obtenerPerfil(identificador)
+      .then((perfil) => setCarga({ estado: 'EXITO', datos: perfil }))
+      .catch(() => {});
+  }
+
   // El caso de «no existe» se contempla aquí aunque `NoEncontrada` ponga el
   // suyo: los efectos del hijo corren antes que los del padre, así que este lo
   // pisaría después y la pestaña acabaría diciendo «Negocio».
@@ -82,14 +100,19 @@ export function PerfilNegocio() {
       );
 
     case 'EXITO':
-      return <Contenido negocio={carga.datos} />;
+      return <Contenido negocio={carga.datos} alPublicarOpinion={refrescarNegocio} />;
 
     default:
       return casoImposible(carga);
   }
 }
 
-function Contenido({ negocio }: { readonly negocio: Perfil }) {
+interface PropsContenido {
+  readonly negocio: Perfil;
+  readonly alPublicarOpinion: () => void;
+}
+
+function Contenido({ negocio, alPublicarOpinion }: PropsContenido) {
   const nota = calificacion(negocio.calificacionPromedio);
   const ubicacion = negocio.barrio === null ? negocio.ciudad : `${negocio.barrio}, ${negocio.ciudad}`;
   const disponibles = negocio.productos.filter((producto) => producto.disponible).length;
@@ -160,7 +183,7 @@ function Contenido({ negocio }: { readonly negocio: Perfil }) {
             )}
           </section>
 
-          <Opiniones negocioId={negocio.id} />
+          <Opiniones negocioId={negocio.id} alPublicar={alPublicarOpinion} />
         </div>
 
         <aside className={estilos.ficha}>
