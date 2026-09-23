@@ -240,7 +240,7 @@ feat(opiniones): mostrar el listado de reseñas en el perfil público
 > de una página, el paginador trae otras distintas. Parar el backend y recargar
 > muestra el mensaje de error, no una pantalla en blanco.
 
-### PR 2 · `feat/frontend-opinar` · **TERMINADO**
+### PR 2 · `feat/frontend-opinar` · **TERMINADO** · [#36](https://github.com/JuanAgogoo/emprende-hub/pull/36)
 
 Calificar con estrellas y escribir la reseña, que son las peticiones 5 y 6 del
 backlog y una sola rebanada: no hay forma de publicar una opinión sin nota,
@@ -275,7 +275,7 @@ feat(opiniones): añadir la publicación de reseñas con calificación por estre
 > dueño del negocio no ve el formulario, y si manda la petición a mano el backend
 > le responde. Intentar publicar sin elegir estrellas no envía nada.
 
-### PR 3 · `feat/frontend-editar-opinion`
+### PR 3 · `feat/frontend-editar-opinion` · **TERMINADO**
 
 Editar y borrar la propia, con `PUT` y `DELETE /opiniones/mia`. Sin esto, C2 deja
 atrapado a quien se equivoque al puntuar: no puede corregirlo y la segunda
@@ -423,7 +423,7 @@ docs: documentar las opiniones y la recuperación de contraseña
 
 | Fase | Incrementos | Estado |
 |---|---|---|
-| 0 · Opiniones | PR 1–3 | |
+| 0 · Opiniones | PR 1–3 | **TERMINADO** |
 | 1 · Recuperar la contraseña | PR 4–5 | |
 | Cierre · Documentación | PR 6 | |
 
