@@ -1,7 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { obtenerCategoriasNegocio } from '../api/catalogos';
-import { obtenerDestacados } from '../api/directorio';
+import { buscarNegocios, obtenerDestacados } from '../api/directorio';
 import { obtenerEstadisticasPortada } from '../api/estadisticas';
 import { EsqueletoTarjetas } from '../componentes/Esqueleto';
 import { TarjetaNegocio } from '../componentes/TarjetaNegocio';
@@ -11,6 +11,7 @@ import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { CategoriaNegocio } from '../types/catalogo';
 import type { EstadisticasPortada } from '../types/estadisticas';
 import type { TarjetaNegocio as Negocio } from '../types/negocio';
+import type { Pagina } from '../types/pagina';
 import estilos from './Inicio.module.css';
 import { useTitulo } from '../titulo';
 
@@ -20,6 +21,23 @@ interface DatosPortada {
   readonly destacados: readonly Negocio[];
   readonly categorias: readonly CategoriaNegocio[];
 }
+
+/** El resultado de una búsqueda, atado al texto que la pidió. */
+interface Busqueda {
+  readonly consulta: string;
+  readonly carga: EstadoCarga<Pagina<Negocio>>;
+}
+
+/** Hasta aquí busca la portada; el resto se ve en el directorio. */
+const MAXIMO_SUGERENCIAS = 6;
+
+/**
+ * Con una sola letra la lista sería todo el directorio y no ayuda a nadie.
+ */
+const MINIMO_LETRAS = 2;
+
+/** Lo que se espera a que deje de escribir, para no lanzar una petición por tecla. */
+const ESPERA_MS = 300;
 
 const PASOS = [
   { titulo: 'Busca', texto: 'Filtra por categoría, ciudad, barrio y precio hasta dar con lo que necesitas.' },
@@ -31,7 +49,20 @@ export function Inicio() {
   useTitulo();
   const [carga, setCarga] = useState<EstadoCarga<DatosPortada>>({ estado: 'CARGANDO' });
   const [texto, setTexto] = useState('');
-  const navegar = useNavigate();
+  /**
+   * Lo último que se buscó, **con el texto que lo produjo**.
+   *
+   * Guardar la consulta al lado del resultado es lo que impide que, al seguir
+   * escribiendo, sigan en pantalla los resultados de lo anterior durante la
+   * espera: si no coincide con lo que hay escrito, no se pinta.
+   */
+  const [busqueda, setBusqueda] = useState<Busqueda | null>(null);
+  const resultados = useRef<HTMLDivElement>(null);
+
+  const consulta = texto.trim();
+  /** Solo se pinta lo que corresponde a lo que hay escrito ahora mismo. */
+  const enPantalla =
+    busqueda !== null && busqueda.consulta === consulta ? busqueda.carga : null;
 
   useEffect(() => {
     // Las tres llegan juntas: son del mismo backend y la portada no sirve de
@@ -52,10 +83,45 @@ export function Inicio() {
     };
   }, []);
 
+  /**
+   * La búsqueda de la portada, **sin salir de la portada**.
+   *
+   * Espera a que se deje de escribir antes de preguntar: sin eso saldría una
+   * petición por tecla. El guardia `vigente` evita que una respuesta lenta de
+   * hace tres letras pise a la de ahora, que es el fallo clásico de un buscador
+   * que va escribiendo.
+   */
+  useEffect(() => {
+    if (consulta.length < MINIMO_LETRAS) return;
+
+    let vigente = true;
+    const espera = setTimeout(() => {
+      setBusqueda({ consulta, carga: { estado: 'CARGANDO' } });
+      buscarNegocios({ texto: consulta, size: MAXIMO_SUGERENCIAS })
+        .then((pagina) => {
+          if (vigente) setBusqueda({ consulta, carga: { estado: 'EXITO', datos: pagina } });
+        })
+        .catch((error: unknown) => {
+          const mensaje = error instanceof Error ? error.message : 'No se pudo buscar';
+          if (vigente) setBusqueda({ consulta, carga: { estado: 'ERROR', mensaje } });
+        });
+    }, ESPERA_MS);
+
+    return () => {
+      vigente = false;
+      clearTimeout(espera);
+    };
+  }, [consulta]);
+
+  /**
+   * El botón ya no lleva a ninguna parte: los resultados están debajo.
+   *
+   * Lo que hace es mover el foco hasta ellos, que es lo que necesita quien
+   * navega con teclado y no ve que la lista ha aparecido sola.
+   */
   function buscar(evento: FormEvent) {
     evento.preventDefault();
-    const limpio = texto.trim();
-    navegar(limpio === '' ? '/directorio' : `/directorio?texto=${encodeURIComponent(limpio)}`);
+    resultados.current?.focus();
   }
 
   return (
@@ -87,6 +153,12 @@ export function Inicio() {
             Buscar
           </button>
         </form>
+
+        {enPantalla !== null && (
+          <div className={estilos.resultados} ref={resultados} tabIndex={-1}>
+            <ResultadosDeBusqueda busqueda={enPantalla} texto={consulta} />
+          </div>
+        )}
       </section>
 
       <ContenidoPortada carga={carga} />
@@ -217,6 +289,97 @@ function ContenidoPortada({ carga }: { readonly carga: EstadoCarga<DatosPortada>
 
     default:
       return casoImposible(carga);
+  }
+}
+
+/**
+ * Lo que sale debajo del buscador mientras se escribe.
+ *
+ * Es una lista compacta, no el directorio: enseña las primeras y ofrece el
+ * enlace para verlas todas allí. La portada no tiene que convertirse en otra
+ * pantalla de listado.
+ */
+function ResultadosDeBusqueda({
+  busqueda,
+  texto,
+}: {
+  readonly busqueda: EstadoCarga<Pagina<Negocio>>;
+  readonly texto: string;
+}) {
+  switch (busqueda.estado) {
+    case 'CARGANDO':
+      return (
+        <p className={estilos.buscando} aria-live="polite">
+          Buscando «{texto}»…
+        </p>
+      );
+
+    case 'ERROR':
+      return (
+        <p className={estilos.errorBusqueda} role="alert">
+          No se pudo buscar: {busqueda.mensaje}.
+        </p>
+      );
+
+    case 'EXITO': {
+      const { content, totalElements } = busqueda.datos;
+
+      if (content.length === 0) {
+        return (
+          <p className={estilos.sinResultados} aria-live="polite">
+            Ningún negocio coincide con «{texto}». Prueba con otra palabra o explora el{' '}
+            <Link to="/directorio">directorio completo</Link>.
+          </p>
+        );
+      }
+
+      return (
+        <>
+          <p className={estilos.recuento} aria-live="polite">
+            {totalElements === 1 ? '1 negocio' : `${totalElements} negocios`} para «{texto}»
+          </p>
+
+          <ul className={estilos.listaResultados}>
+            {content.map((negocio) => (
+              <li key={negocio.id}>
+                <Link to={`/negocios/${negocio.id}`} className={estilos.resultado}>
+                  {negocio.fotoPrincipal === null ? (
+                    <span className={estilos.inicial} aria-hidden="true">
+                      {negocio.nombre.charAt(0)}
+                    </span>
+                  ) : (
+                    <img className={estilos.fotoResultado} src={negocio.fotoPrincipal} alt="" />
+                  )}
+
+                  <span className={estilos.datosResultado}>
+                    <span className={estilos.nombreResultado}>{negocio.nombre}</span>
+                    <span className={estilos.metaResultado}>
+                      {negocio.categoria} <span aria-hidden="true">·</span> {negocio.ciudad}
+                    </span>
+                  </span>
+
+                  {/* Sin opiniones no es lo mismo que cero (C5). */}
+                  <span className={estilos.notaResultado}>
+                    {calificacion(negocio.calificacionPromedio) ?? 'Sin opiniones'}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {totalElements > content.length && (
+            <p className={estilos.verTodos}>
+              <Link to={`/directorio?texto=${encodeURIComponent(texto)}`}>
+                Ver los {totalElements} resultados en el directorio
+              </Link>
+            </p>
+          )}
+        </>
+      );
+    }
+
+    default:
+      return casoImposible(busqueda);
   }
 }
 

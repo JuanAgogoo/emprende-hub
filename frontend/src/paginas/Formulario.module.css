@@ -191,3 +191,13 @@
   font-size: var(--texto-xs);
   color: var(--color-apagado);
 }
+
+/* Un aviso que no es un error: la cuenta se creó y solo falta entrar. */
+.aviso {
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-exito) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-exito) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-exito);
+}

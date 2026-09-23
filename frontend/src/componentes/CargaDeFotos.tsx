@@ -235,8 +235,8 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
         Las fotos
       </h2>
       <p className={estilos.entrada}>
-        Tu negocio ya está creado y en revisión. Añadir fotos ahora es opcional: la primera será la
-        portada, y puedes subir hasta {MAXIMO_FOTOS}.
+        Tu negocio ya está creado. Añadir fotos ahora es opcional: la primera será la portada, y
+        puedes subir hasta {MAXIMO_FOTOS}. Al terminar entrarás con tu correo y tu contraseña.
       </p>
 
       {fallo !== null && (
@@ -380,7 +380,7 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
           disabled={subiendo}
           onClick={alTerminar}
         >
-          {subidas.length > 0 ? 'Ir a mi negocio' : 'Seguir sin fotos'}
+          {subidas.length > 0 ? 'Terminar el registro' : 'Seguir sin fotos'}
         </button>
       </div>
 

@@ -14,7 +14,7 @@ import type { RespuestaAuth, Sesion } from '../types/sesion';
 interface ValorSesion {
   readonly sesion: Sesion | null;
   entrar: (correo: string, contrasena: string) => Promise<Sesion>;
-  registrar: (nombre: string, correo: string, contrasena: string) => Promise<Sesion>;
+  registrar: (nombre: string, correo: string, contrasena: string) => Promise<void>;
   registrarNegocio: (peticion: RegistroEmprendedor) => Promise<Sesion>;
   salir: () => void;
 }
@@ -46,13 +46,12 @@ export function SesionProvider({ children }: { readonly children: ReactNode }) {
   }, []);
 
   const registrar = useCallback(
-    async (nombre: string, correo: string, contrasena: string): Promise<Sesion> => {
-      // El registro devuelve el token, así que se entra sin pasar por el login.
-      const respuesta = await registrarCliente(nombre, correo, contrasena);
-      const nueva = deRespuesta(respuesta);
-      guardarSesion(nueva);
-      setSesion(nueva);
-      return nueva;
+    async (nombre: string, correo: string, contrasena: string): Promise<void> => {
+      // El alta **no abre sesión a propósito**. El backend devuelve un token y
+      // aquí se descarta: quien se registra pasa por el login y entra con las
+      // credenciales que acaba de elegir, que es lo que confirma que las
+      // recuerda.
+      await registrarCliente(nombre, correo, contrasena);
     },
     [],
   );

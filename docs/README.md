@@ -21,10 +21,15 @@ el docente y quien sustente. Va versionada en Git y se entrega con el repositori
   cobertura en el backend, el cierre obligatorio en el frontend, y las trampas
   que ya costaron tiempo.
 - [flujo-de-trabajo.md](flujo-de-trabajo.md) — Ramas, commits, Pull Requests y release.
+  Las cifras que estos documentos repiten —endpoints, peticiones, pruebas y
+  cobertura— las verifica `./scripts/cifras.sh`, que sale con error si alguna
+  se quedó atrás.
 - [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos del backend, uno
   por rama y PR.
 - [plan-de-entrega-frontend-fase-1.md](plan-de-entrega-frontend-fase-1.md) — Los
   13 de la primera fase del frontend.
+- [plan-de-entrega-frontend-fase-2.md](plan-de-entrega-frontend-fase-2.md) — Los 6
+  de la segunda: opiniones y recuperación de contraseña.
 
 ## Material del curso
 

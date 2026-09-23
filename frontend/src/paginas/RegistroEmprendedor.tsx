@@ -304,7 +304,7 @@ function construirPeticion(cuenta: ValoresCuenta, negocio: ValoresNegocio): Peti
 
 export function RegistroEmprendedor() {
   useTitulo('Registro de emprendedor');
-  const { registrarNegocio } = useSesion();
+  const { registrarNegocio, salir } = useSesion();
   const navegar = useNavigate();
 
   const [paso, setPaso] = useState(PASO_CUENTA);
@@ -377,6 +377,20 @@ export function RegistroEmprendedor() {
   const erroresCuenta = validarCuenta(cuenta);
   const erroresNegocio = validarNegocio(negocio);
   const erroresBorrador = validarProducto(borrador);
+
+  /**
+   * Cierra el asistente devolviendo al login.
+   *
+   * La sesión se abrió en el paso 3 porque **hacía falta**: crear los productos
+   * y subir las fotos son llamadas con token. Cumplido eso, se revoca: quien
+   * acaba de registrarse entra con las credenciales que eligió, igual que el
+   * cliente.
+   */
+  function terminarElRegistro() {
+    const correo = cuenta.correo.trim();
+    salir();
+    navegar('/entrar', { replace: true, state: { registrado: correo } });
+  }
 
   function reintentarCatalogos() {
     setCatalogos({ estado: 'CARGANDO' });
@@ -634,10 +648,7 @@ export function RegistroEmprendedor() {
           {/* El paso 4 trae sus propios botones: ni envía el formulario ni
               vuelve atrás, porque el negocio ya está creado. */}
           {paso === PASO_FOTOS ? (
-            <CargaDeFotos
-              alTerminar={() => navegar('/mi-negocio', { replace: true })}
-              encabezado={encabezado}
-            />
+            <CargaDeFotos alTerminar={terminarElRegistro} encabezado={encabezado} />
           ) : (
             <>
               <div className={estilos.navegacion}>

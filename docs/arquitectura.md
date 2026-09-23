@@ -327,6 +327,10 @@ Además del código, la entrega incluye:
 - **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador y
   cursos. **Los negocios no se siembran**, se crean: doce generados por un bucle
   se notan, y la vitrina es parte de lo que se enseña.
-- **`docker-compose.yml`** que levanta PostgreSQL con un solo comando.
+- **`docker-compose.yml`** que levanta el proyecto entero con un solo comando:
+  PostgreSQL, la API y la web, las dos últimas en modo desarrollo y con el código
+  montado desde el host. `docker compose up -d postgres` levanta solo la base,
+  para quien prefiera `bootRun` y `npm run dev` a mano; los dos modos usan los
+  mismos puertos y no pueden convivir.
 - **README** con los pasos para arrancar las dos mitades y verificarlas.
 

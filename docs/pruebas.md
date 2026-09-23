@@ -70,6 +70,38 @@ va PostgreSQL sobre Testcontainers, porque el enunciado del proyecto prohíbe ba
 de datos en memoria. El equipo no lo habrá visto en clase, así que hay que
 explicarlo aparte de cara a la sustentación.
 
+### `@InjectMocks` no sabe rellenar un primitivo
+
+Añadir un parámetro primitivo al constructor de un servicio —pasó con el
+interruptor `moderacionAutomatica`, un `boolean` leído de la configuración—
+**tumba su clase de prueba entera**, no una prueba:
+
+```
+MockitoException: Cannot instantiate @InjectMocks field named 'service'!
+Cause: the type 'FotoService' has no default constructor
+```
+
+Mockito solo sabe inyectar lo que puede simular, y un `boolean` no se simula. La
+salida es dejar de usar `@InjectMocks` en esa clase y construir el servicio a
+mano:
+
+```java
+private FotoService service;
+
+@BeforeEach
+void prepararConModeracion() {
+    service = servicioCon(false);
+}
+
+private FotoService servicioCon(boolean moderacionAutomatica) {
+    return new FotoService(fotoRepository, negocioRepository, cambioRepository,
+            almacenamiento, moderacionAutomatica);
+}
+```
+
+Sale más a cuenta de lo que parece: cada prueba puede elegir el valor, así que el
+interruptor se prueba en sus dos posiciones sin duplicar la clase.
+
 ## Cobertura
 
 El enunciado exige 80% «en la lógica de negocio» sin definir qué es. Nuestra
@@ -119,6 +151,29 @@ Un `<Link>` a una ruta que no existe compila, pasa la CI y solo se nota al
 pulsar. Aparecieron **tres en siete incrementos**, dos de ellos vivieron cuatro.
 Antes de cerrar una rebanada, cotejar los `to=` del código contra las rutas
 declaradas en `App.tsx`.
+
+### Las clases de CSS Modules hashean por fichero
+
+Una regla que nombre una clase de **otro** módulo no falla: simplemente no se
+aplica nunca, y eso no lo detecta ni el build ni el navegador señalando nada.
+
+`.campo` vive en `paginas/Formulario.module.css`. Escribir en
+`RegistroEmprendedor.module.css` una regla como `.campo .zonaFoto input { … }`
+parece razonable y **no casa jamás**, porque ahí `.campo` es una clase local
+distinta que nadie usa. Dentro de un mismo módulo sí funciona, y ahí lo que
+muerde es la especificidad: `.campo label` le gana a una clase suelta, así que un
+botón dibujado con una etiqueta hay que anidarlo —`.zonaFoto .botonArchivo`— o
+sale con el tamaño y el color de las etiquetas de campo.
+
+Los dos casos se comprueban igual, mirando el CSS compilado en vez de suponer:
+
+```bash
+npm run build
+grep -o '\.[A-Za-z0-9_-]*zonaFoto[^{]*{[^}]*}' dist/assets/*.css
+```
+
+Si el selector no aparece con las dos clases hasheadas juntas, la regla no está
+casando con lo que se cree.
 
 ## Lo que depende del reloj se inyecta
 
@@ -182,6 +237,31 @@ No lo detecta ninguna prueba unitaria que simule el servicio, porque el problema
 está en el mapeo del JSON. **Al probar un endpoint con `curl`, mirar el cuerpo de
 la respuesta y no solo el código de estado**, y comprobar después que el dato se
 guardó de verdad.
+
+## Una columna `NOT NULL` no se añade sola a una tabla con filas
+
+`ddl-auto: update` crea y amplía el esquema, pero **no migra datos**. Al añadir
+`producto.foto` como obligatoria, Hibernate emite un `ALTER TABLE … ADD COLUMN …
+NOT NULL` que PostgreSQL rechaza en cuanto la tabla tiene una sola fila, porque
+no sabe qué poner en las que ya existen.
+
+Con la base de desarrollo viva —y con negocios creados a mano que no se quieren
+perder— la migración va aparte y en tres pasos:
+
+```sql
+ALTER TABLE producto ADD COLUMN IF NOT EXISTS foto VARCHAR(255);   -- permisiva
+UPDATE producto p SET foto = (…)                     WHERE p.foto IS NULL;
+DELETE FROM producto                                 WHERE foto IS NULL;
+ALTER TABLE producto ALTER COLUMN foto SET NOT NULL;               -- y ahora sí
+```
+
+El tercer paso no es opcional: **las filas que no se puedan rellenar son datos
+que la regla nueva ya no admite**, y hay que decidir qué pasa con ellas antes de
+arrancar la aplicación, no después. Al hacerlo de verdad se perdieron seis
+productos de seis negocios que no tenían ninguna foto que heredar.
+
+Todo dentro de una transacción. Aquí falló una vez por el nombre de una columna
+y el `ROLLBACK` evitó dejar la tabla a medias.
 
 ## Filtros opcionales en PostgreSQL
 
