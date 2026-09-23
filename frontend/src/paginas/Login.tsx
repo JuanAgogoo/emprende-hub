@@ -40,6 +40,12 @@ function correoRecienRegistrado(estado: unknown): string | null {
   return typeof traspaso.registrado === 'string' ? traspaso.registrado : null;
 }
 
+/** Si se acaba de elegir una contraseña nueva, para decirlo aquí. */
+function vieneDeRestablecer(estado: unknown): boolean {
+  if (typeof estado !== 'object' || estado === null) return false;
+  return (estado as Record<string, unknown>).restablecido === true;
+}
+
 /**
  * La página desde la que se pidió entrar, si la hay.
  *
@@ -80,6 +86,7 @@ export function Login() {
   const estadoDeNavegacion = useLocation().state;
   const recienRegistrado = correoRecienRegistrado(estadoDeNavegacion);
   const vuelta = destinoDeVuelta(estadoDeNavegacion);
+  const restablecido = vieneDeRestablecer(estadoDeNavegacion);
 
   const [valores, setValores] = useState<Valores>({
     correo: recienRegistrado ?? '',
@@ -138,6 +145,12 @@ export function Login() {
             </p>
           )}
 
+          {fallo === null && restablecido && (
+            <p className={estilos.aviso} role="status">
+              Tu contraseña está cambiada. Entra con la que acabas de elegir.
+            </p>
+          )}
+
           {fallo !== null && (
             <p className={estilos.fallo} role="alert">
               {fallo}
@@ -188,6 +201,9 @@ export function Login() {
           </button>
         </form>
 
+        <p className={estilos.pie}>
+          <Link to="/recuperar">¿Olvidaste tu contraseña?</Link>
+        </p>
         <p className={estilos.pie}>
           ¿No tienes cuenta? <Link to="/registro">Crear una cuenta</Link>
         </p>

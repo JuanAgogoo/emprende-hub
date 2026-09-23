@@ -9,8 +9,10 @@ import { Login } from './paginas/Login';
 import { MiNegocio } from './paginas/MiNegocio';
 import { NoEncontrada } from './paginas/NoEncontrada';
 import { PerfilNegocio } from './paginas/PerfilNegocio';
+import { RecuperarContrasena } from './paginas/RecuperarContrasena';
 import { RegistroCliente } from './paginas/RegistroCliente';
 import { RegistroEmprendedor } from './paginas/RegistroEmprendedor';
+import { RestablecerContrasena } from './paginas/RestablecerContrasena';
 import { TratamientoDeDatos } from './paginas/TratamientoDeDatos';
 
 /** La estructura que comparten todas las rutas. */
@@ -38,6 +40,8 @@ export function App() {
         <Route path="/negocios/:id" element={<PerfilNegocio />} />
         <Route path="/entrar" element={<Login />} />
         <Route path="/registro" element={<RegistroCliente />} />
+        <Route path="/recuperar" element={<RecuperarContrasena />} />
+        <Route path="/recuperar/:token" element={<RestablecerContrasena />} />
         <Route path="/registro-emprendedor" element={<RegistroEmprendedor />} />
         <Route
           path="/mi-negocio"

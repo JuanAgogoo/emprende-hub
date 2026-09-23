@@ -310,7 +310,7 @@ feat(opiniones): permitir editar y borrar la reseña propia
 El incremento de las decisiones 2 y 3. El primero es de backend y el segundo lo
 consume: no hay pantalla sin endpoint, ni correo sin servidor que lo reciba.
 
-### PR 4 · `feat/recuperar-contrasena` — backend · **TERMINADO**
+### PR 4 · `feat/recuperar-contrasena` — backend · **TERMINADO** · [#38](https://github.com/JuanAgogoo/emprende-hub/pull/38)
 
 El más grande de la fase, y el único que toca las dos mitades del repositorio.
 **Reabre I1**, así que `docs/decisiones-dominio.md` entra en el mismo PR.
@@ -358,7 +358,7 @@ feat(auth): añadir la recuperación de contraseña por correo con token de un s
 > funciona con ella; el mismo enlace usado dos veces devuelve `410`. Un correo
 > que no existe devuelve `200` y **no** deja ningún correo en Mailpit.
 
-### PR 5 · `feat/frontend-recuperar-contrasena`
+### PR 5 · `feat/frontend-recuperar-contrasena` · **TERMINADO**
 
 Las dos pantallas, más el enlace que la fase 1 tuvo que no dibujar.
 
@@ -424,7 +424,7 @@ docs: documentar las opiniones y la recuperación de contraseña
 | Fase | Incrementos | Estado |
 |---|---|---|
 | 0 · Opiniones | PR 1–3 | **TERMINADO** |
-| 1 · Recuperar la contraseña | PR 4–5 | |
+| 1 · Recuperar la contraseña | PR 4–5 | **TERMINADO** |
 | Cierre · Documentación | PR 6 | |
 
 ---

@@ -97,10 +97,13 @@ async function peticion<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
     throw leerError(respuesta.status, cuerpoError);
   }
 
-  // 204 y compañía: no hay cuerpo que leer.
+  // 204 y compañía: no hay cuerpo que leer. El 200 de `/auth/recuperacion`
+  // tampoco lo trae, así que se mira el texto en vez de fiarse del código:
+  // `json()` sobre una respuesta vacía revienta con un error de sintaxis.
   if (respuesta.status === 204) return undefined as T;
 
-  return (await respuesta.json()) as T;
+  const texto = await respuesta.text();
+  return (texto.length === 0 ? undefined : JSON.parse(texto)) as T;
 }
 
 export function obtener<T>(ruta: string, conSesion = false): Promise<T> {
