@@ -7,3 +7,25 @@
   border-radius: var(--radio-md);
   background: var(--color-lienzo);
 }
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+.secundario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
