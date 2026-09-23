@@ -4,6 +4,8 @@ import { obtenerPerfil } from '../api/directorio';
 import { ErrorApi } from '../api/cliente';
 import { Estrellas } from '../componentes/Estrellas';
 import { Galeria } from '../componentes/Galeria';
+import { IconoInstagram } from '../componentes/IconoInstagram';
+import { IconoLinkedIn } from '../componentes/IconoLinkedIn';
 import { Opiniones } from '../componentes/Opiniones';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
@@ -224,22 +226,26 @@ function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
             <div className={estilos.redes}>
               {negocio.instagram !== null && (
                 <a
-                  className={estilos.red}
+                  className={estilos.redIcono}
                   href={negocio.instagram}
                   target="_blank"
                   rel="noreferrer noopener"
+                  /* El logotipo es decorativo, así que el nombre lo pone el
+                     enlace, y dice de quién es el perfil. */
+                  aria-label={`Instagram de ${negocio.nombre}`}
                 >
-                  Instagram
+                  <IconoInstagram />
                 </a>
               )}
               {negocio.linkedin !== null && (
                 <a
-                  className={estilos.red}
+                  className={estilos.redIcono}
                   href={negocio.linkedin}
                   target="_blank"
                   rel="noreferrer noopener"
+                  aria-label={`LinkedIn de ${negocio.nombre}`}
                 >
-                  LinkedIn
+                  <IconoLinkedIn />
                 </a>
               )}
             </div>
