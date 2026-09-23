@@ -358,7 +358,7 @@ feat(auth): añadir la recuperación de contraseña por correo con token de un s
 > funciona con ella; el mismo enlace usado dos veces devuelve `410`. Un correo
 > que no existe devuelve `200` y **no** deja ningún correo en Mailpit.
 
-### PR 5 · `feat/frontend-recuperar-contrasena` · **TERMINADO**
+### PR 5 · `feat/frontend-recuperar-contrasena` · **TERMINADO** · [#39](https://github.com/JuanAgogoo/emprende-hub/pull/39)
 
 Las dos pantallas, más el enlace que la fase 1 tuvo que no dibujar.
 
@@ -393,7 +393,7 @@ feat(auth): añadir las pantallas de recuperación de contraseña
 
 ## Cierre — Documentación (PR 6)
 
-### PR 6 · `docs/frontend-fase-2`
+### PR 6 · `docs/frontend-fase-2` · **TERMINADO**
 
 No añade funcionalidad. Actualiza lo que los cinco incrementos dejaron desfasado:
 
@@ -421,11 +421,15 @@ docs: documentar las opiniones y la recuperación de contraseña
 
 ## Estado de la fase 2
 
+**Fase 2 terminada.** Los seis incrementos están construidos y verificados, con
+la salvedad de siempre: la revisión visual en el navegador le corresponde a quien
+tenga la pantalla delante, y está escrita al final de este documento.
+
 | Fase | Incrementos | Estado |
 |---|---|---|
 | 0 · Opiniones | PR 1–3 | **TERMINADO** |
 | 1 · Recuperar la contraseña | PR 4–5 | **TERMINADO** |
-| Cierre · Documentación | PR 6 | |
+| Cierre · Documentación | PR 6 | **TERMINADO** |
 
 ---
 
