@@ -126,7 +126,7 @@ negocio— y guarda cada token en su variable.
 
 ## El recorrido de la sustentación
 
-El guion de punta a punta, con las dos mitades arriba. Son diez minutos y se
+El guion de punta a punta, con las dos mitades arriba. Son quince minutos y se
 puede ensayar entero antes del día.
 
 ### Antes: preparar la vitrina
@@ -151,6 +151,11 @@ entre todos, porque es lo que la interfaz enseña:
 
 La forma rápida de crearlos es la carpeta **1 · Acceso y datos de partida** de la
 colección de Postman, y después repetir su petición de alta cambiando los datos.
+
+> **Las cinco opiniones del destacado piden cinco cuentas distintas.** Cada
+> persona tiene como mucho una opinión por negocio (C2), así que no se llega a
+> cinco desde una sola sesión: hay que registrar cinco clientes. Desde la web se
+> puede, pero repetir el alta en Postman es más rápido.
 
 > **El orden importa, y esta es la trampa que más tiempo ha costado.** Hay que
 > **crear el negocio, subirle las fotos y aprobarlo al final**. Al revés no: una
@@ -216,6 +221,39 @@ aparece, con su foto de portada, y las cifras de la portada han subido. Con eso
 el círculo se cierra: se registró desde el navegador, se moderó desde la API y se
 publicó.
 
+**6. Opinar sobre un negocio, con la cuenta de clienta.** Entrar en `/entrar` y
+abrir un negocio que **no** sea el suyo:
+
+| Qué hacer | Qué se ve |
+|---|---|
+| Mirar las opiniones sin sesión | Se leen igual: la lista es pública (C1) |
+| Calificar con tres estrellas y escribir la reseña | Aparece arriba de la lista **sin recargar**, y la nota de la ficha cambia en la misma pantalla (C4) |
+| Cambiarla a cinco estrellas | La fila se actualiza y queda marcada como «Editada» |
+| Borrarla | Pide confirmación, y al aceptar vuelve el formulario de publicar |
+| Abrir el negocio propio con la cuenta de la emprendedora | **No hay formulario**: el dueño no opina sobre lo suyo (A4) |
+
+> Si era la única opinión del negocio, al borrarla la ficha vuelve a decir «Sin
+> opiniones» y **no «0,0»**. Es C5, y merece nombrarlo: son dos cosas distintas.
+
+**7. Recuperar una contraseña, viendo llegar el correo.** Es el recorrido que
+cruza las dos mitades y el servidor de correo:
+
+1. En `/entrar`, **«¿Olvidaste tu contraseña?»**.
+2. Escribir el correo de la clienta. Sale siempre el mismo mensaje —«si ese
+   correo tiene una cuenta, le acabamos de enviar un enlace»— **exista o no**:
+   decir lo contrario convertiría el formulario en una lista de qué direcciones
+   están registradas.
+3. Abrir **Mailpit en <http://localhost:8025>**. El correo está ahí, con su
+   enlace. Conviene enseñarlo en pantalla: es la prueba de que el correo sale de
+   verdad y no es un `log`.
+4. Abrir el enlace, escribir la contraseña nueva dos veces y guardar. Lleva al
+   login con el aviso, y entra con ella.
+5. **Volver a abrir el mismo enlace**: dice que ya no vale, sin enseñar el
+   formulario. Sirve una sola vez y caduca a los 30 minutos.
+
+> Probarlo con la cuenta de la clienta y no con la del administrador: si algo
+> sale mal, la moderación del paso 4 sigue estando disponible.
+
 ### Si algo falla en directo
 
 | Síntoma | Qué es | Qué hacer |
@@ -226,6 +264,7 @@ publicó.
 | Un puerto ya está ocupado | Hay otro backend o otro Vite corriendo en el equipo | Pararlo, o `API_PORT=8081 docker compose up -d` |
 | Tras un fallo de puerto, sigue sin ir | El contenedor quedó creado **sin red**: ni publica puertos ni resuelve `postgres` | `docker compose up -d --force-recreate backend`. Un `up -d` a secas solo lo arranca |
 | Todas las fotos rotas | La base apunta a ficheros que no están en `backend/uploads/` | Recuperar el directorio; la base y el disco van por separado |
+| El correo no llega a Mailpit | El backend arrancó sin el servicio de correo delante | `docker compose up -d mailpit` y repetir. La petición sigue devolviendo `200`: el fallo solo está en el log |
 | Caen ~30 pruebas del backend | Se paró el contenedor de la base | `docker compose up -d postgres` y repetir |
 
 ## Probar la API

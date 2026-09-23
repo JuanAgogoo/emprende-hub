@@ -47,9 +47,12 @@ por supuesto:
 - **Los cursos**, en cualquier forma.
 - **Las opiniones.** El perfil público muestra la calificación y el número de
   opiniones porque vienen en la misma respuesta, pero no se listan, ni se
-  escriben, ni se denuncian.
+  escriben, ni se denuncian. **Leerlas, escribirlas y gestionarlas entraron
+  después**, en los PR 1–3 de
+  [la fase 2](plan-de-entrega-frontend-fase-2.md); denunciarlas sigue fuera.
 - **Recuperar la contraseña.** No existe en el backend (I1) y no se dibuja un
-  enlace que no lleve a ninguna parte.
+  enlace que no lleve a ninguna parte. **Entró después**, en los PR 4–5 de la
+  fase 2, que reabren I1 con I1-bis y devuelven el enlace al login.
 - **Ninguna dependencia más allá de `react-router-dom`**: ni Redux, ni
   react-query, ni axios, ni Zod, ni React Hook Form, ni Tailwind, ni i18n, ni
   Storybook, ni pruebas de extremo a extremo. El porqué, en
@@ -400,7 +403,8 @@ feat(directorio): añadir búsqueda, filtros, ordenación y paginación de negoc
 Perfil de `GET /directorio/{id}`: galería de fotos aprobadas, escaparate con
 precios formateados en pesos con `Intl.NumberFormat`, disponibilidad, teléfono y
 enlaces a Instagram y LinkedIn cuando existen. La calificación y el número de
-opiniones se muestran; el listado de opiniones no es de esta fase.
+opiniones se muestran; el listado de opiniones no es de esta fase —lo añade el
+PR 1 de [la fase 2](plan-de-entrega-frontend-fase-2.md)—.
 
 Un identificador que no existe —o un negocio pendiente, que responde `404` y no
 `403` a propósito (B6)— lleva a una página de «no encontrado» y no a un error
@@ -828,7 +832,10 @@ comprobados por código y por `curl`, pero no vistos. Es la única comprobación
 plan que no se cumplió, y le corresponde a quien tenga la pantalla delante.
 
 Lo que la fase 2 recogerá, ya escrito en el alcance: el dashboard de gestión, el
-panel de administración, los cursos y las opiniones.
+panel de administración, los cursos y las opiniones. De esa lista,
+[la fase 2](plan-de-entrega-frontend-fase-2.md) se llevó las opiniones y añadió
+la recuperación de contraseña; el dashboard, el panel y los cursos siguen
+pendientes.
 
 ---
 
