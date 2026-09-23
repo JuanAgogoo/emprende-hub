@@ -207,7 +207,7 @@ backlog.
 Se verifican contra un negocio aprobado y **al menos dos cuentas de cliente**,
 porque una sola no deja ver la lista con opiniones de otros ni la regla de A4.
 
-### PR 1 · `feat/frontend-opiniones-listado` · **TERMINADO**
+### PR 1 · `feat/frontend-opiniones-listado` · **TERMINADO** · [#35](https://github.com/JuanAgogoo/emprende-hub/pull/35)
 
 El listado de reseñas en el perfil público, que es lo único que le faltaba al
 perfil para estar completo. `GET /api/v1/negocios/{id}/opiniones` devuelve una
@@ -240,7 +240,7 @@ feat(opiniones): mostrar el listado de reseñas en el perfil público
 > de una página, el paginador trae otras distintas. Parar el backend y recargar
 > muestra el mensaje de error, no una pantalla en blanco.
 
-### PR 2 · `feat/frontend-opinar`
+### PR 2 · `feat/frontend-opinar` · **TERMINADO**
 
 Calificar con estrellas y escribir la reseña, que son las peticiones 5 y 6 del
 backlog y una sola rebanada: no hay forma de publicar una opinión sin nota,

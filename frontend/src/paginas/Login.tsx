@@ -40,6 +40,23 @@ function correoRecienRegistrado(estado: unknown): string | null {
   return typeof traspaso.registrado === 'string' ? traspaso.registrado : null;
 }
 
+/**
+ * La página desde la que se pidió entrar, si la hay.
+ *
+ * La pone quien enlaza al login —hoy, el bloque de opiniones del perfil— para
+ * volver justo a donde se estaba. Se comprueba que sea una ruta de esta
+ * aplicación: `state` es dato externo y una dirección completa enviaría a
+ * cualquier sitio.
+ */
+function destinoDeVuelta(estado: unknown): string | null {
+  if (typeof estado !== 'object' || estado === null) return null;
+  const traspaso = estado as Record<string, unknown>;
+  const volverA = traspaso.volverA;
+
+  if (typeof volverA !== 'string') return null;
+  return volverA.startsWith('/') && !volverA.startsWith('//') ? volverA : null;
+}
+
 /** A dónde va cada quien según su rol. */
 function destino(rol: Rol): string {
   switch (rol) {
@@ -60,7 +77,9 @@ export function Login() {
   const { entrar } = useSesion();
   const navegar = useNavigate();
 
-  const recienRegistrado = correoRecienRegistrado(useLocation().state);
+  const estadoDeNavegacion = useLocation().state;
+  const recienRegistrado = correoRecienRegistrado(estadoDeNavegacion);
+  const vuelta = destinoDeVuelta(estadoDeNavegacion);
 
   const [valores, setValores] = useState<Valores>({
     correo: recienRegistrado ?? '',
@@ -86,7 +105,9 @@ export function Login() {
     setEnviando(true);
     try {
       const sesion = await entrar(valores.correo.trim(), valores.contrasena);
-      navegar(destino(sesion.rol), { replace: true });
+      // Volver a donde se estaba manda sobre el destino del rol: quien venía a
+      // opinar sobre un negocio quiere ese negocio, no su panel.
+      navegar(vuelta ?? destino(sesion.rol), { replace: true });
     } catch (error: unknown) {
       // El 401 no vacía el formulario: solo se dice qué pasó.
       if (error instanceof ErrorApi && error.estado === 401) {

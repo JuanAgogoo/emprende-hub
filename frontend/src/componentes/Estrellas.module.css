@@ -16,3 +16,74 @@
 .vacia {
   color: color-mix(in srgb, var(--color-aviso) 25%, var(--color-lienzo));
 }
+
+/* ── Para elegir la calificación ─────────────────────────────────────── */
+
+/* El navegador le pone a todo `fieldset` un borde y un padding propios. */
+.grupo {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leyenda {
+  padding: 0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.opciones {
+  display: flex;
+  gap: var(--e-1);
+  margin-top: var(--e-2);
+}
+
+.opcion {
+  display: grid;
+  place-items: center;
+  /* Ancla del radio y del texto para lectores, que van en absoluto. */
+  position: relative;
+  /* El área táctil entera, aunque la estrella mida menos. */
+  min-width: var(--toque-min);
+  min-height: var(--toque-min);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+}
+
+/* La estrella de elegir es mayor que la de leer: es un control, no un dato. */
+.opcion .llena,
+.opcion .vacia {
+  font-size: var(--texto-xl);
+  line-height: 1;
+  transition: color var(--dur-rapida) var(--curva);
+}
+
+/* El radio sigue ahí —recibe el foco y responde a las flechas—, solo que la
+   estrella es lo que se ve. `opacity: 0` y no `display: none`, que lo sacaría
+   del recorrido del tabulador. */
+.radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* El foco se dibuja sobre la estrella, que es lo que se está mirando. */
+.opcion:has(.radio:focus-visible) {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.opcion:hover .vacia {
+  color: color-mix(in srgb, var(--color-aviso) 60%, var(--color-lienzo));
+}
+
+.textoOculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

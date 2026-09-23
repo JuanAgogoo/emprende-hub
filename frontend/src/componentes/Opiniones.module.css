@@ -21,6 +21,28 @@
   color: var(--color-apagado);
 }
 
+/* ── Tu parte: el formulario, el aviso o la opinión propia ───────────── */
+
+.invitacion {
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.tuya {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.subtitulo {
+  font-size: var(--texto-md);
+  font-weight: 600;
+}
+
 .lista {
   display: flex;
   flex-direction: column;
