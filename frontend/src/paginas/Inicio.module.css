@@ -354,3 +354,120 @@
     transform: none;
   }
 }
+
+/* ── Resultados de la búsqueda, dentro de la propia portada ──────────── */
+
+.resultados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  width: 100%;
+  max-width: 40rem;
+  margin-top: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-md);
+  text-align: start;
+}
+
+/* Recibe el foco al pulsar «Buscar»: sin contorno no se vería llegar. */
+.resultados:focus-visible {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.buscando,
+.recuento {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.sinResultados {
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.errorBusqueda {
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.listaResultados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resultado {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-height: var(--toque-min);
+  padding: var(--e-2);
+  border-radius: var(--radio-md);
+  text-decoration: none;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.resultado:hover {
+  background: var(--color-lienzo-alt);
+}
+
+/* Recortada al mismo cuadrado, venga como venga el original. */
+.fotoResultado {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+  background: var(--color-lienzo-alt);
+}
+
+/* Sin foto, la inicial: jamás una imagen rota. */
+.inicial {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: var(--radio-sm);
+  background: var(--color-acento-suave);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-acento-fuerte);
+}
+
+.datosResultado {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nombreResultado {
+  font-weight: 600;
+  color: var(--color-tinta);
+  overflow-wrap: break-word;
+}
+
+.metaResultado {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.notaResultado {
+  flex-shrink: 0;
+  font-size: var(--texto-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-cuerpo);
+}
+
+.verTodos {
+  font-size: var(--texto-sm);
+  text-align: center;
+}
