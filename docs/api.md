@@ -586,7 +586,8 @@ buzón.
 ```
 
 **Es la única respuesta de la API que enseña el correo de otra persona**, y es a
-propósito (D2). La plataforma no envía correos (I1) ni permite responder desde
+propósito (D2). La plataforma no manda correos por esto —el único que manda es
+el de recuperar la contraseña, I1-bis— ni permite responder desde
 dentro, así que sin esa dirección el buzón sería un montón de preguntas sin forma
 de contestarlas. La excepción está acotada: el correo **no aparece** en el
 directorio, ni en el perfil público, ni en las opiniones, y solo lo recibe el
@@ -604,7 +605,7 @@ lectura: dejarla puesta diría que se abrió y se ignoró.
 
 **No hay respuesta desde la plataforma** (D2) ni hilo de conversación. Es un
 buzón de entrada, y la limitación es deliberada: montar mensajería de ida y
-vuelta sin correos habría exigido que las dos partes entraran a mirar.
+vuelta sin correos de aviso habría exigido que las dos partes entraran a mirar.
 
 ## Métricas de visitas · `/negocios/mio/metricas`
 
@@ -671,8 +672,9 @@ solo cuatro:
 **Fuera los hitos de visitas** que enseñaba el prototipo («superaste las 1.000
 este mes»): no son un hecho del que haya que enterarse, y H2 los descarta.
 
-Sin correos (I1) esto no es decoración: es el único canal por el que un
-emprendedor se entera de que le rechazaron el negocio.
+Sin correos de aviso (I1, que I1-bis solo reabre para la recuperación) esto no
+es decoración: es el único canal por el que un emprendedor se entera de que le
+rechazaron el negocio.
 
 `?leida=false` devuelve las pendientes, y el `totalElements` de esa página es el
 número de la campana. El texto **se escribe cuando ocurre el hecho y se guarda
@@ -716,8 +718,9 @@ Solo **ADMIN**.
 | `PATCH` | `/usuarios/{id}/reactivar` | La reactiva (`204`) |
 | `GET` | `/log` | Historial, filtrable por fechas |
 
-El motivo del rechazo lo lee el dueño en `GET /negocios/mio`: sin correos (I1),
-ese campo es el único sitio donde se entera de por qué le rechazaron.
+El motivo del rechazo lo lee el dueño en `GET /negocios/mio`: sin correos de
+aviso (I1), ese campo es el único sitio donde se entera de por qué le
+rechazaron.
 
 `GET /cambios-pendientes` enseña el valor actual junto al propuesto —revisar es
 comparar— y cuántas fotos espera publicar cada propuesta. Una propuesta puede ser
