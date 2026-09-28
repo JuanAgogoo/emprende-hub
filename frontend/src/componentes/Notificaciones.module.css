@@ -1,0 +1,116 @@
+.bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-3);
+  font-size: var(--texto-xl);
+}
+
+.pendientes {
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  width: 100%;
+  list-style: none;
+  padding: 0;
+}
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+/* Lo pendiente no se marca solo con el peso del texto: lleva su barra. */
+.sinLeer {
+  border-inline-start: 4px solid var(--color-acento);
+  background: var(--color-acento-suave);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e-2);
+  width: 100%;
+}
+
+.tipo {
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.fecha {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.texto {
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.marcar,
+.secundario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.marcar:hover,
+.secundario:hover {
+  background: var(--color-lienzo-alt);
+}
+
+.vacio {
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.fallo,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}

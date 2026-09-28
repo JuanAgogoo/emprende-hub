@@ -29,10 +29,12 @@ export function EsqueletoTarjetas({ cuantas }: Props) {
 }
 
 /**
- * La forma de una lista de opiniones mientras llega: la fila del autor, la
- * calificación y un par de renglones de comentario.
+ * La forma de una lista mientras llega: una línea corta arriba y dos de texto.
+ *
+ * La usan las opiniones, el buzón de consultas y los avisos, que se dibujan
+ * igual: una cabecera pequeña y un par de renglones debajo.
  */
-export function EsqueletoOpiniones({ cuantas }: Props) {
+export function EsqueletoLista({ cuantas }: Props) {
   return (
     <div className={estilos.lista} aria-hidden="true">
       {Array.from({ length: cuantas }, (_, posicion) => (

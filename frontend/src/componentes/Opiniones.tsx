@@ -10,7 +10,7 @@ import {
   publicarOpinion,
 } from '../api/opiniones';
 import { useSesion } from '../estado/SesionContext';
-import { EsqueletoOpiniones } from './Esqueleto';
+import { EsqueletoLista } from './Esqueleto';
 import { Estrellas } from './Estrellas';
 import { FormularioOpinion } from './FormularioOpinion';
 import { Paginacion } from './Paginacion';
@@ -444,7 +444,7 @@ function Listado({ carga, alPaginar, alReintentar }: PropsListado) {
     case 'CARGANDO':
       return (
         <div aria-busy="true">
-          <EsqueletoOpiniones cuantas={3} />
+          <EsqueletoLista cuantas={3} />
         </div>
       );
 

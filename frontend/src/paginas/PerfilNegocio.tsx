@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { obtenerPerfil } from '../api/directorio';
 import { ErrorApi } from '../api/cliente';
+import { Contacto } from '../componentes/Contacto';
 import { Estrellas } from '../componentes/Estrellas';
 import { Galeria } from '../componentes/Galeria';
 import { IconoInstagram } from '../componentes/IconoInstagram';
@@ -185,6 +186,8 @@ function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
               </ul>
             )}
           </section>
+
+          <Contacto negocioId={negocio.id} />
 
           <Opiniones negocioId={negocio.id} alCambiarOpiniones={alCambiarOpiniones} />
         </div>

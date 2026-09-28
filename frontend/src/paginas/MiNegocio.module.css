@@ -244,6 +244,14 @@
   color: var(--color-error);
 }
 
+/* Los dos paneles, uno debajo del otro y a todo el ancho: son listas con su
+   paginación, y en una columna estrecha no caben. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-6);
+}
+
 .nota {
   max-width: var(--ancho-lectura);
   font-size: var(--texto-sm);
