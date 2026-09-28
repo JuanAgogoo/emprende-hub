@@ -1,0 +1,52 @@
+/* La misma forma que los bloques del perfil, repetida aquí porque las clases de
+   CSS Modules hashean por fichero: `.bloque` del perfil no llega hasta este
+   componente. */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.titulo {
+  font-size: var(--texto-xl);
+}
+
+.aviso {
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+/* La confirmación es un acierto, no un aviso: verde, como la del alta. */
+.enviado {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-exito) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-exito) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-exito);
+}
+
+.otro {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.otro:hover {
+  background: var(--color-lienzo-alt);
+}
