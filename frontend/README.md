@@ -88,16 +88,25 @@ las dos que añade la recuperación de contraseña.
 | `/registro-emprendedor` | El asistente de cuatro pasos | Cualquiera |
 | `/recuperar` | Pide el correo y manda el enlace | Cualquiera |
 | `/recuperar/:token` | Elegir la contraseña nueva, desde el enlace del correo | Quien tenga el enlace |
-| `/mi-negocio` | El negocio propio, **solo de consulta** | `EMPRENDEDOR` |
+| `/mi-negocio` | El negocio propio, con sus avisos y su buzón de consultas | `EMPRENDEDOR` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 
-El perfil público lleva además **las opiniones**: se leen sin sesión, y con
-sesión se califica con estrellas, se escribe la reseña y se edita o se borra la
-propia. No son una ruta aparte porque viven dentro de `/negocios/:id`.
+El perfil público lleva además dos cosas que no son rutas aparte, porque viven
+dentro de `/negocios/:id`:
+
+- **Las opiniones**: se leen sin sesión, y con sesión se califica con estrellas,
+  se escribe la reseña y se edita o se borra la propia.
+- **Escribirle al negocio**: con sesión, asunto y mensaje van a su buzón. El
+  nombre y el correo los pone la cuenta, no un campo del formulario.
+
+Y `/mi-negocio` es el otro lado de eso: los **avisos** de la persona y el
+**buzón** del negocio, con el correo de quien escribe para poder responderle. La
+plataforma no responde desde dentro (D2), así que cada consulta lleva su enlace
+de correo.
 
 Lo que **no** entra todavía, para que nadie lo busque: el panel de
-administración, el dashboard de gestión —editar, buzón, visitas—, los cursos y
+administración, editar el negocio, las métricas de visitas, los cursos y
 denunciar una opinión, que existe en el backend pero se queda fuera hasta que
 haya quien resuelva las denuncias.
 
