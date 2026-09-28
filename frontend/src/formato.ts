@@ -23,6 +23,26 @@ export function calificacion(valor: number | null): string | null {
   return valor === null ? null : CALIFICACION.format(valor);
 }
 
+const VARIACION = new Intl.NumberFormat('es-CO', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+  // El signo se enseña también cuando sube: «+12,2 %» dice más que «12,2 %».
+  signDisplay: 'exceptZero',
+});
+
+/**
+ * Una variación porcentual, con su signo.
+ *
+ * El backend manda 12.2 queriendo decir 12,2 %, así que **no se usa
+ * `style: 'percent'`**, que multiplicaría por cien y enseñaría 1220 %.
+ *
+ * No trata el nulo a propósito: «no hay con qué comparar» se dice distinto en
+ * cada sitio, así que lo decide quien lo dibuja y no el formato.
+ */
+export function variacion(valor: number): string {
+  return `${VARIACION.format(valor)} %`;
+}
+
 const PRECIO = new Intl.NumberFormat('es-CO', {
   style: 'currency',
   currency: 'COP',
