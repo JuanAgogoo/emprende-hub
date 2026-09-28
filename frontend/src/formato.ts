@@ -23,6 +23,36 @@ export function calificacion(valor: number | null): string | null {
   return valor === null ? null : CALIFICACION.format(valor);
 }
 
+const RELATIVO = new Intl.RelativeTimeFormat('es-CO', {
+  // «ayer» y «la semana pasada» en vez de «hace 1 día» y «hace 1 semana».
+  numeric: 'auto',
+});
+
+const MINUTO = 60_000;
+const HORA = 60 * MINUTO;
+const DIA = 24 * HORA;
+const SEMANA = 7 * DIA;
+const MES = 30 * DIA;
+
+/**
+ * Cuánto hace de algo: «hace 5 minutos», «ayer», «la semana pasada».
+ *
+ * La unidad se elige por el tamaño del hueco, que es como se lee de verdad: a
+ * nadie le dice nada «hace 2.880 minutos». El caso raro de una fecha en el
+ * futuro —los relojes no siempre coinciden— cae en «ahora mismo» en vez de
+ * enseñar un «dentro de» que no tendría sentido en un aviso ya recibido.
+ */
+export function tiempoTranscurrido(instante: string): string {
+  const transcurrido = Date.now() - new Date(instante).getTime();
+
+  if (transcurrido < MINUTO) return 'ahora mismo';
+  if (transcurrido < HORA) return RELATIVO.format(-Math.floor(transcurrido / MINUTO), 'minute');
+  if (transcurrido < DIA) return RELATIVO.format(-Math.floor(transcurrido / HORA), 'hour');
+  if (transcurrido < SEMANA) return RELATIVO.format(-Math.floor(transcurrido / DIA), 'day');
+  if (transcurrido < MES) return RELATIVO.format(-Math.floor(transcurrido / SEMANA), 'week');
+  return RELATIVO.format(-Math.floor(transcurrido / MES), 'month');
+}
+
 const DIA_CORTO = new Intl.DateTimeFormat('es-CO', { weekday: 'short' });
 const FECHA_CORTA = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' });
 
