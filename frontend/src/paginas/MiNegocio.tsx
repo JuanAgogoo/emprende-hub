@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { BuzonDeConsultas } from '../componentes/BuzonDeConsultas';
+import { Metricas } from '../componentes/Metricas';
 import { Notificaciones } from '../componentes/Notificaciones';
 import { obtenerMiNegocio, obtenerMisFotos, obtenerMisProductos } from '../api/negocios';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
@@ -216,6 +217,7 @@ function Contenido({ datos }: { readonly datos: Datos }) {
       </div>
 
       <div className={estilos.panel}>
+        <Metricas negocio={negocio} />
         <Notificaciones />
         <BuzonDeConsultas />
       </div>

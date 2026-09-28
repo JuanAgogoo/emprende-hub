@@ -1,0 +1,129 @@
+.bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+}
+
+.titulo {
+  font-size: var(--texto-xl);
+}
+
+/* Mobile first: una tarjeta por fila, y se van repartiendo al haber sitio. */
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-3);
+  width: 100%;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+.tituloTarjeta {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-apagado);
+}
+
+.cifra {
+  font-size: var(--texto-2xl);
+  font-weight: 700;
+  line-height: var(--alto-apretado);
+  color: var(--color-tinta);
+  /* Las cifras no bailan de ancho al cambiar: son tabulares. */
+  font-variant-numeric: tabular-nums;
+}
+
+.apunte {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+/* La subida y la bajada llevan su flecha y su palabra, no solo su color. */
+.sube,
+.baja {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.sube {
+  color: var(--color-exito);
+}
+
+.baja {
+  color: var(--color-error);
+}
+
+.esqueleto {
+  height: 7rem;
+  border-radius: var(--radio-md);
+  background: linear-gradient(
+    90deg,
+    var(--color-lienzo-alt) 25%,
+    color-mix(in srgb, var(--color-borde) 60%, var(--color-lienzo)) 50%,
+    var(--color-lienzo-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: barrido 1.4s var(--curva) infinite;
+}
+
+@keyframes barrido {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.secundario {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.secundario:hover {
+  background: var(--color-lienzo-alt);
+}
+
+@media (min-width: 40rem) {
+  .rejilla {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .rejilla {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
