@@ -57,9 +57,34 @@
   width: 100%;
 }
 
+/* Cada tipo se distingue por su color y su señal, no solo por su nombre: en una
+   lista larga el ojo busca la forma antes que la palabra. */
 .tipo {
+  padding: 0 var(--e-2);
+  border-radius: var(--radio-full);
+  font-size: var(--texto-xs);
   font-weight: 600;
-  color: var(--color-tinta);
+  white-space: nowrap;
+}
+
+.opinion {
+  background: color-mix(in srgb, var(--color-aviso) 14%, var(--color-lienzo));
+  color: var(--color-aviso);
+}
+
+.consulta {
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+
+.aprobado {
+  background: color-mix(in srgb, var(--color-exito) 12%, var(--color-lienzo));
+  color: var(--color-exito);
+}
+
+.rechazado {
+  background: color-mix(in srgb, var(--color-error) 10%, var(--color-lienzo));
+  color: var(--color-error);
 }
 
 .fecha {

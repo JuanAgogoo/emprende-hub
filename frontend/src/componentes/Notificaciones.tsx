@@ -6,7 +6,7 @@ import {
 } from '../api/notificaciones';
 import { EsqueletoLista } from './Esqueleto';
 import { Paginacion } from './Paginacion';
-import { fecha, numero } from '../formato';
+import { fecha, numero, tiempoTranscurrido } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { Notificacion, TipoNotificacion } from '../types/notificacion';
 import type { Pagina } from '../types/pagina';
@@ -15,17 +15,31 @@ import estilos from './Notificaciones.module.css';
 /** Diez por página: es una columna dentro de una pantalla que ya es larga. */
 const POR_PAGINA = 10;
 
-/** Cómo se llama cada hecho, tal como se enseña. */
-function titulo(tipo: TipoNotificacion): string {
+/** Cómo se enseña cada hecho: su nombre, su señal y su color. */
+interface Insignia {
+  readonly etiqueta: string;
+  /** Decorativa: va en `aria-hidden`, porque la etiqueta ya lo dice. */
+  readonly senal: string;
+  readonly clase: string;
+}
+
+/**
+ * La insignia de cada tipo.
+ *
+ * Es una función con su `switch` y no un mapa de configuración, y es exhaustiva:
+ * si mañana el backend añade un tipo, esto deja de compilar en vez de dibujar un
+ * aviso sin nombre.
+ */
+function insignia(tipo: TipoNotificacion): Insignia {
   switch (tipo) {
     case 'OPINION_NUEVA':
-      return 'Nueva opinión';
+      return { etiqueta: 'Nueva opinión', senal: '★', clase: estilos.opinion };
     case 'CONSULTA_NUEVA':
-      return 'Nueva consulta';
+      return { etiqueta: 'Nueva consulta', senal: '✉', clase: estilos.consulta };
     case 'NEGOCIO_APROBADO':
-      return 'Negocio aprobado';
+      return { etiqueta: 'Negocio aprobado', senal: '✓', clase: estilos.aprobado };
     case 'NEGOCIO_RECHAZADO':
-      return 'Negocio rechazado';
+      return { etiqueta: 'Negocio rechazado', senal: '✕', clase: estilos.rechazado };
   }
 }
 
@@ -165,27 +179,7 @@ function Listado({ carga, alPaginar, alMarcar, alReintentar }: PropsListado) {
         <>
           <ul className={estilos.lista}>
             {pagina.content.map((aviso) => (
-              <li
-                key={aviso.id}
-                className={aviso.leida ? estilos.aviso : `${estilos.aviso} ${estilos.sinLeer}`}
-              >
-                <div className={estilos.cabecera}>
-                  <span className={estilos.tipo}>{titulo(aviso.tipo)}</span>
-                  <time className={estilos.fecha} dateTime={aviso.fecha}>
-                    {fecha(aviso.fecha)}
-                  </time>
-                </div>
-
-                <p className={estilos.texto}>{aviso.texto}</p>
-
-                <button
-                  type="button"
-                  className={estilos.marcar}
-                  onClick={() => alMarcar(aviso)}
-                >
-                  {aviso.leida ? 'Marcar como pendiente' : 'Marcar como leído'}
-                </button>
-              </li>
+              <AvisoRecibido key={aviso.id} aviso={aviso} alMarcar={alMarcar} />
             ))}
           </ul>
           <Paginacion
@@ -200,4 +194,35 @@ function Listado({ carga, alPaginar, alMarcar, alReintentar }: PropsListado) {
     default:
       return casoImposible(carga);
   }
+}
+
+interface PropsAviso {
+  readonly aviso: Notificacion;
+  readonly alMarcar: (aviso: Notificacion) => void;
+}
+
+function AvisoRecibido({ aviso, alMarcar }: PropsAviso) {
+  const { etiqueta, senal, clase } = insignia(aviso.tipo);
+
+  return (
+    <li className={aviso.leida ? estilos.aviso : `${estilos.aviso} ${estilos.sinLeer}`}>
+      <div className={estilos.cabecera}>
+        <span className={`${estilos.tipo} ${clase}`}>
+          <span aria-hidden="true">{senal}</span> {etiqueta}
+        </span>
+
+        {/* Lo que se lee es cuánto hace; la fecha exacta queda a un palmo, en el
+            título, para quien la necesite. */}
+        <time className={estilos.fecha} dateTime={aviso.fecha} title={fecha(aviso.fecha)}>
+          {tiempoTranscurrido(aviso.fecha)}
+        </time>
+      </div>
+
+      <p className={estilos.texto}>{aviso.texto}</p>
+
+      <button type="button" className={estilos.marcar} onClick={() => alMarcar(aviso)}>
+        {aviso.leida ? 'Marcar como pendiente' : 'Marcar como leído'}
+      </button>
+    </li>
+  );
 }
