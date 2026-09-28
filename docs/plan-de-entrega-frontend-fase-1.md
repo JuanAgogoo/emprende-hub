@@ -41,8 +41,11 @@ Lo que **no** entra, y conviene tenerlo por escrito antes de que alguien lo dé
 por supuesto:
 
 - **El dashboard de gestión.** Editar el negocio, el buzón de consultas, las
-  métricas de visitas y las notificaciones son fase 2. Aquí solo hay una vista
-  de **solo lectura** del negocio recién creado.
+  métricas de visitas y las notificaciones. Aquí solo hay una vista de **solo
+  lectura** del negocio recién creado. **Entró después**, y no en la fase 2 sino
+  por historias sueltas del tablero: el buzón y los avisos (HU-018 y HU-031), las
+  cuatro cifras (HU-029) y la gráfica de visitas (HU-030). Editar el negocio
+  sigue pendiente.
 - **El panel de administración**: moderación, denuncias, gestión de cursos.
 - **Los cursos**, en cualquier forma.
 - **Las opiniones.** El perfil público muestra la calificación y el número de

@@ -260,7 +260,7 @@ añadió a la plantilla de Vite es `react-router-dom`, porque sin ella no hay ru
 | En vez de | Se usa | Razón |
 |---|---|---|
 | Redux, Zustand, Jotai | Un contexto por dominio con `useState` | Es la traducción directa del servicio con Signals del curso: estado privado, lectura pública, mutaciones por métodos |
-| axios, react-query, SWR | `fetch` en `api/` | `HttpClient` tampoco cachea ni reintenta. Son quince endpoints |
+| axios, react-query, SWR | `fetch` en `api/` | `HttpClient` tampoco cachea ni reintenta. Ni con las 38 llamadas de hoy hace falta caché: ninguna pantalla pide dos veces lo mismo |
 | React Hook Form, Zod | Una función `validar()` pura | Es lo que hace `Validators`, y se prueba y se explica sola |
 | Tailwind, styled-components | CSS plano y módulos CSS | Los valores viven en un fichero de tokens, no en las clases |
 
@@ -275,10 +275,19 @@ frontend/src/
 ├── types/       Interfaces y uniones del dominio
 ├── api/         Lo que habla con el backend. El único sitio con fetch
 ├── estado/      Un contexto por dominio
-├── componentes/ Piezas reutilizables, con su módulo CSS al lado
+├── componentes/ Piezas reutilizables y bloques de pantalla, con su módulo CSS
 ├── paginas/     Una por ruta
 └── estilos/     tokens.css manda: ningún color se escribe fuera
 ```
+
+**En `componentes/` hay dos clases de cosas**, y conviene saberlo antes de buscar
+algo: piezas pequeñas que se reutilizan —`Estrellas`, `CampoContrasena`,
+`Paginacion`— y **bloques enteros de pantalla que piden sus propios datos**:
+`Opiniones`, `Contacto`, `Metricas`, `Notificaciones`, `BuzonDeConsultas`. Los
+segundos no están en `paginas/` porque no son una ruta: viven dentro del perfil
+público o del panel, y cada uno se trae lo suyo. Eso deja las páginas legibles y
+hace que un bloque que falla —el listado de opiniones, por ejemplo— no se lleve
+por delante el resto de la pantalla.
 
 Tres reglas que se verifican con `grep` antes de cerrar cada incremento: ninguna
 llamada a `fetch` fuera de `api/`, ningún `any`, y ningún color fuera de
@@ -315,6 +324,19 @@ queries en lugar de a la ventana.
 Todo va dentro de `@supports`: si el navegador no lo soporta, la aplicación
 funciona igual y solo se pierde el efecto. **Ninguna funcionalidad depende de una
 animación.**
+
+El panel del emprendedor estiró esa misma idea a tres sitios donde lo normal es
+tirar de paquete:
+
+| Lo que suele instalarse | Lo que se usa | Por qué basta |
+|---|---|---|
+| Una librería de gráficas | **Treinta `div` con su altura en porcentaje** | La serie viene en la respuesta de las métricas; dibujarla son rectángulos y una regla de tres. Alternar entre semana y mes no pide nada al servidor: enseña más o menos de lo que ya está en memoria |
+| Una librería de fechas | **`Intl.RelativeTimeFormat`** | «hace 5 minutos», «ayer», «la semana pasada», en el idioma y sin dependencia. La unidad se elige por el tamaño del hueco |
+| El atributo `title` o un paquete de tooltips | **Un globo con `opacity` y `:hover`** | El `title` del navegador tarda cerca de un segundo y ese retardo no se puede tocar. El globo responde al instante y ya está en el marcado, así que aparecer no mueve nada |
+
+Las tres son la misma decisión de siempre: **antes de añadir una dependencia, mirar
+si el navegador ya lo trae**. Y las tres se explican en una frase, que es lo que
+se pide para poder defenderlas.
 
 ## Entregables
 

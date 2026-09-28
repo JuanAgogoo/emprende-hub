@@ -345,6 +345,55 @@ apretados.
 El paso completado se marca con un check, no solo con color. El actual lleva
 `aria-current="step"`, y el conjunto va en un `<ol>`, que es lo que es.
 
+### Insignia de estado y de tipo
+
+Una píldora pequeña con su palabra y su señal, en el color que le toca al hecho:
+la opinión en `--color-aviso`, la consulta en `--color-acento`, lo aprobado en
+`--color-exito` y lo rechazado en `--color-error`, cada una sobre su propio color
+rebajado con `color-mix`.
+
+**La señal va en `aria-hidden` y el nombre se escribe siempre.** El color y el
+dibujo solos no sirven para quien no los distingue, así que la insignia es
+redundante a propósito: dice lo mismo tres veces —posición, color y palabra— y
+con cualquiera de las tres se entiende.
+
+Lo mismo vale para lo pendiente de leer: **barra de acento en el borde de inicio
+y fondo suave**, nunca solo un texto en negrita.
+
+### Tarjeta de cifra
+
+La unidad del panel: un título pequeño y apagado, la cifra grande en
+`--texto-2xl` con `tabular-nums` —para que no baile de ancho al cambiar— y debajo
+una línea de contexto.
+
+Cuando esa línea es una comparación, **lleva flecha, signo y palabras**: «▲ +65,1
+% más que la semana pasada». Verde si sube, rojo si baja, y la flecha en
+`aria-hidden` porque la frase ya lo dice. Tres casos, no dos: sube, baja, y **no
+hay con qué comparar** —que no es lo mismo que cero—.
+
+En móvil van apiladas; a partir de 40rem, dos por fila; a partir de 64rem, las
+cuatro.
+
+### Gráfica de barras
+
+Barras de CSS, sin librería: un `div` por día con su altura en porcentaje del
+máximo, sobre una línea de base que las ancla.
+
+Las reglas que la hacen legible:
+
+- **Un día en cero conserva dos píxeles de barra.** Si desapareciera, parecería
+  que ese día no existe.
+- **El eje dice lo que cabe.** Siete días abreviados en la vista de semana; en la
+  de mes, tres fechas de extremo a extremo, porque treinta no caben y salpicar
+  números sueltos ensucia más de lo que informa.
+- **El dibujo es una imagen con descripción**: `role="img"` y un `aria-label` con
+  el total y el máximo. Quien no lo ve se queda con eso, no con treinta `div`
+  sueltos.
+- **El detalle va en un globo propio**, no en el `title` del navegador, que tarda
+  cerca de un segundo. Se enciende desde la columna entera —en un día flojo la
+  barra son dos píxeles— y en los extremos se ancla a su borde para no salirse de
+  la tarjeta.
+
 ### Estados de carga y vacío
 
 Cada vista que carga datos tiene sus tres estados dibujados, porque la unión
