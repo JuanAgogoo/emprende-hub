@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { listarMisConsultas } from '../api/consultas';
 import { obtenerMetricasDeVisitas } from '../api/metricas';
+import { GraficaDeVisitas } from './GraficaDeVisitas';
 import { calificacion, numero, variacion } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { MetricasVisitas, PeriodoMetrica } from '../types/metricas';
@@ -64,6 +65,9 @@ export function Metricas({ negocio }: Props) {
         negocio={negocio}
         alReintentar={() => setIntento((valor) => valor + 1)}
       />
+
+      {/* La serie ya vino con las cifras: la gráfica no pide nada más. */}
+      {carga.estado === 'EXITO' && <GraficaDeVisitas serie={carga.datos.visitas.serie} />}
     </section>
   );
 }
