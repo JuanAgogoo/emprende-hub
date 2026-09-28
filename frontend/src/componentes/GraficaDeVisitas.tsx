@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { diaCorto, diaDelMes, fechaCorta, numero } from '../formato';
+import { diaCorto, fechaCorta, numero } from '../formato';
 import type { PuntoSerie } from '../types/metricas';
 import estilos from './GraficaDeVisitas.module.css';
 
@@ -13,9 +13,6 @@ type Periodo = 'SEMANA' | 'MES';
 
 /** Cuántos días enseña cada una. Son las mismas ventanas que usan las tarjetas. */
 const DIAS = { SEMANA: 7, MES: 30 } as const;
-
-/** Con treinta barras no caben treinta fechas: se rotula una de cada cinco. */
-const CADA_CUANTAS_ETIQUETAS = { SEMANA: 1, MES: 5 } as const;
 
 /**
  * Las visitas por día, en barras.
@@ -84,28 +81,67 @@ export function GraficaDeVisitas({ serie }: Props) {
           total,
         )} en total y ${numero(maximo)} como mucho en un día`}
       >
-        {puntos.map((punto, posicion) => (
-          <div key={punto.fecha} className={estilos.columna}>
-            <div className={estilos.hueco}>
-              {/* El título es el que sale al pasar el ratón, y lo pone el
-                  navegador: no hace falta montar un tooltip propio. */}
-              <div
-                className={estilos.barra}
-                style={{ height: `${(punto.visitas / maximo) * 100}%` }}
-                title={`${fechaCorta(punto.fecha)}: ${numero(punto.visitas)} visitas`}
-              />
-            </div>
-
-            <span className={estilos.eje}>
-              {posicion % CADA_CUANTAS_ETIQUETAS[periodo] === 0
-                ? periodo === 'SEMANA'
-                  ? diaCorto(punto.fecha)
-                  : diaDelMes(punto.fecha)
-                : ''}
-            </span>
+        {puntos.map((punto) => (
+          // El título va en la columna entera y no en la barra: así se enseña
+          // pasando el ratón por cualquier punto del día, también por encima de
+          // una barra baja. Lo dibuja el navegador, sin tooltip propio.
+          <div
+            key={punto.fecha}
+            className={estilos.columna}
+            title={`${fechaCorta(punto.fecha)}: ${numero(punto.visitas)} ${
+              punto.visitas === 1 ? 'visita' : 'visitas'
+            }`}
+          >
+            <div
+              className={estilos.barra}
+              style={{ height: `${(punto.visitas / maximo) * 100}%` }}
+            />
           </div>
         ))}
       </div>
+
+      <Eje periodo={periodo} puntos={puntos} />
+    </div>
+  );
+}
+
+interface PropsEje {
+  readonly periodo: Periodo;
+  readonly puntos: readonly PuntoSerie[];
+}
+
+/**
+ * El eje de abajo, que cambia con la vista.
+ *
+ * En la semana caben los siete días, uno bajo su barra. **En el mes no caben
+ * treinta**, y salpicar números sueltos cada cinco barras ensucia el dibujo más
+ * de lo que informa: se ponen tres fechas —principio, mitad y final—, que es lo
+ * que hace falta para saber de cuándo a cuándo va lo que se está mirando.
+ */
+function Eje({ periodo, puntos }: PropsEje) {
+  if (periodo === 'SEMANA') {
+    return (
+      <div className={estilos.eje}>
+        {puntos.map((punto) => (
+          <span key={punto.fecha} className={estilos.marca}>
+            {diaCorto(punto.fecha)}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  const primero = puntos.at(0);
+  const medio = puntos.at(Math.floor(puntos.length / 2));
+  const ultimo = puntos.at(-1);
+
+  if (primero === undefined || medio === undefined || ultimo === undefined) return null;
+
+  return (
+    <div className={estilos.ejeAmplio}>
+      <span>{fechaCorta(primero.fecha)}</span>
+      <span>{fechaCorta(medio.fecha)}</span>
+      <span>{fechaCorta(ultimo.fecha)}</span>
     </div>
   );
 }

@@ -86,25 +86,18 @@
   gap: 2px;
   width: 100%;
   height: 9rem;
+  /* La línea de base: sin ella las barras flotan y el eje no se lee como eje. */
+  border-bottom: 1px solid var(--color-borde);
 }
 
+/* La columna ocupa el alto entero aunque su barra sea baja, y por eso el título
+   se enseña pasando el ratón por cualquier punto del día. */
 .columna {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--e-1);
+  align-items: end;
   flex: 1;
   height: 100%;
   min-width: 0;
-}
-
-/* El hueco ocupa el alto entero y la barra crece dentro: así todas las barras
-   se miden contra lo mismo y el eje queda alineado abajo. */
-.hueco {
-  display: flex;
-  align-items: end;
-  width: 100%;
-  flex: 1;
 }
 
 .barra {
@@ -115,10 +108,31 @@
   min-height: 2px;
 }
 
+/* El eje de la semana: una marca por columna, alineada con su barra. Las mismas
+   medidas que `.barras`, o los días dejarían de caer bajo su día. */
 .eje {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  padding-top: var(--e-1);
+}
+
+.marca {
+  flex: 1;
+  min-width: 0;
   font-size: var(--texto-xs);
   color: var(--color-apagado);
-  /* Sin esto, una etiqueta larga ensancha su columna y descuadra las barras. */
-  overflow: hidden;
+  text-align: center;
   white-space: nowrap;
+}
+
+/* El del mes: tres fechas repartidas de extremo a extremo. Treinta marcas no
+   caben, y de cinco en cinco ensucian el dibujo más de lo que informan. */
+.ejeAmplio {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: var(--e-1);
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
 }

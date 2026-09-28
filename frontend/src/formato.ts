@@ -49,11 +49,6 @@ export function fechaCorta(dia: string): string {
   return FECHA_CORTA.format(comoDiaLocal(dia));
 }
 
-/** Solo el número del día: «30». Para un eje donde no caben las fechas enteras. */
-export function diaDelMes(dia: string): string {
-  return String(comoDiaLocal(dia).getDate());
-}
-
 const VARIACION = new Intl.NumberFormat('es-CO', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
