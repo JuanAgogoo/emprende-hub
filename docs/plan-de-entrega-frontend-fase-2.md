@@ -64,7 +64,10 @@ por supuesto:
   resuelve, y el panel de administración no está en esta fase.
 - **El panel de administración**, otra vez: moderación, denuncias, cursos.
 - **El dashboard de gestión** del emprendedor: editar el negocio, el buzón de
-  consultas, las métricas de visitas y las notificaciones siguen pendientes.
+  consultas, las métricas de visitas y las notificaciones. Siguió pendiente
+  durante esta fase y **se construyó justo después**, por historias sueltas del
+  tablero —HU-018, HU-029, HU-030 y HU-031—, sin plan de entrega propio. De esa
+  lista solo queda fuera editar el negocio.
 - **Cambiar la contraseña estando dentro.** Es otra cosa que recuperarla: no hay
   endpoint y nadie lo pidió. Si se quiere, es un incremento aparte.
 - **Verificar el correo al registrarse.** La fase añade envío de correos, pero
