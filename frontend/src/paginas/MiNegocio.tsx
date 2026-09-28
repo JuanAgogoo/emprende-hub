@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
+import { BuzonDeConsultas } from '../componentes/BuzonDeConsultas';
+import { Notificaciones } from '../componentes/Notificaciones';
 import { obtenerMiNegocio, obtenerMisFotos, obtenerMisProductos } from '../api/negocios';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
@@ -213,9 +215,14 @@ function Contenido({ datos }: { readonly datos: Datos }) {
         </section>
       </div>
 
+      <div className={estilos.panel}>
+        <Notificaciones />
+        <BuzonDeConsultas />
+      </div>
+
       <p className={estilos.nota}>
-        Esta pantalla es solo de consulta. Editar el negocio, responder consultas y ver las visitas
-        llegan más adelante.
+        Los datos del negocio son de solo consulta: editarlos y ver las visitas llegan más
+        adelante. A las consultas se responde por correo, desde el enlace de cada una.
       </p>
     </div>
   );
