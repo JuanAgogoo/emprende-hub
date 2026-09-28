@@ -81,21 +81,20 @@ export function GraficaDeVisitas({ serie }: Props) {
           total,
         )} en total y ${numero(maximo)} como mucho en un día`}
       >
-        {puntos.map((punto) => (
-          // El título va en la columna entera y no en la barra: así se enseña
-          // pasando el ratón por cualquier punto del día, también por encima de
-          // una barra baja. Lo dibuja el navegador, sin tooltip propio.
-          <div
-            key={punto.fecha}
-            className={estilos.columna}
-            title={`${fechaCorta(punto.fecha)}: ${numero(punto.visitas)} ${
-              punto.visitas === 1 ? 'visita' : 'visitas'
-            }`}
-          >
+        {puntos.map((punto, posicion) => (
+          // El globo sale encima de su barra, pero lo enciende el ratón sobre
+          // la columna entera: en un día flojo la barra son dos píxeles y
+          // habría que acertarle.
+          <div key={punto.fecha} className={estilos.columna}>
             <div
               className={estilos.barra}
               style={{ height: `${(punto.visitas / maximo) * 100}%` }}
-            />
+            >
+              <span className={`${estilos.globo} ${estilos[anclaje(posicion, puntos.length)]}`}>
+                {fechaCorta(punto.fecha)} <span aria-hidden="true">·</span>{' '}
+                {numero(punto.visitas)} {punto.visitas === 1 ? 'visita' : 'visitas'}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -108,6 +107,18 @@ export function GraficaDeVisitas({ serie }: Props) {
 interface PropsEje {
   readonly periodo: Periodo;
   readonly puntos: readonly PuntoSerie[];
+}
+
+/**
+ * De qué lado se ancla el globo.
+ *
+ * Centrado se sale de la tarjeta en las dos primeras columnas y en las dos
+ * últimas, porque mide más que una columna. En los extremos se pega a su borde.
+ */
+function anclaje(posicion: number, cuantas: number): 'globoIzquierda' | 'globoDerecha' | 'globoCentrado' {
+  if (posicion < 2) return 'globoIzquierda';
+  if (posicion > cuantas - 3) return 'globoDerecha';
+  return 'globoCentrado';
 }
 
 /**
