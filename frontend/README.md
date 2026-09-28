@@ -101,16 +101,17 @@ dentro de `/negocios/:id`:
   nombre y el correo los pone la cuenta, no un campo del formulario.
 
 Y `/mi-negocio` es el otro lado de eso: **las cifras** del negocio —visitas de
-la semana y del mes con su variación, consultas recibidas y calificación—, los
+la semana y del mes con su variación, consultas recibidas y calificación, más la
+**gráfica de visitas por día**, que alterna entre semana y mes sin volver a
+pedir nada—, los
 **avisos** de la persona y el **buzón**, con el correo de quien escribe para
 poder responderle. La plataforma no responde desde dentro (D2), así que cada
 consulta lleva su enlace de correo.
 
 Lo que **no** entra todavía, para que nadie lo busque: el panel de
-administración, editar el negocio, la gráfica diaria de visitas —la serie llega
-en la misma respuesta, pero nadie pidió dibujarla—, los cursos y denunciar una
-opinión, que existe en el backend pero se queda fuera hasta que haya quien
-resuelva las denuncias.
+administración, editar el negocio, los cursos y denunciar una opinión, que
+existe en el backend pero se queda fuera hasta que haya quien resuelva las
+denuncias.
 
 > `/mi-negocio` comprueba el rol **por comodidad de la interfaz, no por
 > seguridad**. Quien mande la petición a mano se topa igual con el backend, que
