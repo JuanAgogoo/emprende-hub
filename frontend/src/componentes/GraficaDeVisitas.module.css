@@ -1,0 +1,176 @@
+.grafica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  width: 100%;
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+/* El navegador le pone a todo `fieldset` un borde y un padding propios. */
+.selector {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leyenda {
+  padding: 0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-apagado);
+}
+
+.opciones {
+  display: flex;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+}
+
+.opcion {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-full);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+  cursor: pointer;
+  /* Ancla del radio, que va en absoluto. */
+  position: relative;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.opcion:hover {
+  background: var(--color-lienzo-alt);
+}
+
+/* La elegida no se distingue solo por el color: cambia el relleno entero. */
+.elegida {
+  border-color: var(--color-acento);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+}
+
+.elegida:hover {
+  background: var(--color-acento-fuerte);
+}
+
+/* El radio sigue ahí —recibe el foco y responde a las flechas—, solo que lo que
+   se ve es la píldora. `opacity: 0` y no `display: none`, que lo sacaría del
+   recorrido del tabulador. */
+.radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcion:has(.radio:focus-visible) {
+  outline: 2px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.resumen {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.barras {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  width: 100%;
+  height: 9rem;
+  /* La línea de base: sin ella las barras flotan y el eje no se lee como eje. */
+  border-bottom: 1px solid var(--color-borde);
+}
+
+/* La columna ocupa el alto entero aunque su barra sea baja, y por eso el globo
+   se enseña pasando el ratón por cualquier punto del día. */
+.columna {
+  display: flex;
+  align-items: end;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+}
+
+/* El globo se dibuja aquí y no con el atributo `title`, que tarda cerca de un
+   segundo en salir y ese retardo lo decide el navegador, no nosotros. */
+.globo {
+  position: absolute;
+  bottom: 100%;
+  z-index: 1;
+  margin-bottom: var(--e-1);
+  padding: var(--e-1) var(--e-2);
+  border-radius: var(--radio-sm);
+  background: var(--color-tinta);
+  color: var(--color-sobre-senal);
+  font-size: var(--texto-xs);
+  white-space: nowrap;
+  /* Escondido, pero sin salir del sitio: así aparece sin mover nada. */
+  opacity: 0;
+  /* Que no se coma el ratón de la columna de al lado mientras está escondido. */
+  pointer-events: none;
+}
+
+.columna:hover .globo {
+  opacity: 1;
+}
+
+.globoCentrado {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.globoIzquierda {
+  left: 0;
+}
+
+.globoDerecha {
+  right: 0;
+}
+
+.barra {
+  width: 100%;
+  border-radius: var(--radio-sm) var(--radio-sm) 0 0;
+  background: var(--color-acento);
+  /* Un día sin visitas deja su marca: si no, parecería que ese día no existe. */
+  min-height: 2px;
+  /* Ancla del globo, que sale justo encima de esta barra. */
+  position: relative;
+}
+
+/* El eje de la semana: una marca por columna, alineada con su barra. Las mismas
+   medidas que `.barras`, o los días dejarían de caer bajo su día. */
+.eje {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  padding-top: var(--e-1);
+}
+
+.marca {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* El del mes: tres fechas repartidas de extremo a extremo. Treinta marcas no
+   caben, y de cinco en cinco ensucian el dibujo más de lo que informan. */
+.ejeAmplio {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: var(--e-1);
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}

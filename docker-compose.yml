@@ -86,6 +86,11 @@ services:
       # El proxy de Vite apunta al servicio, no a localhost, que dentro del
       # contenedor sería el propio contenedor.
       VITE_PROXY_TARGET: http://backend:8080
+      # Con el proyecto montado desde el host, el aviso de «este fichero
+      # cambió» no siempre llega al contenedor y Vite se queda sirviendo el
+      # módulo viejo. Sondeando el disco se entera igual. Costó dos ratos de
+      # «no veo mi cambio» antes de encontrarlo.
+      VITE_SONDEO: "true"
     ports:
       - "${WEB_PORT:-5173}:5173"
     volumes:

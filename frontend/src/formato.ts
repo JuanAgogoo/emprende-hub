@@ -23,6 +23,32 @@ export function calificacion(valor: number | null): string | null {
   return valor === null ? null : CALIFICACION.format(valor);
 }
 
+const DIA_CORTO = new Intl.DateTimeFormat('es-CO', { weekday: 'short' });
+const FECHA_CORTA = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' });
+
+/**
+ * Un día suelto de la API (`YYYY-MM-DD`) como fecha local.
+ *
+ * **No vale `new Date('2026-08-30')`**: eso se interpreta como medianoche UTC,
+ * que en Colombia es el día anterior a las siete de la tarde, y la gráfica
+ * enseñaría cada barra corrida un día. Construyéndola por partes, el día es el
+ * que dice la cadena.
+ */
+function comoDiaLocal(dia: string): Date {
+  const [anio, mes, numeroDeDia] = dia.split('-').map(Number);
+  return new Date(anio, mes - 1, numeroDeDia);
+}
+
+/** El día de la semana, abreviado: «lun», «mar». */
+export function diaCorto(dia: string): string {
+  return DIA_CORTO.format(comoDiaLocal(dia));
+}
+
+/** El día y el mes: «30 de ago». Para decir de cuándo a cuándo va algo. */
+export function fechaCorta(dia: string): string {
+  return FECHA_CORTA.format(comoDiaLocal(dia));
+}
+
 const VARIACION = new Intl.NumberFormat('es-CO', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
