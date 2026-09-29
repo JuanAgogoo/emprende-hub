@@ -288,7 +288,14 @@ class NegocioServiceTest {
     }
 
     private com.emprendehub.dto.EditarNegocioPublicoRequest edicion(String nombre) {
-        return new com.emprendehub.dto.EditarNegocioPublicoRequest(nombre, DESCRIPCION_VALIDA);
+        return new com.emprendehub.dto.EditarNegocioPublicoRequest(
+                nombre, DESCRIPCION_VALIDA, null);
+    }
+
+    private com.emprendehub.dto.EditarNegocioPublicoRequest edicion(String nombre,
+                                                                    Long categoriaId) {
+        return new com.emprendehub.dto.EditarNegocioPublicoRequest(
+                nombre, DESCRIPCION_VALIDA, categoriaId);
     }
 
     @Test
@@ -322,14 +329,93 @@ class NegocioServiceTest {
     }
 
     @Test
-    @DisplayName("proponerCambioPublico: un negocio pendiente no propone cambios")
-    void proponerCambio_negocioPendiente_lanzaExcepcion() {
+    @DisplayName("proponerCambioPublico: un negocio sin publicar se edita al momento")
+    void proponerCambio_negocioPendiente_seAplicaAlMomento() {
         Negocio negocio = negocioAprobado();
         negocio.setEstado(com.emprendehub.model.EstadoNegocio.PENDIENTE);
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        NegocioResponse respuesta = service.proponerCambioPublico(cliente(), edicion("Nombre Nuevo"));
+
+        // No hay versión pública que proteger: el negocio todavía no está en el
+        // directorio y pasará por revisión entero.
+        assertEquals("Nombre Nuevo", respuesta.nombre());
+        assertNull(respuesta.cambioPendiente());
+        verify(cambioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: un negocio rechazado corrige y reenvía, no propone")
+    void proponerCambio_negocioRechazado_lanzaExcepcion() {
+        Negocio negocio = negocioAprobado();
+        negocio.setEstado(com.emprendehub.model.EstadoNegocio.RECHAZADO);
         when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
 
         assertThrows(ReglaDeNegocioException.class,
                 () -> service.proponerCambioPublico(cliente(), edicion("X")));
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: sin moderación, el cambio se publica al instante")
+    void proponerCambio_sinModeracion_seAplicaAlInstante() {
+        NegocioService sinModeracion = servicioCon(true);
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        NegocioResponse respuesta = sinModeracion.proponerCambioPublico(
+                cliente(), edicion("Nombre Nuevo"));
+
+        assertEquals("Nombre Nuevo", respuesta.nombre());
+        assertNull(respuesta.cambioPendiente());
+        verify(cambioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: la categoría viaja en la propuesta, no en el negocio")
+    void proponerCambio_conCategoria_laGuardaEnLaPropuesta() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.empty());
+        CategoriaNegocio moda = new CategoriaNegocio("Moda", "👗");
+        moda.setId(9L);
+        when(categoriaRepository.findById(9L)).thenReturn(Optional.of(moda));
+
+        NegocioResponse respuesta = service.proponerCambioPublico(
+                cliente(), edicion("Nombre Nuevo", 9L));
+
+        assertEquals("Gastronomía", respuesta.categoria());
+        assertEquals("Moda", respuesta.cambioPendiente().categoria());
+    }
+
+    @Test
+    @DisplayName("proponerCambioPublico: una categoría que no existe es 404")
+    void proponerCambio_categoriaInexistente_lanzaExcepcion() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(categoriaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.proponerCambioPublico(cliente(), edicion("Nombre Nuevo", 99L)));
+    }
+
+    @Test
+    @DisplayName("obtenerElMio: el dueño ve la propuesta que tiene esperando revisión")
+    void obtenerElMio_conPropuestaViva_laDevuelve() {
+        Negocio negocio = negocioAprobado();
+        when(negocioRepository.findByUsuarioId(1L)).thenReturn(Optional.of(negocio));
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.of(
+                new com.emprendehub.model.CambioPendiente(
+                        negocio, "Nombre Propuesto", DESCRIPCION_VALIDA)));
+
+        NegocioResponse respuesta = service.obtenerElMio(cliente());
+
+        // El negocio conserva lo publicado y la propuesta viaja al lado: sin
+        // esto, editar y recargar parece que perdió el cambio.
+        assertEquals("Panadería La Tradicional", respuesta.nombre());
+        assertEquals("Nombre Propuesto", respuesta.cambioPendiente().nombre());
+        assertNull(respuesta.cambioPendiente().categoria());
     }
 
     @Test

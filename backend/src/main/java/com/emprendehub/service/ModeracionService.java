@@ -145,6 +145,9 @@ public class ModeracionService {
                     return new CambioPendienteResponse(
                             negocio.getId(), negocio.getNombre(), cambio.getNombrePropuesto(),
                             negocio.getDescripcion(), cambio.getDescripcionPropuesta(),
+                            negocio.getCategoria().getNombre(),
+                            cambio.getCategoriaPropuesta() == null
+                                    ? null : cambio.getCategoriaPropuesta().getNombre(),
                             fotoRepository.countByNegocioIdAndEstado(
                                     negocio.getId(), EstadoFoto.PENDIENTE),
                             cambio.getFechaSolicitud());
@@ -171,6 +174,11 @@ public class ModeracionService {
             case DecisionModeracion.Aprobar ignorada -> {
                 negocio.setNombre(cambio.getNombrePropuesto());
                 negocio.setDescripcion(cambio.getDescripcionPropuesta());
+                // Nula significa que la propuesta no tocaba la categoría, no que
+                // la borre: una propuesta abierta solo por fotos no la lleva.
+                if (cambio.getCategoriaPropuesta() != null) {
+                    negocio.setCategoria(cambio.getCategoriaPropuesta());
+                }
                 fotoService.aprobarPendientes(negocio.getId());
                 registrar(TipoEventoModeracion.CAMBIO_APROBADO, negocio.getNombre(), null, admin);
             }

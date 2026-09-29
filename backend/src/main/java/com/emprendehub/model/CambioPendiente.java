@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -48,6 +49,18 @@ public class CambioPendiente {
 
     @Column(nullable = false, length = 2000)
     private String descripcionPropuesta;
+
+    /**
+     * La categoría propuesta, o {@code null} si la propuesta no la cambia.
+     *
+     * <p>Es el único campo que admite nulo, y el nulo significa algo: una
+     * propuesta abierta solo por subir fotos no propone categoría ninguna. El
+     * nombre y la descripción se copian de los actuales en ese caso porque ya
+     * eran obligatorios cuando se entregó la tabla; esta columna nació después.
+     */
+    @ManyToOne
+    @JoinColumn(name = "categoria_propuesta_id")
+    private CategoriaNegocio categoriaPropuesta;
 
     @Column(nullable = false)
     private Instant fechaSolicitud;

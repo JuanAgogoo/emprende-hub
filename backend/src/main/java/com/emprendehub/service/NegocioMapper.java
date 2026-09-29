@@ -1,10 +1,12 @@
 package com.emprendehub.service;
 
+import com.emprendehub.dto.CambioPropuestoResponse;
 import com.emprendehub.dto.FotoResponse;
 import com.emprendehub.dto.NegocioPublicoResponse;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.ProductoResponse;
+import com.emprendehub.model.CambioPendiente;
 import com.emprendehub.model.Foto;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Producto;
@@ -31,6 +33,18 @@ final class NegocioMapper {
 
     /** Lo que ve el dueño y lo que ve el administrador. */
     static NegocioResponse aRespuesta(Negocio negocio) {
+        return aRespuesta(negocio, null);
+    }
+
+    /**
+     * Lo mismo, más la propuesta de cambio que el dueño tiene en cola.
+     *
+     * <p>Son dos métodos y no uno porque solo el dueño mira su propuesta: el
+     * administrador la ve en su cola, con los valores actuales al lado, y quien
+     * consulta un negocio ajeno no tiene por qué enterarse de que lo están
+     * editando.
+     */
+    static NegocioResponse aRespuesta(Negocio negocio, CambioPendiente cambio) {
         return new NegocioResponse(
                 negocio.getId(), negocio.getNombre(), negocio.getDescripcion(),
                 negocio.getTelefono(), negocio.getCategoria().getNombre(),
@@ -38,7 +52,19 @@ final class NegocioMapper {
                 negocio.getBarrio() == null ? null : negocio.getBarrio().getNombre(),
                 negocio.getNivelPrecio().name(), negocio.getEstado().name(),
                 negocio.getMotivoRechazo(), negocio.getCalificacionPromedio(),
-                negocio.getNumeroOpiniones(), negocio.getInstagram(), negocio.getLinkedin());
+                negocio.getNumeroOpiniones(), negocio.getInstagram(), negocio.getLinkedin(),
+                aPropuesta(cambio));
+    }
+
+    private static CambioPropuestoResponse aPropuesta(CambioPendiente cambio) {
+        if (cambio == null) {
+            return null;
+        }
+        return new CambioPropuestoResponse(
+                cambio.getNombrePropuesto(), cambio.getDescripcionPropuesta(),
+                cambio.getCategoriaPropuesta() == null
+                        ? null : cambio.getCategoriaPropuesta().getNombre(),
+                cambio.getFechaSolicitud());
     }
 
     /** La tarjeta del directorio: sin estado, sin motivo de rechazo y sin correo. */
