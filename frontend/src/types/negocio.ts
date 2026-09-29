@@ -95,6 +95,23 @@ export interface PerfilNegocio {
   readonly productos: readonly Producto[];
 }
 
+/**
+ * La edición que el dueño mandó y que todavía espera revisión (B2-bis).
+ *
+ * Existe porque el negocio sigue publicado con sus valores de antes: sin esto,
+ * quien edita recarga la pantalla, vuelve a leer lo viejo y cree que su cambio
+ * se perdió.
+ *
+ * `categoria` llega nula cuando la propuesta no la cambia, que es el caso de la
+ * que abre subir una foto a un negocio ya publicado.
+ */
+export interface CambioPropuesto {
+  readonly nombre: string;
+  readonly descripcion: string;
+  readonly categoria: string | null;
+  readonly fechaSolicitud: string;
+}
+
 /** Los tres estados por los que pasa un negocio. Nace PENDIENTE (B6). */
 export type EstadoNegocio = 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
 
@@ -120,4 +137,14 @@ export interface MiNegocio {
   readonly numeroOpiniones: number;
   readonly instagram: string | null;
   readonly linkedin: string | null;
+  /** La edición esperando revisión, o `null` si no hay ninguna en cola. */
+  readonly cambioPendiente: CambioPropuesto | null;
 }
+
+/** Lo que se edita de un negocio y pasa por revisión: los campos públicos. */
+export interface DatosPublicosDelNegocio {
+  readonly nombre: string;
+  readonly descripcion: string;
+  readonly categoriaId: number;
+}
+
