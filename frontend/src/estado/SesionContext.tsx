@@ -1,5 +1,13 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import { iniciarSesion, registrarCliente, registrarEmprendedor } from '../api/auth';
+import { registrarCaducidadDeSesion } from '../api/cliente';
 import { borrarSesion, guardarSesion, leerSesion } from '../almacenSesion';
 import type { RegistroEmprendedor } from '../types/registroEmprendedor';
 import type { RespuestaAuth, Sesion } from '../types/sesion';
@@ -70,6 +78,13 @@ export function SesionProvider({ children }: { readonly children: ReactNode }) {
     borrarSesion();
     setSesion(null);
   }, []);
+
+  // El cliente HTTP no puede usar hooks, así que se le deja aquí el `salir`:
+  // cuando una petición con token reciba un 401, cerrará la sesión por su
+  // cuenta. `RutaDeEmprendedor` se encarga entonces de devolver al login.
+  useEffect(() => {
+    registrarCaducidadDeSesion(salir);
+  }, [salir]);
 
   return (
     <SesionContext.Provider value={{ sesion, entrar, registrar, registrarNegocio, salir }}>

@@ -12,6 +12,24 @@ import { leerToken } from '../almacenSesion';
 const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
 
 /**
+ * Qué hacer cuando el backend rechaza un token que el navegador daba por bueno.
+ *
+ * Este módulo no puede usar hooks de React, así que `SesionContext` le deja aquí
+ * su función de salir y es este el que la llama. Mismo motivo por el que
+ * `almacenSesion` vive fuera del contexto: el cliente necesita la sesión y no
+ * puede depender del árbol de componentes.
+ */
+let alCaducarSesion: (() => void) | null = null;
+
+export function registrarCaducidadDeSesion(accion: () => void): void {
+  alCaducarSesion = accion;
+}
+
+function avisarDeSesionCaducada(): void {
+  alCaducarSesion?.();
+}
+
+/**
  * Un error de la API, ya legible.
  *
  * `porCampo` trae una clave por campo inválido cuando la validación falla,
@@ -96,6 +114,12 @@ async function peticion<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
   }
 
   if (!respuesta.ok) {
+    // Un 401 en una petición que sí llevaba token significa que ya no vale:
+    // ha caducado o el backend lo rechaza. Se avisa a quien lleve la sesión
+    // para que la cierre, en vez de dejar al usuario en un limbo donde la
+    // interfaz dice que está dentro y cada petición le responde que no.
+    if (conSesion && respuesta.status === 401) avisarDeSesionCaducada();
+
     // Con el backend caído, el `fetch` no siempre llega a fallar: el proxy de
     // Vite responde 502, y una pasarela delante de la API responde 502, 503 o
     // 504. Para quien mira la pantalla es el mismo problema que no tener red,
