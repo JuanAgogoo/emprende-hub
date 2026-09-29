@@ -3,6 +3,7 @@ package com.emprendehub.controller;
 import com.emprendehub.dto.NotificacionResponse;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.NotificacionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Cuelga de la persona y no del negocio: la notificación es para una cuenta,
  * y así el día que un cliente reciba avisos no habrá que mover la ruta.
  */
+@Tag(name = "Notificaciones", description = "Los avisos de quien tiene la sesión abierta")
 @RestController
 @RequestMapping("/api/v1/notificaciones")
 public class NotificacionController {

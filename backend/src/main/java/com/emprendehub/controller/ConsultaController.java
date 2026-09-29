@@ -4,6 +4,7 @@ import com.emprendehub.dto.ConsultaResponse;
 import com.emprendehub.dto.EnviarConsultaRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ConsultaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code anyRequest().authenticated()} sin necesitar regla propia. Que el buzón
  * sea el del negocio de quien pregunta lo decide el caso de uso.
  */
+@Tag(name = "Consultas", description = "Escribir al negocio y el buzón de su dueño")
 @RestController
 @RequestMapping("/api/v1/negocios")
 public class ConsultaController {

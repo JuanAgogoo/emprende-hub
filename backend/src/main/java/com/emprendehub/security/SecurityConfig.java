@@ -70,6 +70,13 @@ public class SecurityConfig {
                         // la opinión propia de quien pregunta.
                         .requestMatchers(HttpMethod.GET, "/api/v1/negocios/*/opiniones")
                         .permitAll()
+                        // El documento OpenAPI y Swagger UI son públicos: describen
+                        // el contrato, que ya es público, y no devuelven ni un
+                        // dato del negocio. Protegerlos obligaría a pegar un
+                        // token antes de poder leer la documentación.
+                        .requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/swagger-ui.html").permitAll()
                         // Toda la gestión cuelga de /admin y es solo del ADMIN.
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

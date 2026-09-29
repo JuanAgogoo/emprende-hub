@@ -6,6 +6,7 @@ import com.emprendehub.dto.CursoResponse;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.NivelCurso;
 import com.emprendehub.service.CursoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Cuelga de {@code /api/v1/admin} porque el PR 5 protege esa rama entera con
  * el rol ADMIN. Hasta entonces está abierta.
  */
+@Tag(name = "Cursos · admin", description = "Alta, edición y publicación del catálogo de formación")
 @RestController
 @RequestMapping("/api/v1/admin/cursos")
 public class CursoAdminController {

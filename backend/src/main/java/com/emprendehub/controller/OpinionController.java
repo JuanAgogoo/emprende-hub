@@ -5,6 +5,7 @@ import com.emprendehub.dto.CrearOpinionRequest;
 import com.emprendehub.dto.OpinionResponse;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.OpinionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * como mucho una por negocio (C2), así que {@code /mia} la identifica sin
  * ambigüedad y sin dar pie a que alguien pruebe con el número de otra.
  */
+@Tag(name = "Opiniones", description = "Leerlas es público, escribirlas exige sesión (C1)")
 @RestController
 @RequestMapping("/api/v1/negocios/{negocioId}/opiniones")
 public class OpinionController {

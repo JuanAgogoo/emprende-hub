@@ -7,6 +7,7 @@ import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.DirectorioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * documenta el contrato y deja que Spring convierta y valide cada tipo, de modo
  * que un {@code nivelPrecio=REGALADO} devuelve 400 sin llegar al servicio.
  */
+@Tag(name = "Directorio", description = "La exploración pública de negocios")
 @RestController
 @RequestMapping("/api/v1/directorio")
 public class DirectorioController {

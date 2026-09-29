@@ -36,6 +36,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	// Swagger UI y el documento OpenAPI, generados a partir de los propios
+	// controladores: no hay un fichero que mantener al día a mano. La línea 3.x
+	// es la de Spring Boot 4; la 2.x es de Boot 3 y aquí no arranca.
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
 	// PostgreSQL real para los @DataJpaTest: el enunciado prohíbe bases de
