@@ -128,6 +128,20 @@ export function enviarFormulario<T>(
   return peticion<T>(ruta, { metodo: 'POST', formulario, conSesion });
 }
 
+/**
+ * El mismo `multipart`, pero para cambiar una parte de algo que ya existe.
+ *
+ * Es `PATCH` y no `POST` porque no crea nada: sustituye la imagen de un
+ * producto y deja el resto como estaba.
+ */
+export function parchearFormulario<T>(
+  ruta: string,
+  formulario: FormData,
+  conSesion = false,
+): Promise<T> {
+  return peticion<T>(ruta, { metodo: 'PATCH', formulario, conSesion });
+}
+
 /** Sustituye entero algo que ya existe. El backend devuelve cómo quedó. */
 export function actualizar<T>(ruta: string, cuerpo: unknown, conSesion = false): Promise<T> {
   return peticion<T>(ruta, { metodo: 'PUT', cuerpo, conSesion });
