@@ -1,3 +1,10 @@
-/gradlew text eol=lf
+# Todo lo que se ejecuta dentro de un contenedor Linux tiene que llegar con LF,
+# aunque se clone en Windows, donde Git pone CRLF por defecto: con CRLF el
+# shebang de `gradlew` pasa a ser «/bin/sh\r» y el backend no arranca, sin que
+# el error diga que el problema son los finales de línea.
+#
+# La regla decía `/gradlew`, anclada a la raíz, y dejó de aplicar cuando el
+# backend se movió a `backend/`. Ahora no depende de dónde esté cada fichero.
+* text=auto eol=lf
 *.bat text eol=crlf
 *.jar binary
