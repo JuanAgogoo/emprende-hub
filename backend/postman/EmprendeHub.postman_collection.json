@@ -1148,6 +1148,38 @@
 					}
 				},
 				{
+					"name": "Cambiar la foto de un producto",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/negocios/mio/productos/1/foto",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"negocios",
+								"mio",
+								"productos",
+								"1",
+								"foto"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "foto",
+									"type": "file",
+									"src": [],
+									"description": "La imagen nueva. JPG o PNG, 5 MB como mucho (B9)."
+								}
+							]
+						},
+						"description": "Sustituye solo la imagen y deja el resto igual. Va aparte del PUT porque los campos de texto viajan en JSON y esto es un binario.\n\nLa imagen anterior se borra del servidor. Hay que elegir un fichero a mano en el campo «foto»: Postman no guarda la ruta al exportar la colección."
+					}
+				},
+				{
 					"name": "Cambiar disponibilidad (F3)",
 					"request": {
 						"method": "PATCH",
