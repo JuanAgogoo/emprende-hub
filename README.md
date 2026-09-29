@@ -81,7 +81,7 @@ docker compose down -v        # borra también la base y las cachés
 | `SMTP_PORT` | `1025` | El SMTP de Mailpit, al que manda el backend |
 | `MAILPIT_PORT` | `8025` | La bandeja de Mailpit, que se abre en el navegador |
 | `HOST_UID` / `HOST_GID` | `1000` | El usuario con el que corren los contenedores |
-| `MODERACION_AUTOMATICA` | `false` | **Provisional.** A `true`, los negocios nacen publicados y sus fotos aprobadas |
+| `MODERACION_AUTOMATICA` | `false` | **Provisional.** A `true`, los negocios nacen publicados, sus fotos aprobadas y las ediciones se publican al momento |
 
 `HOST_UID` existe para que las fotos que suba el backend **no queden siendo de
 root** dentro del repositorio. Con un usuario 1000 —lo normal en Linux— no hay
@@ -95,9 +95,13 @@ No uses `UID` a secas: en bash es una variable de solo lectura y la asignación
 falla. Para no repetirlo, `echo "HOST_UID=$(id -u)" >> .env`.
 
 `MODERACION_AUTOMATICA` está puesta a `true` en `docker-compose.yml` **mientras se
-construye**, para no tener que aprobar cada negocio a mano. Se quita esa línea
-para volver a la moderación de verdad, que es lo que hay que enseñar el día de la
-sustentación: el negocio nace `PENDIENTE` (B6) y el administrador lo publica.
+construye**, para no tener que aprobar cada negocio a mano: con ella puesta no
+hay nada que moderar, porque el negocio nace publicado, sus fotos aprobadas y lo
+que el dueño edita se publica al momento. Se quita esa línea para volver a la
+moderación de verdad, que es lo que hay que enseñar el día de la sustentación: el
+negocio nace `PENDIENTE` (B6), el administrador lo publica, y lo que su dueño
+edite después espera en la cola de cambios (B2-bis) mientras el público sigue
+viendo la versión aprobada.
 
 Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
 mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
@@ -304,13 +308,13 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 64 endpoints y un recorrido de demostración de
+**El contrato completo, con los 65 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Colección de Postman
 
-`backend/postman/EmprendeHub.postman_collection.json`, con **75 peticiones que cubren los
-64 endpoints**.
+`backend/postman/EmprendeHub.postman_collection.json`, con **76 peticiones que cubren los
+65 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
 2. Ejecutar las cuatro primeras peticiones de **1 · Acceso**. Cada una guarda su
@@ -349,7 +353,7 @@ cd backend
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**480 pruebas en verde y 98,3% de cobertura sobre `service/**`**, muy por encima
+**490 pruebas en verde y 98,2% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |

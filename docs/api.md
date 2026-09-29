@@ -193,8 +193,9 @@ La cuenta **nace ya como `EMPRENDEDOR`**, sin pasar por cliente, y el negocio
 nace `PENDIENTE` de revisión (B6).
 
 > **Interruptor provisional de desarrollo.** Con `MODERACION_AUTOMATICA=true` el
-> negocio nace `APROBADO` y las fotos que se suban nacen `APROBADA`, sin pasar
-> por el administrador. Es para trabajar sin moderar a mano; **el valor por
+> negocio nace `APROBADO`, las fotos que se suban nacen `APROBADA` y **las
+> ediciones del dueño se publican al momento** en vez de entrar a la cola, sin
+> pasar por el administrador. Es para trabajar sin moderar a mano; **el valor por
 > defecto es `false`** y la regla del dominio sigue siendo B6. Las dos mitades
 > van juntas a propósito: aprobar solo el negocio dejaría sus fotos esperando
 > revisión y el directorio enseñaría fichas sin imagen. La respuesta añade `negocioId` al cuerpo
@@ -343,7 +344,7 @@ cero** (C5).
 |---|---|---|---|
 | `POST` | `/negocios` | Sesión | Registra y **asciende a emprendedor** (A1-bis) |
 | `GET` | `/negocios/mio` | Dueño | Su negocio, en el estado que esté |
-| `PUT` | `/negocios/mio` | Dueño | **Propone** cambiar nombre o descripción |
+| `PUT` | `/negocios/mio` | Dueño | Cambia nombre, descripción y categoría (B2) |
 | `PATCH` | `/negocios/mio/contacto` | Dueño | Cambia el teléfono, al instante |
 | `PATCH` | `/negocios/mio/redes` | Dueño | Instagram y LinkedIn, al instante (B8) |
 | `POST` | `/negocios/mio/reenviar` | Dueño | Corrige un rechazado y reenvía (B1) |
@@ -359,9 +360,44 @@ una división visual del formulario.
 | `nivelPrecio` | `BAJO`, `MEDIO`, `ALTO` (G4) |
 | `barrioId` | Opcional, y debe pertenecer a la ciudad indicada |
 
-**`PUT /negocios/mio` no cambia el negocio.** Guarda una propuesta que espera
-revisión, y el público sigue viendo la versión aprobada mientras tanto (B2-bis).
-El teléfono y las redes son la excepción: se aplican al momento.
+**`PUT /negocios/mio` puede no cambiar el negocio todavía.** Lo decide una sola
+regla: *espera revisión lo que ya está publicado, y solo si la revisión está
+encendida.*
+
+| Negocio | `MODERACION_AUTOMATICA` | Qué pasa |
+|---|---|---|
+| `APROBADO` | apagada (por defecto) | Guarda una propuesta y el público sigue viendo la versión aprobada (B2-bis) |
+| `APROBADO` | encendida | Se aplica al momento |
+| `PENDIENTE` | cualquiera | Se aplica al momento: no hay versión pública que proteger, y el negocio pasará por revisión entero |
+| `RECHAZADO` | cualquiera | `400`. Ese camino es `POST /negocios/mio/reenviar` (B1) |
+
+El teléfono y las redes son la excepción de siempre: se aplican al momento,
+esté como esté el negocio.
+
+`categoriaId` es **opcional**: enviarlo nulo significa que la categoría no
+cambia. Una categoría que no existe devuelve `404`.
+
+**El dueño lee su propia propuesta** en `cambioPendiente`, que viaja dentro del
+negocio en `GET /negocios/mio` y en todas las respuestas de edición, y llega
+nulo cuando no hay ninguna en cola:
+
+```json
+{
+  "nombre": "Artesanías El Roble",
+  "categoria": "Artesanías",
+  "cambioPendiente": {
+    "nombre": "Artesanías El Roble y Cerámica",
+    "descripcion": "Taller de artesanías en cuero, madera y cerámica…",
+    "categoria": "Belleza",
+    "fechaSolicitud": "2026-09-28T16:47:38.087565Z"
+  }
+}
+```
+
+Sin ese campo, quien edita guarda, recarga la pantalla, vuelve a leer los
+valores de antes y cree que su cambio se perdió. El `categoria` de dentro llega
+nulo cuando la propuesta no la cambia, que es el caso de la que abre subir una
+foto.
 
 Los dos enlaces de B8 son opcionales y se validan contra su dominio: un
 `instagram` que apunte a otro sitio devuelve `400`. Sin eso, el botón
@@ -446,7 +482,8 @@ Solo el **dueño**. Es un **escaparate**: no se vende nada (F1).
 |---|---|---|
 | `GET` | `/negocios/mio/productos` | Su escaparate |
 | `POST` | `/negocios/mio/productos` | Crea (`201`). **`multipart/form-data`** |
-| `PUT` | `/negocios/mio/productos/{id}` | Edita |
+| `PUT` | `/negocios/mio/productos/{id}` | Edita los campos de texto y el precio |
+| `PATCH` | `/negocios/mio/productos/{id}/foto` | Sustituye la imagen. **`multipart/form-data`** |
 | `PATCH` | `/negocios/mio/productos/{id}/disponibilidad?disponible=false` | El interruptor de F3 |
 | `DELETE` | `/negocios/mio/productos/{id}` | Elimina (`204`) |
 
@@ -483,9 +520,21 @@ clave `foto` que nombra lo que falta.
 Un producto no disponible **sigue saliendo** en el perfil, marcado. Esconderlo
 haría del interruptor un borrado con otro nombre.
 
-> **`PUT` no cambia la imagen.** Edita los campos de texto y el precio; sustituir
-> la foto no está en el contrato entregado y ninguna pantalla de esta fase lo
-> pide.
+> **`PUT` no cambia la imagen**, y por eso existe
+> `PATCH /negocios/mio/productos/{id}/foto`. Son dos endpoints y no uno porque
+> los campos de texto viajan en JSON y la imagen es un binario: juntarlos
+> obligaría a volver a subir la foto cada vez que se corrige una errata del
+> nombre.
+
+```bash
+curl -X PATCH $A/negocios/mio/productos/1/foto -H "Authorization: Bearer $T" \
+  -F "foto=@nueva.jpg"
+```
+
+La imagen nueva se guarda **antes** de apuntarla en la fila, y la anterior se
+borra al final. Al revés, un fallo a mitad dejaría el producto señalando un
+fichero que ya no existe, que es el hueco que F4 no permite. Las reglas son las
+de siempre: JPG o PNG y 5 MB como mucho (B9).
 
 El producto de otro negocio responde `404`, no `403`: la consulta busca por
 producto **y** negocio a la vez, así que el ajeno sencillamente no aparece.
@@ -722,7 +771,9 @@ El motivo del rechazo lo lee el dueño en `GET /negocios/mio`: sin correos de
 aviso (I1), ese campo es el único sitio donde se entera de por qué le
 rechazaron.
 
-`GET /cambios-pendientes` enseña el valor actual junto al propuesto —revisar es
+`GET /cambios-pendientes` enseña el valor actual junto al propuesto —también la
+categoría, con `categoriaPropuesta` nula cuando la propuesta no la cambia—, y
+aprobar copia al negocio los tres campos. Revisar es
 comparar— y cuántas fotos espera publicar cada propuesta. Una propuesta puede ser
 **solo de fotos**, y entonces los dos textos coinciden. Aprobar una publica sus
 imágenes; rechazarla **las descarta**, porque dejarlas pendientes haría que la
@@ -846,7 +897,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**64 endpoints** en 75 peticiones, agrupadas por quién las usa. Su primera
+**65 endpoints** en 76 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
