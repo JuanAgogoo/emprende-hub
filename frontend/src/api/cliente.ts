@@ -12,6 +12,24 @@ import { leerToken } from '../almacenSesion';
 const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
 
 /**
+ * Qué hacer cuando el backend rechaza un token que el navegador daba por bueno.
+ *
+ * Este módulo no puede usar hooks de React, así que `SesionContext` le deja aquí
+ * su función de salir y es este el que la llama. Mismo motivo por el que
+ * `almacenSesion` vive fuera del contexto: el cliente necesita la sesión y no
+ * puede depender del árbol de componentes.
+ */
+let alCaducarSesion: (() => void) | null = null;
+
+export function registrarCaducidadDeSesion(accion: () => void): void {
+  alCaducarSesion = accion;
+}
+
+function avisarDeSesionCaducada(): void {
+  alCaducarSesion?.();
+}
+
+/**
  * Un error de la API, ya legible.
  *
  * `porCampo` trae una clave por campo inválido cuando la validación falla,
@@ -80,13 +98,36 @@ async function peticion<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
     if (token !== null) cabeceras.Authorization = `Bearer ${token}`;
   }
 
-  const respuesta = await fetch(`${BASE}${ruta}`, {
-    method: metodo,
-    headers: cabeceras,
-    body: formulario ?? (cuerpo === undefined ? undefined : JSON.stringify(cuerpo)),
-  });
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(`${BASE}${ruta}`, {
+      method: metodo,
+      headers: cabeceras,
+      body: formulario ?? (cuerpo === undefined ? undefined : JSON.stringify(cuerpo)),
+    });
+  } catch {
+    // `fetch` solo lanza cuando la petición no llega a salir: sin red, o sin
+    // proxy delante y con el backend apagado. Sin respuesta no hay código de
+    // estado, de ahí el 0. Se traduce aquí porque el «Failed to fetch» del
+    // navegador acaba en pantalla y no le dice nada a quien lo lee.
+    throw new ErrorApi(0, 'No se pudo conectar con el servidor');
+  }
 
   if (!respuesta.ok) {
+    // Un 401 en una petición que sí llevaba token significa que ya no vale:
+    // ha caducado o el backend lo rechaza. Se avisa a quien lleve la sesión
+    // para que la cierre, en vez de dejar al usuario en un limbo donde la
+    // interfaz dice que está dentro y cada petición le responde que no.
+    if (conSesion && respuesta.status === 401) avisarDeSesionCaducada();
+
+    // Con el backend caído, el `fetch` no siempre llega a fallar: el proxy de
+    // Vite responde 502, y una pasarela delante de la API responde 502, 503 o
+    // 504. Para quien mira la pantalla es el mismo problema que no tener red,
+    // así que se cuenta igual y no como «Error 502 al llamar a la API».
+    if (respuesta.status >= 502 && respuesta.status <= 504) {
+      throw new ErrorApi(respuesta.status, 'No se pudo conectar con el servidor');
+    }
+
     const texto = await respuesta.text();
     let cuerpoError: unknown = null;
     try {
