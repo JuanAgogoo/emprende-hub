@@ -1,0 +1,130 @@
+.columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-5);
+  align-items: start;
+}
+
+/* El formulario y la vista previa, uno al lado del otro solo cuando caben los
+   dos sin apretarse. Antes de eso la vista previa va debajo, que es como se lee
+   en un móvil: escribo, bajo la vista y compruebo. */
+@media (min-width: 60rem) {
+  .columnas {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+.formulario {
+  min-width: 0;
+}
+
+.esqueleto {
+  height: 20rem;
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+/* ── Los carteles de después de guardar ──────────────────────────────── */
+
+.confirmacion,
+.enRevision {
+  padding: var(--e-3) var(--e-4);
+  border-left: 4px solid;
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+}
+
+.confirmacion {
+  border-left-color: var(--color-exito);
+  background: color-mix(in srgb, var(--color-exito) 8%, var(--color-lienzo));
+}
+
+.enRevision {
+  border-left-color: var(--color-aviso);
+  background: color-mix(in srgb, var(--color-aviso) 8%, var(--color-lienzo));
+}
+
+/* ── La vista previa ─────────────────────────────────────────────────── */
+
+.vistaPrevia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+/* Se queda a la vista mientras se escribe, que es para lo que sirve. Solo
+   donde hay dos columnas: pegada arriba en un móvil taparía el formulario. */
+@media (min-width: 60rem) {
+  .vistaPrevia {
+    position: sticky;
+    top: var(--e-4);
+  }
+}
+
+.tituloVista {
+  font-size: var(--texto-md);
+  color: var(--color-tinta);
+}
+
+.pieVista {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.nombreVista {
+  font-size: var(--texto-lg);
+  line-height: var(--alto-apretado);
+  color: var(--color-tinta);
+  /* Un nombre largo sin espacios no puede empujar la tarjeta a lo ancho. */
+  overflow-wrap: anywhere;
+}
+
+.metaVista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.descripcionVista {
+  font-size: var(--texto-sm);
+  line-height: var(--alto-comodo);
+  overflow-wrap: anywhere;
+  /* La descripción puede ser larguísima: la vista previa enseña el arranque, no
+     se convierte en la pantalla entera. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  line-clamp: 8;
+  overflow: hidden;
+}
+
+.redesVista {
+  display: flex;
+  gap: var(--e-2);
+  align-items: center;
+}
+
+.telefonoVista {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-acento-fuerte);
+}

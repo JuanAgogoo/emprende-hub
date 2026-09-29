@@ -117,10 +117,16 @@ public class NegocioService {
         return aRespuesta(negocioRepository.save(negocio));
     }
 
-    /** El negocio de quien pregunta, en cualquier estado: es suyo (B6). */
+    /**
+     * El negocio de quien pregunta, en cualquier estado: es suyo (B6).
+     *
+     * <p>Viaja con la propuesta de cambio que tenga en cola, si la tiene: es la
+     * única forma de que el dueño sepa que su edición está esperando revisión y
+     * no se perdió.
+     */
     public NegocioResponse obtenerElMio(Usuario solicitante) {
         return negocioRepository.findByUsuarioId(solicitante.getId())
-                .map(this::aRespuesta)
+                .map(this::conSuPropuesta)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Negocio del usuario", solicitante.getId()));
     }
@@ -146,22 +152,45 @@ public class NegocioService {
     // ---------- Edición por el dueño ----------
 
     /**
-     * Propone un cambio de los campos públicos (B2 y B2-bis).
+     * Edita los campos públicos: nombre, descripción y categoría (B2 y B2-bis).
      *
-     * <p>No toca el negocio: guarda la propuesta aparte. El público sigue viendo
-     * la versión aprobada mientras el administrador decide, así que corregir una
-     * errata nunca saca al negocio del directorio.
+     * <p>Dónde acaba el cambio depende de dos cosas, y esta es la única regla
+     * que hay que recordar: <strong>solo espera revisión lo que ya está
+     * publicado, y solo si la revisión está encendida.</strong>
      *
-     * <p>Solo hay una propuesta viva por negocio: una nueva sustituye a la
-     * anterior.
+     * <ul>
+     *   <li><b>Negocio publicado y revisión encendida</b>: se guarda la
+     *       propuesta aparte y el público sigue viendo la versión aprobada, así
+     *       que corregir una errata nunca saca al negocio del directorio
+     *       (B2-bis). Solo hay una propuesta viva por negocio: una nueva
+     *       sustituye a la anterior.
+     *   <li><b>Negocio publicado y revisión apagada</b>: se aplica al momento.
+     *       Es el mismo interruptor que ya decidía si un negocio nace publicado
+     *       y si sus fotos nacen aprobadas; tenerlo puesto para el registro y no
+     *       para la edición dejaba a medias justo el caso que se usa al
+     *       depurar.
+     *   <li><b>Negocio sin publicar</b>: se aplica al momento, haya revisión o
+     *       no. No hay versión pública que proteger, y el negocio entero pasa
+     *       por revisión igualmente antes de salir al directorio.
+     * </ul>
+     *
+     * <p>Un negocio rechazado no entra por aquí: tiene su propio camino en
+     * {@link #corregirYReenviar}, que además lo devuelve a la cola (B1).
      */
     @Transactional
     public NegocioResponse proponerCambioPublico(Usuario solicitante,
                                                  EditarNegocioPublicoRequest peticion) {
         Negocio negocio = buscarElMio(solicitante);
-        if (negocio.getEstado() != EstadoNegocio.APROBADO) {
+        if (negocio.getEstado() == EstadoNegocio.RECHAZADO) {
             throw new ReglaDeNegocioException(
-                    "Solo un negocio aprobado propone cambios; corrige y vuelve a enviar");
+                    "Un negocio rechazado corrige y vuelve a enviar, no propone cambios");
+        }
+
+        CategoriaNegocio categoria = resolverCategoria(peticion.categoriaId());
+
+        if (moderacionAutomatica || negocio.getEstado() != EstadoNegocio.APROBADO) {
+            aplicar(negocio, peticion, categoria);
+            return conSuPropuesta(negocioRepository.save(negocio));
         }
 
         CambioPendiente cambio = cambioRepository.findByNegocioId(negocio.getId())
@@ -169,9 +198,29 @@ public class NegocioService {
                         peticion.descripcion().trim()));
         cambio.setNombrePropuesto(peticion.nombre().trim());
         cambio.setDescripcionPropuesta(peticion.descripcion().trim());
+        cambio.setCategoriaPropuesta(categoria);
         cambioRepository.save(cambio);
 
-        return aRespuesta(negocio);
+        return NegocioMapper.aRespuesta(negocio, cambio);
+    }
+
+    /** Copia los valores editados sobre el negocio. La categoría es opcional. */
+    private void aplicar(Negocio negocio, EditarNegocioPublicoRequest peticion,
+                         CategoriaNegocio categoria) {
+        negocio.setNombre(peticion.nombre().trim());
+        negocio.setDescripcion(peticion.descripcion().trim());
+        if (categoria != null) {
+            negocio.setCategoria(categoria);
+        }
+    }
+
+    /** Una categoría nula no es un error: significa que no se cambia. */
+    private CategoriaNegocio resolverCategoria(Long categoriaId) {
+        if (categoriaId == null) {
+            return null;
+        }
+        return categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría", categoriaId));
     }
 
     /** El teléfono se actualiza al instante: no pasa por revisión (B2). */
@@ -180,7 +229,9 @@ public class NegocioService {
                                               EditarContactoRequest peticion) {
         Negocio negocio = buscarElMio(solicitante);
         negocio.setTelefono(peticion.telefono().trim());
-        return aRespuesta(negocioRepository.save(negocio));
+        // Devuelve también la propuesta en cola: quien corrige el teléfono
+        // mientras espera revisión no puede perder de vista que la tiene.
+        return conSuPropuesta(negocioRepository.save(negocio));
     }
 
     /**
@@ -196,8 +247,7 @@ public class NegocioService {
         if (negocio.getEstado() != EstadoNegocio.RECHAZADO) {
             throw new ReglaDeNegocioException("Solo se reenvía un negocio rechazado");
         }
-        negocio.setNombre(peticion.nombre().trim());
-        negocio.setDescripcion(peticion.descripcion().trim());
+        aplicar(negocio, peticion, resolverCategoria(peticion.categoriaId()));
         negocio.setEstado(EstadoNegocio.PENDIENTE);
         negocio.setMotivoRechazo(null);
         return aRespuesta(negocioRepository.save(negocio));
@@ -216,7 +266,7 @@ public class NegocioService {
         Negocio negocio = buscarElMio(solicitante);
         negocio.setInstagram(normalizar(peticion.instagram()));
         negocio.setLinkedin(normalizar(peticion.linkedin()));
-        return aRespuesta(negocioRepository.save(negocio));
+        return conSuPropuesta(negocioRepository.save(negocio));
     }
 
     /** Un enlace en blanco es lo mismo que no tenerlo: los dos son opcionales. */
@@ -232,5 +282,11 @@ public class NegocioService {
 
     private NegocioResponse aRespuesta(Negocio negocio) {
         return NegocioMapper.aRespuesta(negocio);
+    }
+
+    /** El negocio con su propuesta en cola, si tiene alguna esperando. */
+    private NegocioResponse conSuPropuesta(Negocio negocio) {
+        return NegocioMapper.aRespuesta(negocio,
+                cambioRepository.findByNegocioId(negocio.getId()).orElse(null));
     }
 }

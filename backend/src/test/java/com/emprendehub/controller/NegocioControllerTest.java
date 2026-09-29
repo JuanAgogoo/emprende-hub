@@ -55,7 +55,7 @@ class NegocioControllerTest extends ControllerTestBase {
     private NegocioResponse respuesta() {
         return new NegocioResponse(1L, "Panadería La Tradicional", DESCRIPCION, "3001234567",
                 "Gastronomía", "Medellín", "El Poblado", "MEDIO", "PENDIENTE", null, null, 0,
-                null, null);
+                null, null, null);
     }
 
     @Test

@@ -10,6 +10,10 @@ import java.math.BigDecimal;
  *
  * <p>El correo de la cuenta no aparece: es el identificador de acceso y no se
  * publica nunca.
+ *
+ * @param cambioPendiente la propuesta que espera revisión, o {@code null} si no
+ *     hay ninguna. Solo se rellena para el dueño, que es quien necesita saber
+ *     que editó y que su cambio está en cola (B2-bis)
  */
 public record NegocioResponse(
         Long id,
@@ -25,5 +29,6 @@ public record NegocioResponse(
         BigDecimal calificacionPromedio,
         int numeroOpiniones,
         String instagram,
-        String linkedin) {
+        String linkedin,
+        CambioPropuestoResponse cambioPendiente) {
 }

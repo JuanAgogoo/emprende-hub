@@ -1,0 +1,264 @@
+.escaparate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.vacio {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.aviso {
+  padding: var(--e-3) var(--e-4);
+  border-left: 4px solid var(--color-exito);
+  border-radius: var(--radio-sm);
+  background: color-mix(in srgb, var(--color-exito) 8%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+}
+
+/* ── La lista ────────────────────────────────────────────────────────── */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  /* El reset global pone el margen a cero, pero no el padding: sin esto un
+     `<ul>` conserva su sangrado de lista y la fila no arranca donde el título
+     de la sección. Es lo que hacen el resto de listas del proyecto. */
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--e-3);
+  align-items: start;
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+.filaEditando {
+  padding: var(--e-4);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: var(--color-acento-suave);
+  list-style: none;
+}
+
+.miniatura {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radio-sm);
+  object-fit: cover;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  min-width: 0;
+}
+
+.nombre {
+  font-weight: 600;
+  color: var(--color-tinta);
+  overflow-wrap: anywhere;
+}
+
+.precio {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-acento-fuerte);
+}
+
+.descripcion {
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+  overflow-wrap: anywhere;
+}
+
+.agotado {
+  align-self: flex-start;
+  padding: var(--e-1) var(--e-2);
+  border-radius: var(--radio-full);
+  background: color-mix(in srgb, var(--color-aviso) 15%, var(--color-lienzo));
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-aviso);
+}
+
+/* En móvil los botones cuelgan de la segunda columna y caen debajo de los
+   datos: al lado comprimirían la miniatura y el nombre hasta lo ilegible. */
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  grid-column: 2;
+}
+
+/* En cuanto hay sitio pasan al final de la fila, en línea con el producto. Se
+   mide sobre 52rem y no menos porque «Marcar no disponible» es una etiqueta
+   larga y por debajo de ahí le robaría el ancho al nombre. */
+@media (min-width: 52rem) {
+  .fila {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .acciones {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+  }
+}
+
+/* ── Botones ─────────────────────────────────────────────────────────── */
+
+.secundario,
+.destructivo {
+  padding: var(--e-2) var(--e-3);
+  border-radius: var(--radio-full);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secundario {
+  border: 1px solid var(--color-borde-control);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.destructivo {
+  border: 1px solid var(--color-error);
+  background: var(--color-lienzo);
+  color: var(--color-error);
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.destructivo:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 8%, var(--color-lienzo));
+}
+
+.secundario:disabled,
+.destructivo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Edición en la propia fila ───────────────────────────────────────── */
+
+.edicion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.tituloEdicion {
+  font-weight: 600;
+  color: var(--color-tinta);
+  overflow-wrap: anywhere;
+}
+
+.accionesEdicion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+/* ── Alta ────────────────────────────────────────────────────────────── */
+
+.alta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-md);
+}
+
+.leyenda {
+  padding-inline: var(--e-2);
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.zonaFoto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+  align-items: center;
+}
+
+.sinFoto {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border: 1px dashed var(--color-borde-control);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-xs);
+  text-align: center;
+  color: var(--color-apagado);
+}
+
+.previa {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radio-sm);
+  object-fit: cover;
+}
+
+.botonArchivo {
+  padding: var(--e-2) var(--e-4);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-full);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-tinta);
+  cursor: pointer;
+}
+
+.botonArchivo:hover {
+  background: var(--color-lienzo-alt);
+}
+
+/* El input sigue en el documento —invisible pero enfocable— para que el
+   tabulador lo alcance y la etiqueta de arriba lo abra. */
+.archivoOculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* El input oculto sigue mostrando su anillo de foco a través de la etiqueta. */
+.archivoOculto:focus-visible + .botonArchivo,
+.zonaFoto:has(.archivoOculto:focus-visible) .botonArchivo {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+/* Texto solo para quien navega con lector de pantalla: sin él, seis botones
+   «Eliminar» seguidos suenan todos igual. */
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

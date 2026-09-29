@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { BuzonDeConsultas } from '../componentes/BuzonDeConsultas';
+import { CargaDeFotos } from '../componentes/CargaDeFotos';
+import { EditarNegocio } from '../componentes/EditarNegocio';
+import { EscaparateEditable } from '../componentes/EscaparateEditable';
 import { Metricas } from '../componentes/Metricas';
 import { Notificaciones } from '../componentes/Notificaciones';
 import { obtenerMiNegocio, obtenerMisFotos, obtenerMisProductos } from '../api/negocios';
-import { calificacion, nivelPrecio, numero, precio } from '../formato';
+import { nivelPrecio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
 import type { EstadoNegocio, FotoNegocio, MiNegocio as Negocio, Producto } from '../types/negocio';
 import estilos from './MiNegocio.module.css';
@@ -68,6 +71,21 @@ export function MiNegocio() {
     };
   }, []);
 
+  /**
+   * Recoge el negocio que devolvió una edición, sin volver a pedirlo.
+   *
+   * La respuesta del backend ya trae cómo quedó —incluida la propuesta en cola
+   * si el cambio espera revisión—, así que pedirlo otra vez sería una vuelta de
+   * más para saber lo que ya se sabe.
+   */
+  function actualizarNegocio(negocio: Negocio) {
+    setCarga((actual) =>
+      actual.estado === 'EXITO'
+        ? { estado: 'EXITO', datos: { ...actual.datos, negocio } }
+        : actual,
+    );
+  }
+
   if (sinNegocio) {
     return (
       <div className={`contenedor ${estilos.pagina}`}>
@@ -98,18 +116,23 @@ export function MiNegocio() {
       );
 
     case 'EXITO':
-      return <Contenido datos={carga.datos} />;
+      return <Contenido datos={carga.datos} alActualizarNegocio={actualizarNegocio} />;
 
     default:
       return casoImposible(carga);
   }
 }
 
-function Contenido({ datos }: { readonly datos: Datos }) {
+interface PropsContenido {
+  readonly datos: Datos;
+  readonly alActualizarNegocio: (negocio: Negocio) => void;
+}
+
+function Contenido({ datos, alActualizarNegocio }: PropsContenido) {
   const { negocio, fotos, productos } = datos;
   const estado = explicar(negocio.estado);
-  const nota = calificacion(negocio.calificacionPromedio);
-  const ubicacion = negocio.barrio === null ? negocio.ciudad : `${negocio.barrio}, ${negocio.ciudad}`;
+  const ubicacion =
+    negocio.barrio === null ? negocio.ciudad : `${negocio.barrio}, ${negocio.ciudad}`;
   const sinRevisar = fotos.filter((foto) => foto.estado !== 'APROBADA').length;
 
   return (
@@ -140,81 +163,45 @@ function Contenido({ datos }: { readonly datos: Datos }) {
         )}
       </section>
 
-      <div className={estilos.columnas}>
-        <section className={estilos.bloque}>
-          <h2 className={estilos.tituloBloque}>Datos</h2>
+      {/* Lo que está esperando al administrador, con lo propuesto a la vista:
+          sin esto, editar y recargar parecería que el cambio se perdió. */}
+      {negocio.cambioPendiente !== null && (
+        <section className={estilos.propuesta}>
+          <h2 className={estilos.tituloEstado}>Tienes un cambio esperando revisión</h2>
+          <p>
+            Tu negocio sigue publicado con los datos de arriba. Esto es lo que se publicará en
+            cuanto lo aprueben:
+          </p>
           <dl className={estilos.datos}>
+            <dt>Nombre</dt>
+            <dd>{negocio.cambioPendiente.nombre}</dd>
+            <dt>Categoría</dt>
+            <dd>{negocio.cambioPendiente.categoria ?? 'No cambia'}</dd>
             <dt>Descripción</dt>
-            <dd>{negocio.descripcion}</dd>
-            <dt>Teléfono</dt>
-            <dd>{negocio.telefono}</dd>
-            <dt>Instagram</dt>
-            <dd>{negocio.instagram ?? 'Sin enlace'}</dd>
-            <dt>LinkedIn</dt>
-            <dd>{negocio.linkedin ?? 'Sin enlace'}</dd>
-            <dt>Calificación</dt>
-            <dd>
-              {nota === null
-                ? 'Sin opiniones todavía'
-                : `${nota} · ${numero(negocio.numeroOpiniones)} ${
-                    negocio.numeroOpiniones === 1 ? 'opinión' : 'opiniones'
-                  }`}
-            </dd>
+            <dd>{negocio.cambioPendiente.descripcion}</dd>
           </dl>
         </section>
+      )}
 
-        <section className={estilos.bloque}>
-          <h2 className={estilos.tituloBloque}>
-            Fotos
-            {sinRevisar > 0 && (
-              <span className={estilos.pendientes}>
-                {numero(sinRevisar)} sin revisar
-              </span>
-            )}
-          </h2>
+      <section className={estilos.bloque}>
+        <h2 className={estilos.tituloBloque}>Datos del negocio</h2>
+        <EditarNegocio negocio={negocio} alActualizar={alActualizarNegocio} />
+      </section>
 
-          {fotos.length === 0 ? (
-            <p className={estilos.vacio}>Todavía no has subido ninguna foto.</p>
-          ) : (
-            <ul className={estilos.galeria}>
-              {fotos.map((foto) => (
-                <li key={foto.id} className={estilos.miniatura}>
-                  <img src={foto.url} alt="" loading="lazy" />
-                  {/* Solo el dueño ve este estado; el público únicamente las aprobadas. */}
-                  {foto.estado !== 'APROBADA' && (
-                    <span className={estilos.marcaFoto}>Sin revisar</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      <section className={estilos.bloque}>
+        <h2 className={estilos.tituloBloque}>
+          Fotos
+          {sinRevisar > 0 && <span className={estilos.pendientes}>{sinRevisar} sin revisar</span>}
+        </h2>
+        {/* La misma galería que el paso 4 del registro, sin su botón de cerrar
+            el paso: aquí no hay paso que cerrar. */}
+        <CargaDeFotos iniciales={fotos} />
+      </section>
 
-        <section className={estilos.bloque}>
-          <h2 className={estilos.tituloBloque}>Escaparate</h2>
-          {productos.length === 0 ? (
-            <p className={estilos.vacio}>Todavía no has añadido productos.</p>
-          ) : (
-            <ul className={estilos.productos}>
-              {productos.map((producto) => (
-                <li key={producto.id} className={estilos.producto}>
-                  <img
-                    className={estilos.fotoProducto}
-                    src={producto.foto}
-                    alt=""
-                    loading="lazy"
-                  />
-                  <span className={estilos.nombreProducto}>{producto.nombre}</span>
-                  <span className={estilos.precio}>{precio(producto.precio)}</span>
-                  {!producto.disponible && (
-                    <span className={estilos.agotado}>No disponible</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+      <section className={estilos.bloque}>
+        <h2 className={estilos.tituloBloque}>Escaparate</h2>
+        <EscaparateEditable iniciales={productos} />
+      </section>
 
       <div className={estilos.panel}>
         <Metricas negocio={negocio} />
@@ -223,8 +210,7 @@ function Contenido({ datos }: { readonly datos: Datos }) {
       </div>
 
       <p className={estilos.nota}>
-        Los datos del negocio son de solo consulta: editarlos y ver las visitas llegan más
-        adelante. A las consultas se responde por correo, desde el enlace de cada una.
+        A las consultas se responde por correo, desde el enlace de cada una.
       </p>
     </div>
   );

@@ -1,6 +1,18 @@
-import { eliminar, enviarFormulario, obtener, parchear } from './cliente';
+import {
+  actualizar,
+  eliminar,
+  enviarFormulario,
+  obtener,
+  parchear,
+  parchearFormulario,
+} from './cliente';
 import type { DatosDeProducto } from '../types/registroEmprendedor';
-import type { FotoNegocio, MiNegocio, Producto } from '../types/negocio';
+import type {
+  DatosPublicosDelNegocio,
+  FotoNegocio,
+  MiNegocio,
+  Producto,
+} from '../types/negocio';
 
 /**
  * El negocio de quien tiene la sesión abierta.
@@ -19,6 +31,40 @@ export function obtenerMisFotos(): Promise<FotoNegocio[]> {
 
 export function obtenerMisProductos(): Promise<Producto[]> {
   return obtener<Producto[]>('/negocios/mio/productos', true);
+}
+
+/**
+ * Edita los campos públicos: nombre, descripción y categoría (B2).
+ *
+ * **Puede que no cambie nada todavía.** Si el negocio ya está publicado y la
+ * revisión está encendida, el backend guarda la edición como propuesta y
+ * devuelve el negocio como estaba, con la propuesta en `cambioPendiente`. Quien
+ * llame tiene que mirar ese campo y no dar por hecho que el cambio ya se ve.
+ */
+export function editarNegocio(datos: DatosPublicosDelNegocio): Promise<MiNegocio> {
+  return actualizar<MiNegocio>('/negocios/mio', datos, true);
+}
+
+/**
+ * Cambia el teléfono, y este **sí** se aplica al momento.
+ *
+ * Es la excepción que reconoce B2: un dato de contacto no es contenido que
+ * alguien tenga que revisar, y esperar tres días para corregir un dígito solo
+ * dejaría más tiempo a la vista el número equivocado.
+ */
+export function editarTelefono(telefono: string): Promise<MiNegocio> {
+  return parchear<MiNegocio>('/negocios/mio/contacto', { telefono }, true);
+}
+
+/**
+ * Cambia los dos enlaces a redes sociales (B8), también al instante.
+ *
+ * **Viajan siempre los dos**, aunque solo cambie uno: el backend sustituye el
+ * par entero, así que mandar solo `instagram` borraría el LinkedIn guardado.
+ * Una cadena vacía es la forma de quitar un enlace.
+ */
+export function editarRedes(instagram: string, linkedin: string): Promise<MiNegocio> {
+  return parchear<MiNegocio>('/negocios/mio/redes', { instagram, linkedin }, true);
 }
 
 /**
@@ -66,6 +112,44 @@ export function crearProducto(datos: DatosDeProducto, foto: File): Promise<Produ
   cuerpo.append('foto', foto);
 
   return enviarFormulario<Producto>('/negocios/mio/productos', cuerpo, true);
+}
+
+/**
+ * Edita un artículo del escaparate.
+ *
+ * **No cambia la imagen**: el contrato entregado edita los campos de texto, el
+ * precio y la disponibilidad. Para otra foto se borra el producto y se crea de
+ * nuevo.
+ */
+export function editarProducto(id: number, datos: DatosDeProducto): Promise<Producto> {
+  return actualizar<Producto>(`/negocios/mio/productos/${id}`, datos, true);
+}
+
+/**
+ * Sustituye la imagen de un producto, y solo la imagen.
+ *
+ * Va por su propio endpoint y no dentro de `editarProducto`: los campos de
+ * texto viajan en JSON y esto es un binario. Juntarlos obligaría a volver a
+ * subir la foto cada vez que se corrige una errata del nombre.
+ */
+export function cambiarFotoDeProducto(id: number, foto: File): Promise<Producto> {
+  const cuerpo = new FormData();
+  cuerpo.append('foto', foto);
+  return parchearFormulario<Producto>(`/negocios/mio/productos/${id}/foto`, cuerpo, true);
+}
+
+/** El interruptor de F3: un producto no disponible sigue saliendo, marcado. */
+export function cambiarDisponibilidad(id: number, disponible: boolean): Promise<Producto> {
+  return parchear<Producto>(
+    `/negocios/mio/productos/${id}/disponibilidad?disponible=${String(disponible)}`,
+    undefined,
+    true,
+  );
+}
+
+/** Borra el producto y, con él, su imagen del servidor. */
+export function borrarProducto(id: number): Promise<void> {
+  return eliminar(`/negocios/mio/productos/${id}`, true);
 }
 
 /**

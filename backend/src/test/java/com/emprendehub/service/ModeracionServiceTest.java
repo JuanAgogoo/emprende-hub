@@ -204,6 +204,39 @@ class ModeracionServiceTest {
     }
 
     @Test
+    @DisplayName("resolverCambio: aprobar copia también la categoría propuesta")
+    void aprobarCambio_copiaLaCategoria() {
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        CambioPendiente cambio = new CambioPendiente(negocio, negocio.getNombre(), DESCRIPCION);
+        com.emprendehub.model.CategoriaNegocio moda =
+                new com.emprendehub.model.CategoriaNegocio("Moda", "👗");
+        cambio.setCategoriaPropuesta(moda);
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.of(cambio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.resolverCambio(7L, new DecisionModeracion.Aprobar(), admin());
+
+        assertEquals("Moda", respuesta.categoria());
+    }
+
+    @Test
+    @DisplayName("resolverCambio: una propuesta sin categoría deja la que ya tenía")
+    void aprobarCambio_sinCategoria_dejaLaSuya() {
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        String categoriaDeAntes = negocio.getCategoria().getNombre();
+        // Es el caso de la propuesta que abre una foto: no propone categoría.
+        CambioPendiente cambio = new CambioPendiente(negocio, "Panadería Nueva", DESCRIPCION);
+        when(cambioRepository.findByNegocioId(7L)).thenReturn(Optional.of(cambio));
+        when(negocioRepository.save(any(Negocio.class))).thenAnswer(i -> i.getArgument(0));
+
+        var respuesta = service.resolverCambio(7L, new DecisionModeracion.Aprobar(), admin());
+
+        assertEquals(categoriaDeAntes, respuesta.categoria());
+    }
+
+    @Test
     @DisplayName("resolverCambio: rechazar descarta la propuesta sin tocar el negocio")
     void rechazarCambio_noTocaElNegocio() {
         Negocio negocio = negocioPendiente();

@@ -12,6 +12,8 @@ import java.time.Instant;
  * @param fotosPendientes cuántas imágenes nuevas espera publicar esta propuesta.
  *     Una propuesta puede ser solo de fotos, y entonces el nombre y la
  *     descripción propuestos son iguales a los actuales
+ * @param categoriaPropuesta nula cuando la propuesta no cambia la categoría, que
+ *     es el caso de la que se abre solo por subir fotos
  */
 public record CambioPendienteResponse(
         Long negocioId,
@@ -19,6 +21,8 @@ public record CambioPendienteResponse(
         String nombrePropuesto,
         String descripcionActual,
         String descripcionPropuesta,
+        String categoriaActual,
+        String categoriaPropuesta,
         int fotosPendientes,
         Instant fechaSolicitud) {
 }

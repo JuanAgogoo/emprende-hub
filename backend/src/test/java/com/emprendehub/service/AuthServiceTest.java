@@ -218,7 +218,7 @@ class AuthServiceTest {
     private NegocioResponse negocioCreado() {
         return new NegocioResponse(7L, "Panadería La Espiga", "descripción", "3105551234",
                 "Gastronomía", "Medellín", null, "BAJO", "PENDIENTE",
-                null, null, 0, null, null);
+                null, null, 0, null, null, null);
     }
 
     @Test

@@ -55,8 +55,11 @@ Estados: `PENDIENTE → APROBADO | RECHAZADO`. La suspensión vive en el usuario
 en el negocio.
 
 - **B1** Un negocio rechazado corrige y reenvía, **sin límite de intentos**.
-- **B2** Los cambios sobre campos públicos (nombre, descripción, fotos) vuelven a
-  revisión. Teléfono y correo se actualizan al instante.
+- **B2** Los cambios sobre campos públicos (nombre, descripción, **categoría**,
+  fotos) vuelven a revisión. Teléfono y correo se actualizan al instante.
+- **B2-ter** Un negocio **todavía sin publicar** se edita al momento, sin cola:
+  no hay versión pública que proteger y va a pasar por revisión entero de todas
+  formas. Lo que B2 protege es lo que ya se ve, no lo que aún no existe.
 - **B2-bis** Mientras un cambio espera revisión, **el público sigue viendo la versión
   aprobada**. Los valores propuestos viven en una tabla aparte y solo se copian al
   negocio cuando el admin los aprueba. El negocio nunca sale del directorio por editar.
