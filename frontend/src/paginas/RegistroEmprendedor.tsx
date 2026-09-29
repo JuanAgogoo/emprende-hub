@@ -648,7 +648,7 @@ export function RegistroEmprendedor() {
           {/* El paso 4 trae sus propios botones: ni envía el formulario ni
               vuelve atrás, porque el negocio ya está creado. */}
           {paso === PASO_FOTOS ? (
-            <CargaDeFotos alTerminar={terminarElRegistro} encabezado={encabezado} />
+            <CargaDeFotos iniciales={[]} alTerminar={terminarElRegistro} encabezado={encabezado} />
           ) : (
             <>
               <div className={estilos.navegacion}>

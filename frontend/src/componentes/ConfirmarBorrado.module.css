@@ -1,0 +1,90 @@
+/* El navegador centra un `<dialog>` modal con `margin: auto`, pero el reset de
+   `global.css` lo pone a cero para todo y lo deja pegado arriba a la izquierda.
+   Se le devuelve aquí: `inset: 0` da los cuatro bordes contra los que repartir
+   el margen, y `height: fit-content` evita que se estire hasta llenarlos. */
+.dialogo {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(28rem, calc(100vw - 2 * var(--e-4)));
+  height: fit-content;
+  max-height: calc(100dvh - 2 * var(--e-4));
+  overflow-y: auto;
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  box-shadow: var(--sombra-lg);
+}
+
+.dialogo::backdrop {
+  background: rgb(15 23 42 / 0.45);
+}
+
+.titulo {
+  margin-bottom: var(--e-2);
+  font-size: var(--texto-lg);
+  line-height: var(--alto-apretado);
+  color: var(--color-tinta);
+}
+
+.texto {
+  font-size: var(--texto-sm);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--e-3);
+  margin-top: var(--e-5);
+}
+
+.cancelar,
+.borrar {
+  padding: var(--e-3) var(--e-5);
+  border-radius: var(--radio-full);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelar {
+  border: 1px solid var(--color-borde-control);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.borrar {
+  border: 1px solid transparent;
+  background: var(--color-error);
+  color: var(--color-sobre-senal);
+}
+
+.cancelar:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.borrar:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 85%, black);
+}
+
+.cancelar:disabled,
+.borrar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* En móvil los dos botones ocupan la fila entera: el destructivo abajo, que es
+   donde cae el pulgar con menos prisa. */
+@media (max-width: 26rem) {
+  .acciones {
+    flex-direction: column-reverse;
+  }
+
+  .cancelar,
+  .borrar {
+    width: 100%;
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent, type RefObject } from 'react';
 import { borrarFoto, reordenarFotos, subirFoto } from '../api/negocios';
+import { ConfirmarBorrado } from './ConfirmarBorrado';
 import type { FotoNegocio } from '../types/negocio';
 import estilos from './CargaDeFotos.module.css';
 
@@ -48,26 +49,49 @@ function revisar(archivo: File): string | null {
 }
 
 interface Props {
-  /** Se llama al cerrar el paso, con fotos o sin ellas. */
-  readonly alTerminar: () => void;
-  /** El mismo título que enfoca el asistente al cambiar de paso. */
-  readonly encabezado: RefObject<HTMLHeadingElement | null>;
+  /** La galería tal como está hoy. Vacía en el asistente, que empieza de cero. */
+  readonly iniciales: readonly FotoNegocio[];
+  /**
+   * Cierra el paso del asistente, con fotos o sin ellas.
+   *
+   * Es lo único que distingue los dos sitios donde vive esta galería: en el
+   * asistente hay un paso que terminar y por eso viene con su título y su
+   * botón; en el panel del negocio la sección ya pone el suyo.
+   */
+  readonly alTerminar?: () => void;
+  /** El título que enfoca el asistente al cambiar de paso. */
+  readonly encabezado?: RefObject<HTMLHeadingElement | null>;
 }
 
 /**
- * El cuarto paso del asistente, ya con la sesión abierta.
+ * La galería del negocio: subir, quitar, reordenar y elegir portada (B9).
  *
- * El negocio existe desde el paso anterior, así que aquí nada es obligatorio:
- * saltarse este paso deja el registro igual de completo, solo que sin galería.
+ * La usan el cuarto paso del registro y el panel del dueño. Son la misma
+ * pantalla con distinto marco, así que el componente es uno solo y el marco
+ * llega por `alTerminar`.
  */
-export function CargaDeFotos({ alTerminar, encabezado }: Props) {
-  const [imagenes, setImagenes] = useState<readonly Imagen[]>([]);
+export function CargaDeFotos({ iniciales, alTerminar, encabezado }: Props) {
+  const [imagenes, setImagenes] = useState<readonly Imagen[]>(() =>
+    iniciales.map((foto, posicion) => ({
+      estado: 'SUBIDA',
+      clave: foto.id,
+      nombre: `Foto ${posicion + 1}`,
+      foto,
+    })),
+  );
+  /** Lo que se acaba de hacer, que la historia pide confirmar en pantalla. */
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [porQuitar, setPorQuitar] = useState<Imagen | null>(null);
   const [rechazados, setRechazados] = useState<readonly string[]>([]);
   const [subiendo, setSubiendo] = useState(false);
   const [reordenando, setReordenando] = useState(false);
+  const [borrando, setBorrando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
 
-  const siguienteClave = useRef(1);
+  // Las que ya estaban usan su propio identificador como clave, así que las
+  // nuevas empiezan por encima del mayor: si no, una local podría chocar con
+  // una subida y React remontaría la fila equivocada.
+  const siguienteClave = useRef(iniciales.reduce((mayor, foto) => Math.max(mayor, foto.id), 0) + 1);
   // El efecto de desmontaje necesita la lista de ahora, no la del primer render,
   // y una ref no se puede escribir mientras se renderiza: se sincroniza aquí.
   const vigentes = useRef<readonly Imagen[]>(imagenes);
@@ -89,7 +113,7 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
   const subidas = imagenes.filter((imagen) => imagen.estado === 'SUBIDA');
   const huecos = MAXIMO_FOTOS - imagenes.length;
   /** Mientras algo esté en marcha, ningún botón de la galería responde. */
-  const ocupado = subiendo || reordenando;
+  const ocupado = subiendo || reordenando || borrando;
   /** Con más de una foto y ninguna pendiente de subir, se puede ordenar. */
   const puedeOrdenar = porSubir.length === 0 && imagenes.length > 1;
 
@@ -100,6 +124,7 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
     if (elegidos.length === 0) return;
 
     setFallo(null);
+    setAviso(null);
     const nuevas: Imagen[] = [];
     const motivos: string[] = [];
 
@@ -133,8 +158,15 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
     });
   }
 
+  /**
+   * Quita una foto ya subida, **después** de que se confirme.
+   *
+   * El borrado no se deshace: la imagen desaparece del servidor y con ella su
+   * fichero. Por eso no cuelga del botón directamente, sino del diálogo.
+   */
   async function quitarSubida(clave: number, fotoId: number) {
     setFallo(null);
+    setBorrando(true);
     try {
       await borrarFoto(fotoId);
       // El backend recoloca las que quedan: la portada pasa a ser la siguiente.
@@ -147,9 +179,13 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
               : imagen,
           ),
       );
+      setAviso('Foto eliminada. La portada es la primera de las que quedan.');
+      setPorQuitar(null);
     } catch (error: unknown) {
       const mensaje = error instanceof Error ? error.message : 'No se pudo quitar la foto';
       setFallo(mensaje);
+    } finally {
+      setBorrando(false);
     }
   }
 
@@ -220,6 +256,11 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
           ),
         );
       }
+      setAviso(
+        porSubir.length === 1
+          ? 'Foto subida y guardada en tu galería.'
+          : `${porSubir.length} fotos subidas y guardadas en tu galería.`,
+      );
     } catch (error: unknown) {
       // Se para en la que falló: las anteriores ya están subidas y se quedan.
       const mensaje = error instanceof Error ? error.message : 'No se pudo subir la foto';
@@ -231,13 +272,24 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
 
   return (
     <>
-      <h2 className={estilos.titulo} ref={encabezado} tabIndex={-1}>
-        Las fotos
-      </h2>
-      <p className={estilos.entrada}>
-        Tu negocio ya está creado. Añadir fotos ahora es opcional: la primera será la portada, y
-        puedes subir hasta {MAXIMO_FOTOS}. Al terminar entrarás con tu correo y tu contraseña.
-      </p>
+      {alTerminar !== undefined && (
+        <>
+          <h2 className={estilos.titulo} ref={encabezado} tabIndex={-1}>
+            Las fotos
+          </h2>
+          <p className={estilos.entrada}>
+            Tu negocio ya está creado. Añadir fotos ahora es opcional: la primera será la portada,
+            y puedes subir hasta {MAXIMO_FOTOS}. Al terminar entrarás con tu correo y tu
+            contraseña.
+          </p>
+        </>
+      )}
+
+      {aviso !== null && (
+        <p className={estilos.aviso} role="status">
+          {aviso}
+        </p>
+      )}
 
       {fallo !== null && (
         <p className={estilos.fallo} role="alert">
@@ -292,13 +344,18 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
 
             return (
             <li key={imagen.clave} className={estilos.miniatura}>
-              <img
-                src={imagen.estado === 'LOCAL' ? imagen.vistaPrevia : imagen.foto.url}
-                alt={nombre}
-              />
+              {/* La marca va dentro del marco de la imagen y no suelta sobre la
+                  fila: así se ancla al pie de la foto y no cae encima del texto
+                  alternativo, que es lo que se ve cuando la imagen no carga. */}
+              <div className={estilos.marco}>
+                <img
+                  src={imagen.estado === 'LOCAL' ? imagen.vistaPrevia : imagen.foto.url}
+                  alt={nombre}
+                />
 
-              {/* La portada no se marca con un campo: es la primera por orden (B9). */}
-              {posicion === 0 && <span className={estilos.portada}>Portada</span>}
+                {/* La portada no se marca con un campo: es la primera por orden (B9). */}
+                {posicion === 0 && <span className={estilos.portada}>Portada</span>}
+              </div>
 
               <span className={imagen.estado === 'SUBIDA' ? estilos.subida : estilos.pendiente}>
                 {imagen.estado === 'SUBIDA' ? 'Subida' : 'Sin subir'}
@@ -348,7 +405,7 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
                 onClick={() =>
                   imagen.estado === 'LOCAL'
                     ? quitarLocal(imagen.clave)
-                    : quitarSubida(imagen.clave, imagen.foto.id)
+                    : setPorQuitar(imagen)
                 }
               >
                 Quitar
@@ -357,6 +414,14 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
             </li>
             );
           })}
+
+          {/* Los huecos que quedan, dibujados: así se ve cuántas caben todavía
+              sin tener que leer el contador de arriba. */}
+          {Array.from({ length: huecos }, (_, posicion) => (
+            <li key={`hueco-${posicion}`} className={estilos.hueco} aria-hidden="true">
+              <span>Libre</span>
+            </li>
+          ))}
         </ul>
       )}
 
@@ -374,22 +439,35 @@ export function CargaDeFotos({ alTerminar, encabezado }: Props) {
           </button>
         )}
 
-        <button
-          type="button"
-          className={porSubir.length > 0 ? estilos.secundario : estilos.primario}
-          disabled={subiendo}
-          onClick={alTerminar}
-        >
-          {subidas.length > 0 ? 'Terminar el registro' : 'Seguir sin fotos'}
-        </button>
+        {alTerminar !== undefined && (
+          <button
+            type="button"
+            className={porSubir.length > 0 ? estilos.secundario : estilos.primario}
+            disabled={subiendo}
+            onClick={alTerminar}
+          >
+            {subidas.length > 0 ? 'Terminar el registro' : 'Seguir sin fotos'}
+          </button>
+        )}
       </div>
 
       {porSubir.length > 0 && (
-        <p className={estilos.aviso} role="status">
+        <p className={estilos.avisoPendiente} role="status">
           Te quedan {porSubir.length === 1 ? '1 imagen' : `${porSubir.length} imágenes`} sin subir:
           si sales ahora, no se guardan. Podrás ordenarlas y elegir la portada en cuanto estén
           subidas.
         </p>
+      )}
+
+      {/* Quitar una foto del servidor no se deshace: se confirma antes. */}
+      {porQuitar !== null && porQuitar.estado === 'SUBIDA' && (
+        <ConfirmarBorrado
+          titulo="¿Eliminar esta foto?"
+          texto="Desaparece de tu galería y del perfil público. Si era la portada, pasa a serlo la siguiente."
+          ocupado={borrando}
+          alConfirmar={() => quitarSubida(porQuitar.clave, porQuitar.foto.id)}
+          alCancelar={() => setPorQuitar(null)}
+        />
       )}
     </>
   );
