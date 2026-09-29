@@ -69,6 +69,19 @@ public class ProductoController {
         return productoService.actualizar(usuario, id, peticion);
     }
 
+    /**
+     * Cambia solo la imagen, en {@code multipart} como el alta.
+     *
+     * <p>Es un `PATCH` propio y no parte del `PUT` porque cambia una sola cosa y
+     * es un binario: así corregir el nombre no obliga a volver a subir la foto.
+     */
+    @PatchMapping(value = "/{id}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductoResponse cambiarFoto(@AuthenticationPrincipal Usuario usuario,
+                                        @PathVariable Long id,
+                                        @RequestParam("foto") MultipartFile foto) {
+        return productoService.cambiarFoto(usuario, id, foto);
+    }
+
     /** El interruptor de F3: todo el control de existencias que hay. */
     @PatchMapping("/{id}/disponibilidad")
     public ProductoResponse cambiarDisponibilidad(@AuthenticationPrincipal Usuario usuario,

@@ -88,6 +88,36 @@ public class ProductoService {
         return NegocioMapper.aRespuestaDeProducto(productoRepository.save(producto));
     }
 
+    /**
+     * Sustituye la imagen de un producto, dejándole todo lo demás igual.
+     *
+     * <p>Va aparte de {@link #actualizar} y no dentro porque son dos cosas
+     * distintas: los campos de texto viajan en JSON y la imagen es un binario.
+     * Meterlos juntos obligaría a convertir la edición entera en
+     * {@code multipart} y a mandar la foto otra vez cada vez que se corrige una
+     * errata del nombre.
+     *
+     * <p>El orden importa: primero se escribe la imagen nueva, después se apunta
+     * en la fila, y solo al final se borra la anterior. Al revés, un fallo al
+     * guardar dejaría el producto señalando un fichero que ya no existe, y un
+     * escaparate con huecos es justo lo que F4 evita. Si lo que falla es el
+     * borrado, lo que queda es un fichero suelto que nadie referencia.
+     */
+    @Transactional
+    public ProductoResponse cambiarFoto(Usuario solicitante, Long productoId,
+                                        MultipartFile foto) {
+        Producto producto = buscarMio(solicitante, productoId);
+        String extension = AlmacenamientoFotos.extensionDe(foto);
+
+        String anterior = producto.getFoto();
+        producto.setFoto(almacenamiento.guardar(foto, extension));
+        ProductoResponse respuesta =
+                NegocioMapper.aRespuestaDeProducto(productoRepository.save(producto));
+
+        almacenamiento.borrar(anterior);
+        return respuesta;
+    }
+
     /** El interruptor de F3, que es todo el control de existencias que hay. */
     @Transactional
     public ProductoResponse cambiarDisponibilidad(Usuario solicitante, Long productoId,

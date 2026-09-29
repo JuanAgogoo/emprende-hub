@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -235,6 +236,52 @@ class ProductoServiceTest {
         assertFalse(respuesta.disponible());
         assertEquals("Pan de masa madre", respuesta.nombre());
         assertEquals(new BigDecimal("12000"), respuesta.precio());
+    }
+
+    @Test
+    @DisplayName("cambiarFoto: apunta a la nueva y borra la de antes")
+    void cambiarFoto_sustituyeLaImagen() {
+        conNegocio();
+        Producto producto = producto();
+        when(productoRepository.findByIdAndNegocioId(3L, 7L)).thenReturn(Optional.of(producto));
+        when(almacenamiento.guardar(any(), eq("jpg"))).thenReturn("nueva.jpg");
+        when(productoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        ProductoResponse respuesta = service.cambiarFoto(duena, 3L, imagenValida());
+
+        assertEquals("/fotos/nueva.jpg", respuesta.foto());
+        // La de antes se va: nadie más la referencia y ocuparía sitio para siempre.
+        verify(almacenamiento).borrar("pan.jpg");
+        // Y no toca ningún otro campo.
+        assertEquals("Pan de masa madre", respuesta.nombre());
+        assertEquals(new BigDecimal("12000"), respuesta.precio());
+    }
+
+    @Test
+    @DisplayName("cambiarFoto: una imagen que no vale no borra la que ya estaba")
+    void cambiarFoto_imagenInvalida_noBorraLaAnterior() {
+        conNegocio();
+        when(productoRepository.findByIdAndNegocioId(3L, 7L)).thenReturn(Optional.of(producto()));
+        MultipartFile pdf = new MockMultipartFile("foto", "hoja.pdf", "application/pdf",
+                new byte[] {1, 2, 3});
+
+        assertThrows(ReglaDeNegocioException.class, () -> service.cambiarFoto(duena, 3L, pdf));
+
+        // Lo que importa: el producto se queda con su foto de siempre y no con
+        // un hueco, que es justo lo que F4 no permite.
+        verify(almacenamiento, never()).borrar(any());
+        verify(productoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("cambiarFoto: el producto de otro negocio no aparece")
+    void cambiarFoto_productoAjeno_lanzaNoEncontrado() {
+        conNegocio();
+        when(productoRepository.findByIdAndNegocioId(9L, 7L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.cambiarFoto(duena, 9L, imagenValida()));
+        verify(almacenamiento, never()).borrar(any());
     }
 
     // ---------- Consulta y borrado ----------
