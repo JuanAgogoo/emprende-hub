@@ -94,6 +94,21 @@ HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose up -d
 No uses `UID` a secas: en bash es una variable de solo lectura y la asignación
 falla. Para no repetirlo, `echo "HOST_UID=$(id -u)" >> .env`.
 
+### En Windows
+
+Funciona con **Docker Desktop** y no hace falta nada más: el JDK 25 va dentro de
+la imagen del backend y Node dentro de la del frontend.
+
+Lo único que hay que respetar es **no forzar `core.autocrlf`**. El repositorio
+trae un `.gitattributes` que obliga a LF, porque `gradlew` se ejecuta dentro de
+un contenedor Linux y con CRLF su intérprete pasa a ser `/bin/sh\r`: el backend
+no arranca y el error no dice por qué. Con clonar normalmente basta; si el repo
+ya estaba clonado de antes, `git rm -r --cached . && git checkout .` lo recoloca.
+
+`HOST_UID` no hace falta: Docker Desktop no traslada la propiedad de los
+ficheros del anfitrión. Y `./scripts/cifras.sh` pide bash, que viene con Git
+Bash; no es parte de levantar el proyecto.
+
 `MODERACION_AUTOMATICA` está puesta a `true` en `docker-compose.yml` **mientras se
 construye**, para no tener que aprobar cada negocio a mano: con ella puesta no
 hay nada que moderar, porque el negocio nace publicado, sus fotos aprobadas y lo
