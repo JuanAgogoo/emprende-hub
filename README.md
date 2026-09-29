@@ -311,6 +311,26 @@ descargan de `/fotos/{archivo}`, sin token.
 **El contrato completo, con los 65 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
+## Swagger
+
+Con el backend levantado, la API se explora y se prueba desde el navegador:
+
+| Dirección | Qué es |
+|---|---|
+| <http://localhost:8080/swagger-ui.html> | La interfaz, con los 65 endpoints agrupados |
+| <http://localhost:8080/v3/api-docs> | El documento OpenAPI en JSON |
+
+Las dos son **públicas**: describen el contrato, que ya es público, y no
+devuelven ni un dato. Para probar lo protegido, `POST /api/v1/auth/login` y
+pegar el `token` de la respuesta en **Authorize**, arriba a la derecha; no hace
+falta escribir «Bearer».
+
+**El documento lo genera springdoc a partir de los propios controladores**, así
+que no hay un fichero que mantener al día: las rutas, los cuerpos, los códigos
+de respuesta y hasta las reglas de validación de cada DTO salen del código. Lo
+único escrito a mano es la portada, el candado del token y el nombre de cada
+grupo, en `OpenApiConfig` y en un `@Tag` por controlador.
+
 ## Colección de Postman
 
 `backend/postman/EmprendeHub.postman_collection.json`, con **76 peticiones que cubren los

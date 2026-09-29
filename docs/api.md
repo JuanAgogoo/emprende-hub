@@ -2,6 +2,12 @@
 
 Todas las rutas cuelgan de `/api/v1`. Los cuerpos son JSON.
 
+> **Con el backend levantado, esto mismo se explora y se prueba** en
+> <http://localhost:8080/swagger-ui.html>, y el documento OpenAPI está en
+> `/v3/api-docs`. Lo genera springdoc desde los controladores, así que no puede
+> contradecir al código; este documento es el que explica **por qué** cada regla
+> es como es, que es lo que un esquema generado no sabe.
+
 Este documento es la fuente de la colección de Postman del PR 14 y el guion para
 explicar el flujo de datos en la sustentación.
 

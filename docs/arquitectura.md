@@ -210,7 +210,7 @@ Tomadas por el equipo de desarrollo. No requieren validación del cliente.
 
 ### Decisiones tomadas durante la implementación
 
-Las anteriores se tomaron antes de escribir código. Estas cinco salieron de
+Las anteriores se tomaron antes de escribir código. Estas seis salieron de
 construirlo, y son las que más fácil se preguntan en una revisión.
 
 - **El reloj es un bean `Clock`**, publicado en la zona `America/Bogota`. Con
@@ -237,6 +237,21 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   borrado de una opinión por moderación **se delega en `OpinionService`**: allí el
   recálculo del promedio es imposible de saltarse, y es el momento que más fácil
   se olvida porque no lo dispara su autor.
+
+- **El Swagger se genera, no se escribe.** `springdoc-openapi` publica
+  `/v3/api-docs` y `/swagger-ui.html` a partir de los propios controladores: las
+  rutas, los cuerpos, los códigos y las reglas de Bean Validation de cada DTO
+  salen del código. La alternativa era un `openapi.yaml` a mano, y habría sido un
+  **segundo sitio donde decir lo mismo**: exactamente lo que `scripts/cifras.sh`
+  existe para evitar. Que las 65 operaciones que genera coincidan con los 65
+  endpoints que ese script cuenta en `docs/api.md` es la comprobación de que
+  ninguno de los dos miente. Lo único escrito a mano es la portada, el esquema de
+  seguridad —ningún tipo de Java dice «esto se autentica con un JWT»— y el nombre
+  de cada grupo, con un `@Tag` por controlador; sin él la interfaz los llama
+  `producto-controller`. **Los métodos no llevan ni una anotación de Swagger**:
+  describir en un texto lo que ya dice la firma solo crea algo que se queda atrás.
+  Es la versión 3.x, que es la de Spring Boot 4; la 2.x es de Boot 3 y aquí no
+  arranca.
 
 ## Primer vertical
 
