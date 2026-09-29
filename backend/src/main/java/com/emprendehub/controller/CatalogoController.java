@@ -4,6 +4,7 @@ import com.emprendehub.dto.CategoriaNegocioResponse;
 import com.emprendehub.dto.CiudadResponse;
 import com.emprendehub.dto.OpcionResponse;
 import com.emprendehub.service.CatalogoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Todo es público y de solo lectura: el directorio se explora sin necesidad
  * de registrarse, así que estos endpoints tienen que responder sin sesión.
  */
+@Tag(name = "Catálogos", description = "Las listas cerradas: categorías, ciudades, barrios y motivos")
 @RestController
 @RequestMapping("/api/v1/catalogos")
 public class CatalogoController {

@@ -9,6 +9,7 @@ import com.emprendehub.dto.RestablecerContrasenaRequest;
 import com.emprendehub.dto.SolicitarRecuperacionRequest;
 import com.emprendehub.service.AuthService;
 import com.emprendehub.service.RecuperacionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Registro e inicio de sesión. Público, como manda la cadena de filtros. */
+@Tag(name = "Acceso", description = "Registro, inicio de sesión y recuperación de contraseña")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {

@@ -3,6 +3,7 @@ package com.emprendehub.controller;
 import com.emprendehub.dto.DenunciarOpinionRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.DenunciaService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Exige sesión, de cualquier rol. Cuelga de la opinión y no del negocio
  * porque lo que se denuncia es un texto concreto, no el sitio donde está.
  */
+@Tag(name = "Denuncias", description = "Denunciar una opinión (C3)")
 @RestController
 @RequestMapping("/api/v1/opiniones")
 public class DenunciaController {

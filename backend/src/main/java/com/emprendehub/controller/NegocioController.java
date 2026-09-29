@@ -7,6 +7,7 @@ import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.RegistrarNegocioRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.NegocioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  * la cadena de filtros. No hace falta rol de emprendedor para registrar, porque
  * justo el registro es lo que convierte a un cliente en emprendedor (A1-bis).
  */
+@Tag(name = "Negocios", description = "El negocio propio: registro y edición de sus datos")
 @RestController
 @RequestMapping("/api/v1/negocios")
 public class NegocioController {

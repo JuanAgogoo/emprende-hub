@@ -4,6 +4,7 @@ import com.emprendehub.dto.FotoResponse;
 import com.emprendehub.dto.ReordenarFotosRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.FotoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
  * <p>Las imágenes se descargan de {@code /fotos/**}, que es público. Aquí solo
  * se gestionan, y siempre las del negocio de quien pregunta.
  */
+@Tag(name = "Fotos del negocio", description = "La galería del dueño: subir, ordenar y quitar (B9)")
 @RestController
 @RequestMapping("/api/v1/negocios/mio/fotos")
 public class FotoController {

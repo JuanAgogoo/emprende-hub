@@ -5,6 +5,7 @@ import com.emprendehub.dto.CrearProductoRequest;
 import com.emprendehub.dto.ProductoResponse;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ProductoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
  * {@code GET /api/v1/directorio/{id}}. Un negocio tiene unos pocos y pedirlos
  * aparte solo añadiría una vuelta más al cliente.
  */
+@Tag(name = "Productos", description = "El escaparate del negocio propio (F1)")
 @RestController
 @RequestMapping("/api/v1/negocios/mio/productos")
 public class ProductoController {

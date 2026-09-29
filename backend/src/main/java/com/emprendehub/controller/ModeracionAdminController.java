@@ -8,6 +8,7 @@ import com.emprendehub.dto.RegistroModeracionResponse;
 import com.emprendehub.model.DecisionModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ModeracionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Panel de moderación. Cuelga de {@code /api/v1/admin}, que la cadena de
  * filtros reserva al rol ADMIN.
  */
+@Tag(name = "Moderación · admin", description = "Las colas de revisión: negocios, cambios, denuncias y cuentas")
 @RestController
 @RequestMapping("/api/v1/admin/moderacion")
 public class ModeracionAdminController {

@@ -4,6 +4,7 @@ import com.emprendehub.dto.CursoResponse;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.NivelCurso;
 import com.emprendehub.service.CursoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Solo enseña los publicados (E4) y no exige sesión: la formación se explora
  * igual que el directorio, sin registrarse.
  */
+@Tag(name = "Cursos", description = "El catálogo de formación, solo lo publicado")
 @RestController
 @RequestMapping("/api/v1/cursos")
 public class CursoController {
