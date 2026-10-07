@@ -1,5 +1,9 @@
 import { obtener, parchear } from './cliente';
-import type { NegocioEnRevision, VistaPreviaNegocio } from '../types/moderacion';
+import type {
+  CambioPendiente,
+  NegocioEnRevision,
+  VistaPreviaNegocio,
+} from '../types/moderacion';
 import type { Pagina } from '../types/pagina';
 
 /**
@@ -26,4 +30,30 @@ export function aprobarNegocio(id: number): Promise<NegocioEnRevision> {
 /** El motivo es obligatorio: es lo que el dueño lee para corregir y reenviar (B1). */
 export function rechazarNegocio(id: number, motivo: string): Promise<NegocioEnRevision> {
   return parchear<NegocioEnRevision>(`${BASE}/negocios/${id}/rechazar`, { motivo }, true);
+}
+
+/**
+ * Las propuestas de cambio, las más antiguas primero. Es una lista y no una
+ * página: el backend la devuelve entera.
+ */
+export function listarCambiosPendientes(): Promise<CambioPendiente[]> {
+  return obtener<CambioPendiente[]>(`${BASE}/cambios-pendientes`, true);
+}
+
+/** Copia al negocio los valores propuestos y publica sus fotos nuevas. */
+export function aprobarCambio(negocioId: number): Promise<NegocioEnRevision> {
+  return parchear<NegocioEnRevision>(
+    `${BASE}/negocios/${negocioId}/cambio/aprobar`,
+    undefined,
+    true,
+  );
+}
+
+/** Descarta la propuesta y sus fotos. El negocio sigue como estaba. */
+export function rechazarCambio(negocioId: number, motivo: string): Promise<NegocioEnRevision> {
+  return parchear<NegocioEnRevision>(
+    `${BASE}/negocios/${negocioId}/cambio/rechazar`,
+    { motivo },
+    true,
+  );
 }

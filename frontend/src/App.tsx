@@ -3,6 +3,7 @@ import { Cabecera } from './componentes/Cabecera';
 import { RutaDeAdmin } from './componentes/RutaDeAdmin';
 import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
 import { Pie } from './componentes/Pie';
+import { AdminCambios } from './paginas/AdminCambios';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
 import { Cursos } from './paginas/Cursos';
@@ -69,6 +70,7 @@ export function App() {
           <Route index element={<Navigate to="/admin/negocios" replace />} />
           <Route path="negocios" element={<AdminNegocios />} />
           <Route path="negocios/:id" element={<AdminRevisarNegocio />} />
+          <Route path="cambios" element={<AdminCambios />} />
         </Route>
         <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
         <Route path="/informacion-personal" element={<InformacionPersonal />} />

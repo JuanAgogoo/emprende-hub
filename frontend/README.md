@@ -94,6 +94,7 @@ administración.
 | `/admin` | El panel: abre la primera cola, la de negocios | `ADMIN` |
 | `/admin/negocios` | Negocios esperando su primera revisión, los más antiguos primero | `ADMIN` |
 | `/admin/negocios/:id` | Vista previa del perfil, con sus fotos sin aprobar, y la decisión | `ADMIN` |
+| `/admin/cambios` | Ediciones de negocios ya publicados: lo de ahora al lado de lo propuesto | `ADMIN` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 
