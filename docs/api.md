@@ -90,6 +90,10 @@ Dos excepciones, las dos del PR 9: el **directorio** ignora `sort` y ordena con
 su propio parámetro `orden`, de lista cerrada; y **destacados** devuelve una
 lista suelta, porque son seis y no se paginan.
 
+Un `sort` por un campo que no existe responde **`400`**, con la clave `sort` en
+el cuerpo: `?sort=inventado` es un error de quien pide, no del servidor. Hasta
+la revisión final respondía `500`, también en el catálogo público de cursos.
+
 ---
 
 ## Acceso · `/auth`

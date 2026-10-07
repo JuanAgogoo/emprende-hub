@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.emprendehub.dto.UsuarioResponse;
 import com.emprendehub.model.DecisionModeracion;
+import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ModeracionService;
 import java.time.Instant;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.core.PropertyReferenceException;
+import org.springframework.data.core.TypeInformation;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -117,5 +120,21 @@ class ModeracionAdminControllerTest extends ControllerTestBase {
         Sort.Order orden = pedido.getValue().getSort().getOrderFor("fechaRegistro");
         assertNotNull(orden, "sin orden explícito, las cuentas salen por fecha de registro");
         assertTrue(orden.isDescending());
+    }
+
+    @Test
+    @DisplayName("GET /usuarios?sort= por un campo que no existe devuelve 400, no 500")
+    void usuarios_ordenInexistente_devuelve400() throws Exception {
+        //arrange
+        // Lo que lanza Spring Data al construir el findAll con ese orden.
+        when(moderacionService.listarUsuarios(any(Pageable.class)))
+                .thenThrow(new PropertyReferenceException("inventado",
+                        TypeInformation.of(Usuario.class), List.of()));
+
+        //act
+        //assert
+        mockMvc.perform(get(BASE + "/usuarios").param("sort", "inventado"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.sort").value("No se puede ordenar por ese campo"));
     }
 }

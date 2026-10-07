@@ -1,5 +1,6 @@
 package com.emprendehub.controller;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,10 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.emprendehub.dto.CursoResponse;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.service.CursoService;
+import jakarta.servlet.ServletException;
 import java.util.List;
+import org.hibernate.query.sqm.PathElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -88,5 +92,36 @@ class CursoControllerTest extends ControllerTestBase {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Not Found"))
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/cursos?sort= por un campo que no existe devuelve 400, no 500")
+    void buscar_ordenInexistente_devuelve400() throws Exception {
+        //arrange
+        // Es lo que lanza de verdad la @Query del catálogo con un Sort desconocido.
+        when(cursoService.buscarPublicados(any(), any(), any(), any(), any()))
+                .thenThrow(new InvalidDataAccessApiUsageException("orden inválido",
+                        new PathElementException("Could not resolve attribute 'inventado'")));
+
+        //act
+        //assert
+        mockMvc.perform(get("/api/v1/cursos").param("sort", "inventado"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.sort").value("No se puede ordenar por ese campo"));
+    }
+
+    @Test
+    @DisplayName("Un mal uso de la capa de datos que no es de ordenación sigue siendo un 500")
+    void buscar_otroUsoInvalido_noSeDisfrazaDe400() {
+        //arrange
+        when(cursoService.buscarPublicados(any(), any(), any(), any(), any()))
+                .thenThrow(new InvalidDataAccessApiUsageException("fallo del código",
+                        new IllegalStateException("no es culpa de quien pide")));
+
+        //act
+        //assert
+        // Sin manejador que lo traduzca, MockMvc deja salir la excepción: en el
+        // servidor real acaba en el 500 de siempre.
+        assertThrows(ServletException.class, () -> mockMvc.perform(get("/api/v1/cursos")));
     }
 }

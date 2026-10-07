@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.hibernate.query.sqm.PathElementException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -86,6 +89,45 @@ public class GlobalExceptionHandler {
         Map<String, Object> respuesta = cuerpo(HttpStatus.BAD_REQUEST, detalle);
         // Una clave por parámetro inválido, igual que en la validación de campos.
         respuesta.put(ex.getName(), detalle);
+        return ResponseEntity.badRequest().body(respuesta);
+    }
+
+    /**
+     * Un {@code ?sort=} por un campo que no existe, en un listado sin consulta
+     * propia: {@code GET /admin/moderacion/usuarios?sort=inventado}.
+     *
+     * <p>Es Spring Data quien no encuentra la propiedad, y sin este manejador
+     * respondía 500. Ordenar por algo que no existe es un error de quien pide,
+     * no del servidor.
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<Map<String, Object>> ordenInexistente(PropertyReferenceException ex) {
+        return ordenNoValido();
+    }
+
+    /**
+     * Lo mismo en un listado con su propia {@code @Query}: ahí quien no
+     * encuentra el atributo es Hibernate, y Spring lo envuelve en esta otra
+     * excepción. Le pasaba al catálogo público, {@code /cursos?sort=inventado},
+     * sin necesidad de sesión.
+     *
+     * <p>Solo se traduce cuando la causa es esa. Esta excepción cubre más usos
+     * indebidos de la capa de datos, y esos siguen siendo un 500: convertirlos
+     * en un 400 escondería un fallo del código detrás de un error de quien pide.
+     */
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    public ResponseEntity<Map<String, Object>> usoInvalidoDeDatos(
+            InvalidDataAccessApiUsageException ex) {
+        if (ex.getMostSpecificCause() instanceof PathElementException) {
+            return ordenNoValido();
+        }
+        throw ex;
+    }
+
+    private ResponseEntity<Map<String, Object>> ordenNoValido() {
+        String detalle = "No se puede ordenar por ese campo";
+        Map<String, Object> respuesta = cuerpo(HttpStatus.BAD_REQUEST, detalle);
+        respuesta.put("sort", detalle);
         return ResponseEntity.badRequest().body(respuesta);
     }
 
