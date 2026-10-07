@@ -53,7 +53,7 @@ final class NegocioMapper {
                 negocio.getNivelPrecio().name(), negocio.getEstado().name(),
                 negocio.getMotivoRechazo(), negocio.getCalificacionPromedio(),
                 negocio.getNumeroOpiniones(), negocio.getInstagram(), negocio.getLinkedin(),
-                aPropuesta(cambio));
+                negocio.getFechaCreacion(), aPropuesta(cambio));
     }
 
     private static CambioPropuestoResponse aPropuesta(CambioPendiente cambio) {

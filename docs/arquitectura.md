@@ -243,7 +243,7 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   rutas, los cuerpos, los códigos y las reglas de Bean Validation de cada DTO
   salen del código. La alternativa era un `openapi.yaml` a mano, y habría sido un
   **segundo sitio donde decir lo mismo**: exactamente lo que `scripts/cifras.sh`
-  existe para evitar. Que las 65 operaciones que genera coincidan con los 65
+  existe para evitar. Que las 66 operaciones que genera coincidan con los 66
   endpoints que ese script cuenta en `docs/api.md` es la comprobación de que
   ninguno de los dos miente. Lo único escrito a mano es la portada, el esquema de
   seguridad —ningún tipo de Java dice «esto se autentica con un JWT»— y el nombre

@@ -1,0 +1,372 @@
+/*
+ * Las páginas del panel de administración comparten esta hoja, como los
+ * formularios comparten `Formulario.module.css`: son la misma pantalla con
+ * distinta cola dentro.
+ */
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  padding-block: var(--e-6) var(--e-7);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.entrada {
+  max-width: var(--ancho-lectura);
+}
+
+/* ── Pestañas ──────────────────────────────────────────────────────────── */
+
+/* En móvil se desplazan en horizontal en vez de partirse en varias filas:
+   son muchas y cortas, y una fila que se desliza se entiende sola. */
+.pestanas {
+  display: flex;
+  gap: var(--e-1);
+  overflow-x: auto;
+  padding: 0 0 var(--e-1);
+  list-style: none;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.pestana {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border-radius: var(--radio-md) var(--radio-md) 0 0;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-cuerpo);
+  text-decoration: none;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.pestana:hover {
+  background: var(--color-lienzo-alt);
+  color: var(--color-tinta);
+}
+
+/* La activa se marca con color, con fondo y con la raya de abajo. */
+.pestanaActiva,
+.pestanaActiva:hover {
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  box-shadow: inset 0 -3px 0 var(--color-acento);
+}
+
+/* ── Sección y mensajes ────────────────────────────────────────────────── */
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.tituloSeccion {
+  font-size: var(--texto-xl);
+}
+
+.recuento {
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.apagado {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.aviso,
+.error,
+.nota {
+  max-width: var(--ancho-lectura);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid;
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+}
+
+.aviso {
+  border-color: color-mix(in srgb, var(--color-exito) 40%, var(--color-borde));
+  background: color-mix(in srgb, var(--color-exito) 6%, var(--color-lienzo));
+  color: var(--color-exito);
+}
+
+.error {
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  color: var(--color-error);
+}
+
+.nota {
+  border-color: var(--color-borde);
+  background: var(--color-lienzo-alt);
+  color: var(--color-cuerpo);
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-2);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+.tituloVacio {
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--color-tinta);
+}
+
+/* ── Listas de la cola ─────────────────────────────────────────────────── */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.filaCuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+
+.nombre {
+  font-size: var(--texto-lg);
+  overflow-wrap: anywhere;
+}
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2) var(--e-5);
+  font-size: var(--texto-sm);
+}
+
+.datos dt {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.datos dd {
+  margin: 0;
+  color: var(--color-tinta);
+}
+
+/* ── Botones ───────────────────────────────────────────────────────────── */
+
+.secundario,
+.aprobar,
+.rechazar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border-radius: var(--radio-md);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.secundario {
+  border: 1px solid var(--color-acento);
+  background: transparent;
+  color: var(--color-acento);
+}
+
+.secundario:hover {
+  background: var(--color-acento-suave);
+}
+
+/* Aprobar y rechazar no se pueden confundir (HU-037): uno relleno en verde y
+   con ✓, el otro con borde rojo y con ✕. */
+.aprobar {
+  border: 1px solid transparent;
+  background: var(--color-exito);
+  color: var(--color-sobre-senal);
+}
+
+.aprobar:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-exito) 85%, black);
+}
+
+.rechazar {
+  border: 1px solid var(--color-error);
+  background: var(--color-lienzo);
+  color: var(--color-error);
+}
+
+.rechazar:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+}
+
+.aprobar:disabled,
+.rechazar:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* ── Revisión de un negocio ────────────────────────────────────────────── */
+
+.revision {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.migas {
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+  overflow-wrap: anywhere;
+}
+
+.columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-5);
+}
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  min-width: 0;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.tituloBloque {
+  font-size: var(--texto-lg);
+}
+
+.descripcion {
+  max-width: var(--ancho-lectura);
+  white-space: pre-line;
+}
+
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--e-3);
+  padding: 0;
+  list-style: none;
+}
+
+.producto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  font-size: var(--texto-sm);
+}
+
+.producto img {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+}
+
+.nombreProducto {
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.nombreFicha {
+  font-size: var(--texto-xl);
+  overflow-wrap: anywhere;
+}
+
+.datosFicha {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--e-2) var(--e-4);
+  font-size: var(--texto-sm);
+}
+
+.datosFicha dt {
+  color: var(--color-apagado);
+}
+
+.datosFicha dd {
+  margin: 0;
+  color: var(--color-tinta);
+  overflow-wrap: anywhere;
+}
+
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.esqueletoRevision {
+  height: 24rem;
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+@media (min-width: 40rem) {
+  .fila {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* A partir de tablet la ficha y las decisiones pasan a su columna, fijas
+   mientras se recorre la galería y el escaparate. */
+@media (min-width: 64rem) {
+  .columnas {
+    grid-template-columns: 1fr 22rem;
+    align-items: start;
+  }
+
+  .ficha {
+    position: sticky;
+    top: calc(60px + var(--e-4));
+  }
+}

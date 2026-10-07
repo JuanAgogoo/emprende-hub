@@ -641,9 +641,9 @@ buzón.
 ```
 
 **Es la única respuesta de la API que enseña el correo de otra persona**, y es a
-propósito (D2). La plataforma no manda correos por esto —el único que manda es
-el de recuperar la contraseña, I1-bis— ni permite responder desde
-dentro, así que sin esa dirección el buzón sería un montón de preguntas sin forma
+propósito (D2). La plataforma no manda correos por esto —solo manda el de recuperar la
+contraseña (I1-bis) y los avisos de las decisiones del administrador (I1-ter)—
+ni permite responder desde dentro, así que sin esa dirección el buzón sería un montón de preguntas sin forma
 de contestarlas. La excepción está acotada: el correo **no aparece** en el
 directorio, ni en el perfil público, ni en las opiniones, y solo lo recibe el
 dueño del negocio al que va dirigida la consulta.
@@ -727,9 +727,10 @@ solo cuatro:
 **Fuera los hitos de visitas** que enseñaba el prototipo («superaste las 1.000
 este mes»): no son un hecho del que haya que enterarse, y H2 los descarta.
 
-Sin correos de aviso (I1, que I1-bis solo reabre para la recuperación) esto no
-es decoración: es el único canal por el que un emprendedor se entera de que le
-rechazaron el negocio.
+Desde I1-ter, aprobar y rechazar un negocio avisan **también** por correo, pero
+esto sigue sin ser decoración: el correo avisa y el panel es donde se actúa. El
+motivo del rechazo está aquí y en `GET /negocios/mio` cuando el dueño entra a
+corregir, haya leído el correo o no.
 
 `?leida=false` devuelve las pendientes, y el `totalElements` de esa página es el
 número de la campana. El texto **se escribe cuando ocurre el hecho y se guarda
@@ -761,6 +762,7 @@ Solo **ADMIN**.
 | Método | Ruta | Hace |
 |---|---|---|
 | `GET` | `/negocios-pendientes` | Cola de revisión, los más antiguos primero |
+| `GET` | `/negocios/{id}` | Vista previa del perfil, **con las fotos sin aprobar** |
 | `PATCH` | `/negocios/{id}/aprobar` | Aprueba y sella la fecha |
 | `PATCH` | `/negocios/{id}/rechazar` | Rechaza. **Motivo obligatorio** |
 | `GET` | `/cambios-pendientes` | Cola de propuestas, las más antiguas primero |
@@ -773,9 +775,20 @@ Solo **ADMIN**.
 | `PATCH` | `/usuarios/{id}/reactivar` | La reactiva (`204`) |
 | `GET` | `/log` | Historial, filtrable por fechas |
 
-El motivo del rechazo lo lee el dueño en `GET /negocios/mio`: sin correos de
-aviso (I1), ese campo es el único sitio donde se entera de por qué le
-rechazaron.
+La cola trae `fechaCreacion` de cada negocio, que es cuánto lleva esperando: el
+plazo de revisión es de tres días hábiles (B5).
+
+**La vista previa** devuelve el perfil con la forma del público —galería y
+escaparate— para cualquier estado, y con **todas** las fotos, cada una con su
+`estado`. Son justo las que se publicarían al aprobar: el perfil público de un
+negocio pendiente responde `404` (B6), así que sin esta ruta se aprobaría a
+ciegas. `fechaAprobacion` llega nula si nunca se aprobó.
+
+Aprobar y rechazar **avisan al dueño por correo** (I1-ter), además del aviso del
+panel. Si el servidor de correo no responde, la decisión se mantiene y el fallo
+queda en el registro del backend: deshacer la decisión porque no salió un correo
+sería peor que el correo perdido. El motivo del rechazo sigue viviendo en
+`GET /negocios/mio`, que es donde el dueño corrige y reenvía.
 
 `GET /cambios-pendientes` enseña el valor actual junto al propuesto —también la
 categoría, con `categoriaPropuesta` nula cuando la propuesta no la cambia—, y
@@ -903,7 +916,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**65 endpoints** en 76 peticiones, agrupadas por quién las usa. Su primera
+**66 endpoints** en 77 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,

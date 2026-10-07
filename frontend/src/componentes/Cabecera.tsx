@@ -49,6 +49,18 @@ export function Cabecera() {
               </li>
             ) : (
               <>
+                {sesion.rol === 'ADMIN' && (
+                  <li>
+                    <NavLink
+                      to="/admin"
+                      className={({ isActive }) =>
+                        isActive ? `${estilos.enlace} ${estilos.enlaceActivo}` : estilos.enlace
+                      }
+                    >
+                      Admin
+                    </NavLink>
+                  </li>
+                )}
                 {sesion.rol === 'EMPRENDEDOR' && (
                   <li>
                     <NavLink

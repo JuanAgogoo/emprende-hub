@@ -1,13 +1,18 @@
 package com.emprendehub.service;
 
+import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Usuario;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 /**
- * Los correos que manda la aplicación. Hoy solo hay uno: el de recuperación.
+ * Los correos que manda la aplicación: el de recuperación (I1-bis) y los avisos
+ * de las decisiones del administrador (I1-ter).
  *
  * <p>Va contra un servidor SMTP local —Mailpit, un servicio más de
  * {@code docker-compose.yml}—, así que funciona sin internet y sin cuenta de
@@ -19,6 +24,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CorreoService {
+
+    private static final Logger log = LoggerFactory.getLogger(CorreoService.class);
 
     private final JavaMailSender mailSender;
     private final String remitente;
@@ -59,5 +66,65 @@ public class CorreoService {
                 """.formatted(usuario.getNombre(), urlBase, token, minutosDeVida));
 
         mailSender.send(mensaje);
+    }
+
+    // ---------- Avisos de moderación (I1-ter) ----------
+
+    /** Avisa al dueño de que su negocio ya se ve en el directorio. */
+    public void avisarNegocioAprobado(Negocio negocio) {
+        enviarAviso(negocio.getUsuario(), "Tu negocio ya está publicado en EmprendeHub", """
+                Hola, %s:
+
+                Tu negocio «%s» ya está publicado en el directorio. Así lo ve
+                todo el mundo:
+
+                %s/negocios/%d
+                """.formatted(negocio.getUsuario().getNombre(), negocio.getNombre(),
+                urlBase, negocio.getId()));
+    }
+
+    /**
+     * Avisa al dueño de que su negocio necesita cambios, con el motivo.
+     *
+     * <p>El motivo sigue además en su panel, que es donde corrige y reenvía: el
+     * correo avisa, el panel es donde se actúa.
+     */
+    public void avisarNegocioRechazado(Negocio negocio, String motivo) {
+        enviarAviso(negocio.getUsuario(), "Tu negocio necesita cambios antes de publicarse", """
+                Hola, %s:
+
+                Revisamos tu negocio «%s» y necesita cambios antes de publicarse.
+                El motivo:
+
+                %s
+
+                Corrígelo y vuelve a enviarlo desde tu panel; no hay límite de
+                intentos:
+
+                %s/mi-negocio
+                """.formatted(negocio.getUsuario().getNombre(), negocio.getNombre(), motivo,
+                urlBase));
+    }
+
+    /**
+     * Manda un aviso sin que su fallo tumbe la decisión que lo provoca.
+     *
+     * <p>El aviso informa de algo que ya pasó: si el servidor de correo no
+     * responde, el negocio sigue aprobado y el dueño lo ve igual en su panel
+     * (H2). Deshacer la decisión del administrador porque no salió un correo
+     * sería peor que el correo perdido, así que se anota y se sigue.
+     */
+    private void enviarAviso(Usuario destinatario, String asunto, String texto) {
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setFrom(remitente);
+        mensaje.setTo(destinatario.getCorreo());
+        mensaje.setSubject(asunto);
+        mensaje.setText(texto);
+
+        try {
+            mailSender.send(mensaje);
+        } catch (MailException ex) {
+            log.error("No se pudo enviar el aviso «{}» a {}", asunto, destinatario.getCorreo(), ex);
+        }
     }
 }

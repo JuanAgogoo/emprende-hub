@@ -3,6 +3,7 @@ package com.emprendehub.service;
 import com.emprendehub.dto.CambioPendienteResponse;
 import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
@@ -22,6 +23,7 @@ import com.emprendehub.repository.CambioPendienteRepository;
 import com.emprendehub.repository.DenunciaRepository;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.ProductoRepository;
 import com.emprendehub.repository.RegistroModeracionRepository;
 import com.emprendehub.repository.UsuarioRepository;
 import java.time.Instant;
@@ -50,6 +52,8 @@ public class ModeracionService {
     private final DenunciaRepository denunciaRepository;
     private final OpinionService opinionService;
     private final NotificacionService notificacionService;
+    private final CorreoService correoService;
+    private final ProductoRepository productoRepository;
 
     public ModeracionService(NegocioRepository negocioRepository,
                              CambioPendienteRepository cambioRepository,
@@ -59,7 +63,9 @@ public class ModeracionService {
                              FotoService fotoService,
                              DenunciaRepository denunciaRepository,
                              OpinionService opinionService,
-                             NotificacionService notificacionService) {
+                             NotificacionService notificacionService,
+                             CorreoService correoService,
+                             ProductoRepository productoRepository) {
         this.negocioRepository = negocioRepository;
         this.cambioRepository = cambioRepository;
         this.logRepository = logRepository;
@@ -69,6 +75,8 @@ public class ModeracionService {
         this.denunciaRepository = denunciaRepository;
         this.opinionService = opinionService;
         this.notificacionService = notificacionService;
+        this.correoService = correoService;
+        this.productoRepository = productoRepository;
     }
 
     // ---------- Cola de revisión ----------
@@ -77,6 +85,23 @@ public class ModeracionService {
         return negocioRepository
                 .findByEstadoOrderByFechaCreacionAsc(EstadoNegocio.PENDIENTE, pageable)
                 .map(NegocioMapper::aRespuesta);
+    }
+
+    /**
+     * El perfil de un negocio tal como quedaría publicado, para decidir sobre él
+     * (HU-036).
+     *
+     * <p>A diferencia del perfil público, responde para cualquier estado —el
+     * administrador ve también lo que no se ha publicado (B6)— y trae
+     * <strong>todas</strong> las fotos, también las que esperan revisión: son
+     * justo las que se publicarían al aprobar, y sin verlas se aprobaría a
+     * ciegas.
+     */
+    public PerfilNegocioResponse vistaPrevia(Long negocioId) {
+        Negocio negocio = buscarNegocio(negocioId);
+        return NegocioMapper.aPerfil(negocio,
+                fotoRepository.findByNegocioIdOrderByOrdenAsc(negocioId),
+                productoRepository.findByNegocioIdOrderByNombreAsc(negocioId));
     }
 
     /**
@@ -110,17 +135,19 @@ public class ModeracionService {
                         TipoNotificacion.NEGOCIO_APROBADO,
                         "Tu negocio «%s» ya está publicado en el directorio"
                                 .formatted(negocio.getNombre()));
+                correoService.avisarNegocioAprobado(negocio);
                 registrar(TipoEventoModeracion.NEGOCIO_APROBADO, negocio.getNombre(), null, admin);
             }
             case DecisionModeracion.Rechazar rechazo -> {
                 negocio.setEstado(EstadoNegocio.RECHAZADO);
-                // Sin correos (I1), este texto es el único sitio donde el dueño
-                // se entera de por qué le rechazaron.
+                // El correo avisa (I1-ter), pero el motivo vive aquí: es lo que
+                // el dueño tiene delante en su panel cuando corrige y reenvía.
                 negocio.setMotivoRechazo(rechazo.motivo());
                 notificacionService.avisar(negocio.getUsuario(),
                         TipoNotificacion.NEGOCIO_RECHAZADO,
                         "Tu negocio «%s» necesita cambios: %s"
                                 .formatted(negocio.getNombre(), rechazo.motivo()));
+                correoService.avisarNegocioRechazado(negocio, rechazo.motivo());
                 registrar(TipoEventoModeracion.NEGOCIO_RECHAZADO, negocio.getNombre(),
                         rechazo.motivo(), admin);
             }

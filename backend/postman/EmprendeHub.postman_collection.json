@@ -1423,6 +1423,26 @@
 					}
 				},
 				{
+					"name": "Vista previa de un negocio · fotos sin aprobar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/moderacion/negocios/11",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"moderacion",
+								"negocios",
+								"11"
+							]
+						},
+						"description": "El perfil tal como quedaría publicado, con todas sus fotos —cada una con su estado— y el escaparate. El perfil público de un negocio pendiente responde 404 (B6); esta es la única forma de verlo antes de decidir."
+					}
+				},
+				{
 					"name": "Aprobar un negocio",
 					"request": {
 						"method": "PATCH",

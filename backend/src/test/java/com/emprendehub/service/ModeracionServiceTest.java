@@ -22,6 +22,7 @@ import com.emprendehub.model.Denuncia;
 import com.emprendehub.model.EstadoDenuncia;
 import com.emprendehub.model.EstadoFoto;
 import com.emprendehub.model.EstadoNegocio;
+import com.emprendehub.model.Foto;
 import com.emprendehub.model.MotivoDenuncia;
 import com.emprendehub.model.Negocio;
 import com.emprendehub.model.Opinion;
@@ -34,6 +35,7 @@ import com.emprendehub.repository.CambioPendienteRepository;
 import com.emprendehub.repository.DenunciaRepository;
 import com.emprendehub.repository.FotoRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.ProductoRepository;
 import com.emprendehub.repository.RegistroModeracionRepository;
 import com.emprendehub.repository.UsuarioRepository;
 import java.util.List;
@@ -79,6 +81,12 @@ class ModeracionServiceTest {
     /** Aprobar o rechazar un negocio avisa a su dueño (H2). */
     @Mock private NotificacionService notificacionService;
 
+    /** Y también por correo (I1-ter), además del aviso del panel. */
+    @Mock private CorreoService correoService;
+
+    /** La vista previa trae el escaparate del negocio (HU-036). */
+    @Mock private ProductoRepository productoRepository;
+
     @InjectMocks private ModeracionService service;
 
     private Usuario admin() {
@@ -111,6 +119,7 @@ class ModeracionServiceTest {
 
         assertEquals("APROBADO", respuesta.estado());
         assertNotNull(negocio.getFechaAprobacion());
+        verify(correoService).avisarNegocioAprobado(negocio);
     }
 
     @Test
@@ -126,6 +135,57 @@ class ModeracionServiceTest {
         assertEquals("RECHAZADO", respuesta.estado());
         assertEquals("La descripción es insuficiente", respuesta.motivoRechazo());
         assertNull(negocio.getFechaAprobacion());
+        verify(correoService).avisarNegocioRechazado(negocio, "La descripción es insuficiente");
+    }
+
+    @Test
+    @DisplayName("resolverNegocio: si ya estaba resuelto no avisa a nadie por correo")
+    void resolverNegocio_yaAprobado_noMandaCorreo() {
+        //arrange
+        Negocio negocio = negocioPendiente();
+        negocio.setEstado(EstadoNegocio.APROBADO);
+        when(negocioRepository.findWithDetalleById(7L)).thenReturn(Optional.of(negocio));
+
+        //act
+        assertThrows(ReglaDeNegocioException.class,
+                () -> service.resolverNegocio(7L, new DecisionModeracion.Aprobar(), admin()));
+
+        //verify
+        verify(correoService, never()).avisarNegocioAprobado(any());
+    }
+
+    // ---------- Vista previa ----------
+
+    @Test
+    @DisplayName("vistaPrevia: un negocio pendiente se ve entero, con sus fotos sin aprobar")
+    void vistaPrevia_pendiente_traeTodasLasFotos() {
+        //arrange
+        Negocio negocio = negocioPendiente();
+        Foto fachada = new Foto(negocio, "fachada.jpg", 0);
+        Foto vitrina = new Foto(negocio, "vitrina.jpg", 1);
+        when(negocioRepository.findWithDetalleById(7L)).thenReturn(Optional.of(negocio));
+        when(fotoRepository.findByNegocioIdOrderByOrdenAsc(7L)).thenReturn(List.of(fachada, vitrina));
+        when(productoRepository.findByNegocioIdOrderByNombreAsc(7L)).thenReturn(List.of());
+
+        //act
+        var perfil = service.vistaPrevia(7L);
+
+        //assert
+        assertEquals("Panadería La Tradicional", perfil.nombre());
+        assertEquals(2, perfil.fotos().size(), "las fotos pendientes son las que se juzgan");
+        assertTrue(perfil.fotos().get(0).principal());
+        assertTrue(perfil.fotos().get(0).url().endsWith("fachada.jpg"));
+    }
+
+    @Test
+    @DisplayName("vistaPrevia: un negocio que no existe responde como no encontrado")
+    void vistaPrevia_inexistente_lanzaNoEncontrado() {
+        //arrange
+        when(negocioRepository.findWithDetalleById(99L)).thenReturn(Optional.empty());
+
+        //act
+        //assert
+        assertThrows(ResourceNotFoundException.class, () -> service.vistaPrevia(99L));
     }
 
     @Test
