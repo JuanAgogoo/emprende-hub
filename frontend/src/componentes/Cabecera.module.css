@@ -7,11 +7,14 @@
   border-bottom: 1px solid var(--color-borde);
 }
 
+/* En un móvil la marca y los enlaces no caben en una fila: la navegación baja
+   a la siguiente en vez de salirse de la pantalla. */
 .interior {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--e-4);
+  gap: 0 var(--e-4);
   min-height: 60px;
 }
 
@@ -29,6 +32,7 @@
 
 .lista {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--e-1);
   list-style: none;
@@ -40,7 +44,7 @@
   align-items: center;
   /* 44px de área táctil: la cifra no se negocia por composición. */
   min-height: var(--toque-min);
-  padding-inline: var(--e-3);
+  padding-inline: var(--e-2);
   border-radius: var(--radio-md);
   font-size: var(--texto-sm);
   font-weight: 600;
@@ -102,4 +106,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (min-width: 48rem) {
+  .enlace {
+    padding-inline: var(--e-3);
+  }
 }
