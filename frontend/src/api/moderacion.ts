@@ -1,8 +1,9 @@
-import { obtener, parchear } from './cliente';
+import { consulta, obtener, parchear } from './cliente';
 import type {
   CambioPendiente,
   CuentaUsuario,
   NegocioEnRevision,
+  RegistroModeracion,
   VistaPreviaNegocio,
 } from '../types/moderacion';
 import type { Denuncia } from '../types/denuncia';
@@ -93,4 +94,21 @@ export function eliminarOpinionDenunciada(denunciaId: number, motivo: string): P
 /** La opinión se queda publicada, y queda constancia de que se miró. */
 export function desestimarDenuncia(denunciaId: number): Promise<void> {
   return parchear<void>(`${BASE}/denuncias/${denunciaId}/desestimar`, undefined, true);
+}
+
+/**
+ * El historial de moderación, lo más reciente primero (HU-041).
+ *
+ * `desde` y `hasta` son instantes ISO-8601 y los dos son opcionales; el backend
+ * incluye los extremos.
+ */
+export function consultarHistorial(
+  desde: string | undefined,
+  hasta: string | undefined,
+  pagina: number,
+): Promise<Pagina<RegistroModeracion>> {
+  return obtener<Pagina<RegistroModeracion>>(
+    `${BASE}/log${consulta({ desde, hasta, page: pagina })}`,
+    true,
+  );
 }

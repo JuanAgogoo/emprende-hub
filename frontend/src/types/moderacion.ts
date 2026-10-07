@@ -55,3 +55,33 @@ export interface CuentaUsuario {
   readonly fechaRegistro: string;
   readonly activo: boolean;
 }
+
+/** Las acciones que deja escritas el log de moderación (sección L). */
+export type TipoEventoModeracion =
+  | 'NEGOCIO_APROBADO'
+  | 'NEGOCIO_RECHAZADO'
+  | 'CAMBIO_APROBADO'
+  | 'CAMBIO_RECHAZADO'
+  | 'CUENTA_SUSPENDIDA'
+  | 'CUENTA_REACTIVADA'
+  | 'CURSO_PUBLICADO'
+  | 'OPINION_ELIMINADA'
+  | 'DENUNCIA_DESESTIMADA';
+
+/**
+ * Una entrada del historial (HU-041). Es de solo lectura: el backend no tiene
+ * ninguna ruta para editarla ni borrarla.
+ *
+ * `afectado` es texto y no una referencia: si el negocio o la cuenta
+ * desaparecen, la entrada tiene que seguir contando qué pasó.
+ */
+export interface RegistroModeracion {
+  readonly id: number;
+  readonly tipo: TipoEventoModeracion;
+  readonly descripcionTipo: string;
+  readonly afectado: string;
+  /** El motivo, en las acciones que lo llevan. */
+  readonly detalle: string | null;
+  readonly administrador: string;
+  readonly fecha: string;
+}

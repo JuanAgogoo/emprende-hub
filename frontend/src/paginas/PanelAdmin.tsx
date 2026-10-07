@@ -8,6 +8,7 @@ const SECCIONES = [
   { a: '/admin/denuncias', texto: 'Denuncias' },
   { a: '/admin/usuarios', texto: 'Usuarios' },
   { a: '/admin/cursos', texto: 'Cursos' },
+  { a: '/admin/historial', texto: 'Historial' },
 ] as const;
 
 /**

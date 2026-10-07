@@ -143,3 +143,16 @@ export function nivelPrecio(nivel: 'BAJO' | 'MEDIO' | 'ALTO'): string {
 export function localidad(lugar: { readonly ciudad: string; readonly barrio: string | null }) {
   return lugar.barrio === null ? lugar.ciudad : `${lugar.barrio}, ${lugar.ciudad}`;
 }
+
+const FECHA_Y_HORA = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
+/** Una fecha con su hora, en la zona de quien mira: «6 oct 2026, 9:24 p. m.». */
+export function fechaYHora(valor: string): string {
+  return FECHA_Y_HORA.format(new Date(valor));
+}

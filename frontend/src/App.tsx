@@ -7,6 +7,7 @@ import { AdminCambios } from './paginas/AdminCambios';
 import { AdminCursos } from './paginas/AdminCursos';
 import { AdminDenuncias } from './paginas/AdminDenuncias';
 import { AdminFormularioCurso } from './paginas/AdminFormularioCurso';
+import { AdminHistorial } from './paginas/AdminHistorial';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
 import { AdminUsuarios } from './paginas/AdminUsuarios';
@@ -80,6 +81,7 @@ export function App() {
           <Route path="cursos" element={<AdminCursos />} />
           <Route path="cursos/nuevo" element={<AdminFormularioCurso />} />
           <Route path="cursos/:id" element={<AdminFormularioCurso />} />
+          <Route path="historial" element={<AdminHistorial />} />
         </Route>
         <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
         <Route path="/informacion-personal" element={<InformacionPersonal />} />

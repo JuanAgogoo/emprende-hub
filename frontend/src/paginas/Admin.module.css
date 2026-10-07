@@ -581,3 +581,63 @@
   font-weight: 600;
   color: var(--color-tinta);
 }
+
+/* ── Historial ─────────────────────────────────────────────────────────── */
+
+.filtroFechas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--e-3);
+}
+
+.campoFecha {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  gap: var(--e-2);
+  max-width: 14rem;
+}
+
+.campoFecha label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.campoFecha input {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.campoFecha:has(input[aria-invalid='true']) input {
+  border-color: var(--color-error);
+}
+
+.registro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+}
+
+.registroCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+}
+
+.detalleRegistro {
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
