@@ -198,3 +198,29 @@
 .reintentar:hover {
   background: var(--color-lienzo-alt);
 }
+
+/* Terciario y pequeño: denunciar está disponible, pero no compite con leer.
+   Sigue midiendo 44px de alto para el dedo. */
+.denunciar {
+  align-self: start;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-2);
+  border: none;
+  border-radius: var(--radio-md);
+  background: none;
+  color: var(--color-apagado);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.denunciar:hover {
+  color: var(--color-error);
+}
+
+.denunciada {
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}

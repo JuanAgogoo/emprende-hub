@@ -5,6 +5,7 @@ import estilos from './Admin.module.css';
 const SECCIONES = [
   { a: '/admin/negocios', texto: 'Negocios' },
   { a: '/admin/cambios', texto: 'Cambios' },
+  { a: '/admin/denuncias', texto: 'Denuncias' },
   { a: '/admin/usuarios', texto: 'Usuarios' },
   { a: '/admin/cursos', texto: 'Cursos' },
 ] as const;

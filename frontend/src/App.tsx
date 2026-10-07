@@ -5,6 +5,7 @@ import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
 import { Pie } from './componentes/Pie';
 import { AdminCambios } from './paginas/AdminCambios';
 import { AdminCursos } from './paginas/AdminCursos';
+import { AdminDenuncias } from './paginas/AdminDenuncias';
 import { AdminFormularioCurso } from './paginas/AdminFormularioCurso';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
@@ -74,6 +75,7 @@ export function App() {
           <Route path="negocios" element={<AdminNegocios />} />
           <Route path="negocios/:id" element={<AdminRevisarNegocio />} />
           <Route path="cambios" element={<AdminCambios />} />
+          <Route path="denuncias" element={<AdminDenuncias />} />
           <Route path="usuarios" element={<AdminUsuarios />} />
           <Route path="cursos" element={<AdminCursos />} />
           <Route path="cursos/nuevo" element={<AdminFormularioCurso />} />

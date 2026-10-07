@@ -556,3 +556,28 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ── Denuncias ─────────────────────────────────────────────────────────── */
+
+/* La opinión denunciada, citada entera y separada de los datos de la denuncia. */
+.cita {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding: var(--e-3) var(--e-4);
+  border-inline-start: 3px solid var(--color-borde-control);
+  border-radius: 0 var(--radio-md) var(--radio-md) 0;
+  background: var(--color-lienzo-alt);
+  overflow-wrap: anywhere;
+}
+
+.citaAutor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-tinta);
+}
