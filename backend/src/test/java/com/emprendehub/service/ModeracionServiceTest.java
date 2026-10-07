@@ -524,6 +524,8 @@ class ModeracionServiceTest {
         assertFalse(maria.isActivo());
         verify(usuarioRepository).save(maria);
         verify(logRepository).save(any(RegistroModeracion.class));
+        // Suspendida no puede entrar al panel: el correo es su único aviso.
+        verify(correoService).avisarCuentaSuspendida(maria);
     }
 
     @Test
@@ -548,6 +550,7 @@ class ModeracionServiceTest {
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(maria));
 
         assertThrows(ReglaDeNegocioException.class, () -> service.suspender(2L, admin()));
+        verify(correoService, never()).avisarCuentaSuspendida(any());
     }
 
     @Test
@@ -562,6 +565,28 @@ class ModeracionServiceTest {
 
         assertTrue(maria.isActivo());
         verify(logRepository).save(any(RegistroModeracion.class));
+        verify(correoService).avisarCuentaReactivada(maria);
+    }
+
+    @Test
+    @DisplayName("listarUsuarios: trae el correo, el rol, la fecha y si está suspendida")
+    void listarUsuarios_traduceCadaCuenta() {
+        //arrange
+        Usuario maria = new Usuario("María", "maria@test.co", "hash", Rol.EMPRENDEDOR);
+        maria.setId(2L);
+        maria.setActivo(false);
+        when(usuarioRepository.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(maria)));
+
+        //act
+        var pagina = service.listarUsuarios(Pageable.unpaged());
+
+        //assert
+        var cuenta = pagina.getContent().get(0);
+        assertEquals("maria@test.co", cuenta.correo());
+        assertEquals("EMPRENDEDOR", cuenta.rol());
+        assertFalse(cuenta.activo());
+        assertNotNull(cuenta.fechaRegistro());
     }
 
     @Test

@@ -6,6 +6,12 @@ interface Props {
   readonly titulo: string;
   readonly texto: string;
   readonly ocupado: boolean;
+  /**
+   * El botón, cuando lo que no se deshace no es borrar: suspender una cuenta
+   * también pide este paso. Por defecto, «Sí, eliminar».
+   */
+  readonly etiquetaConfirmar?: string;
+  readonly etiquetaOcupado?: string;
   readonly alConfirmar: () => void;
   readonly alCancelar: () => void;
 }
@@ -18,7 +24,15 @@ interface Props {
  * Abrirlo con `showModal()` trae gratis lo que costaría escribir a mano: el
  * foco atrapado dentro, `Esc` para salir y el resto de la página inerte.
  */
-export function ConfirmarBorrado({ titulo, texto, ocupado, alConfirmar, alCancelar }: Props) {
+export function ConfirmarBorrado({
+  titulo,
+  texto,
+  ocupado,
+  etiquetaConfirmar = 'Sí, eliminar',
+  etiquetaOcupado = 'Eliminando…',
+  alConfirmar,
+  alCancelar,
+}: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -46,7 +60,7 @@ export function ConfirmarBorrado({ titulo, texto, ocupado, alConfirmar, alCancel
           Cancelar
         </button>
         <button type="button" className={estilos.borrar} disabled={ocupado} onClick={alConfirmar}>
-          {ocupado ? 'Eliminando…' : 'Sí, eliminar'}
+          {ocupado ? etiquetaOcupado : etiquetaConfirmar}
         </button>
       </div>
     </dialog>

@@ -1,19 +1,30 @@
 package com.emprendehub.controller;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.emprendehub.dto.UsuarioResponse;
 import com.emprendehub.model.DecisionModeracion;
 import com.emprendehub.service.ModeracionService;
+import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -82,5 +93,29 @@ class ModeracionAdminControllerTest extends ControllerTestBase {
         //verify
         verify(moderacionService).resolverCambio(eq(7L),
                 eq(new DecisionModeracion.Rechazar("La foto nueva no es del local")), any());
+    }
+
+    @Test
+    @DisplayName("GET /usuarios devuelve la página de cuentas, de la más reciente a la más antigua")
+    void usuarios_devuelvePaginaOrdenadaPorFecha() throws Exception {
+        //arrange
+        UsuarioResponse maria = new UsuarioResponse(2L, "María", "maria@test.co", "CLIENTE",
+                Instant.parse("2026-09-01T15:00:00Z"), true);
+        when(moderacionService.listarUsuarios(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(maria)));
+
+        //act
+        //assert
+        mockMvc.perform(get(BASE + "/usuarios"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].correo").value("maria@test.co"))
+                .andExpect(jsonPath("$.content[0].activo").value(true));
+
+        //verify
+        ArgumentCaptor<Pageable> pedido = ArgumentCaptor.forClass(Pageable.class);
+        verify(moderacionService).listarUsuarios(pedido.capture());
+        Sort.Order orden = pedido.getValue().getSort().getOrderFor("fechaRegistro");
+        assertNotNull(orden, "sin orden explícito, las cuentas salen por fecha de registro");
+        assertTrue(orden.isDescending());
     }
 }

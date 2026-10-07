@@ -1632,6 +1632,35 @@
 					}
 				},
 				{
+					"name": "Cuentas registradas · las más recientes primero",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/admin/moderacion/usuarios?page=0&size=20",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"moderacion",
+								"usuarios"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								}
+							]
+						},
+						"description": "Nombre, correo, rol, fecha de registro y si está activa (HU-038). Es la única respuesta con el correo de cualquier cuenta: solo la ve el administrador."
+					}
+				},
+				{
 					"name": "Suspender una cuenta (B4)",
 					"request": {
 						"method": "PATCH",

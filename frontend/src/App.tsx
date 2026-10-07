@@ -6,6 +6,7 @@ import { Pie } from './componentes/Pie';
 import { AdminCambios } from './paginas/AdminCambios';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
+import { AdminUsuarios } from './paginas/AdminUsuarios';
 import { Cursos } from './paginas/Cursos';
 import { Directorio } from './paginas/Directorio';
 import { InformacionPersonal } from './paginas/InformacionPersonal';
@@ -71,6 +72,7 @@ export function App() {
           <Route path="negocios" element={<AdminNegocios />} />
           <Route path="negocios/:id" element={<AdminRevisarNegocio />} />
           <Route path="cambios" element={<AdminCambios />} />
+          <Route path="usuarios" element={<AdminUsuarios />} />
         </Route>
         <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
         <Route path="/informacion-personal" element={<InformacionPersonal />} />

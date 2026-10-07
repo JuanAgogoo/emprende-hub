@@ -95,6 +95,7 @@ administración.
 | `/admin/negocios` | Negocios esperando su primera revisión, los más antiguos primero | `ADMIN` |
 | `/admin/negocios/:id` | Vista previa del perfil, con sus fotos sin aprobar, y la decisión | `ADMIN` |
 | `/admin/cambios` | Ediciones de negocios ya publicados: lo de ahora al lado de lo propuesto | `ADMIN` |
+| `/admin/usuarios` | Las cuentas con su correo, rol y estado; suspender y reactivar | `ADMIN` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 

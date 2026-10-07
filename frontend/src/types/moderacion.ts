@@ -1,4 +1,5 @@
 import type { MiNegocio, PerfilNegocio } from './negocio';
+import type { Rol } from './sesion';
 
 /**
  * Un negocio en la cola de revisión.
@@ -37,4 +38,20 @@ export interface CambioPendiente {
   readonly categoriaPropuesta: string | null;
   readonly fotosPendientes: number;
   readonly fechaSolicitud: string;
+}
+
+/**
+ * Una cuenta en el listado del administrador (HU-038).
+ *
+ * Es la única vista con el correo de cualquiera: quien suspende tiene que saber
+ * a quién, y dos personas pueden llamarse igual. `activo` es `false` mientras
+ * está suspendida (B4).
+ */
+export interface CuentaUsuario {
+  readonly id: number;
+  readonly nombre: string;
+  readonly correo: string;
+  readonly rol: Rol;
+  readonly fechaRegistro: string;
+  readonly activo: boolean;
 }

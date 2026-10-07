@@ -229,6 +229,7 @@
   background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
 }
 
+.secundario:disabled,
 .aprobar:disabled,
 .rechazar:disabled {
   opacity: 0.6;
@@ -453,4 +454,35 @@
     grid-template-columns: 8rem 1fr 1fr;
     align-items: start;
   }
+}
+
+/* ── Insignias de estado ───────────────────────────────────────────────── */
+
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  padding: 0 var(--e-2);
+  border: 1px solid;
+  border-radius: var(--radio-full);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+/* Al 6 % y no al 8: con el 8 el verde se queda en 4,51:1, en el límite. */
+.insigniaExito {
+  border-color: var(--color-exito);
+  background: color-mix(in srgb, var(--color-exito) 6%, var(--color-lienzo));
+  color: var(--color-exito);
+}
+
+.insigniaError {
+  border-color: var(--color-error);
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  color: var(--color-error);
+}
+
+/* Un correo largo no tiene por dónde partirse y desbordaría en móvil. */
+.correo {
+  overflow-wrap: anywhere;
 }
