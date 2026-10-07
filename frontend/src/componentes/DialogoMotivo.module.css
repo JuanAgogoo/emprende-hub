@@ -1,0 +1,144 @@
+/* El centrado que el reset de `global.css` le quita al `<dialog>` modal: la
+   misma receta que `ConfirmarBorrado`, explicada allí. */
+.dialogo {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(32rem, calc(100vw - 2 * var(--e-4)));
+  height: fit-content;
+  max-height: calc(100dvh - 2 * var(--e-4));
+  overflow-y: auto;
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  color: var(--color-cuerpo);
+  box-shadow: var(--sombra-lg);
+}
+
+.dialogo::backdrop {
+  background: color-mix(in srgb, var(--color-tinta) 45%, transparent);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.titulo {
+  font-size: var(--texto-lg);
+  line-height: var(--alto-apretado);
+}
+
+.texto {
+  font-size: var(--texto-sm);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.campo textarea {
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  line-height: var(--alto-normal);
+  resize: vertical;
+}
+
+.campo:has(textarea:focus-visible) label {
+  color: var(--color-acento);
+}
+
+.campo:has(textarea[aria-invalid='true']) textarea {
+  border-color: var(--color-error);
+}
+
+.error,
+.contador {
+  font-size: var(--texto-xs);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.contador {
+  align-self: end;
+  color: var(--color-apagado);
+  font-variant-numeric: tabular-nums;
+}
+
+.fallo {
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-error) 6%, var(--color-lienzo));
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--e-3);
+}
+
+.cancelar,
+.confirmar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border-radius: var(--radio-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelar {
+  border: 1px solid var(--color-borde-control);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+/* Rechazar o borrar: la acción que no se deshace va en el color del peligro. */
+.confirmar {
+  border: 1px solid transparent;
+  background: var(--color-error);
+  color: var(--color-sobre-senal);
+}
+
+.cancelar:hover:not(:disabled) {
+  background: var(--color-lienzo-alt);
+}
+
+.confirmar:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 85%, black);
+}
+
+.cancelar:disabled,
+.confirmar:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+@media (max-width: 26rem) {
+  .acciones {
+    flex-direction: column-reverse;
+  }
+
+  .cancelar,
+  .confirmar {
+    width: 100%;
+  }
+}

@@ -138,3 +138,8 @@ export function nivelPrecio(nivel: 'BAJO' | 'MEDIO' | 'ALTO'): string {
       return '$$$';
   }
 }
+
+/** «Medellín» o «El Poblado, Medellín»: el barrio solo existe en Medellín (G3). */
+export function localidad(lugar: { readonly ciudad: string; readonly barrio: string | null }) {
+  return lugar.barrio === null ? lugar.ciudad : `${lugar.barrio}, ${lugar.ciudad}`;
+}

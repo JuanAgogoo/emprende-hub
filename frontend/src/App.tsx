@@ -1,7 +1,10 @@
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { Cabecera } from './componentes/Cabecera';
+import { RutaDeAdmin } from './componentes/RutaDeAdmin';
 import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
 import { Pie } from './componentes/Pie';
+import { AdminNegocios } from './paginas/AdminNegocios';
+import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
 import { Cursos } from './paginas/Cursos';
 import { Directorio } from './paginas/Directorio';
 import { InformacionPersonal } from './paginas/InformacionPersonal';
@@ -9,6 +12,7 @@ import { Inicio } from './paginas/Inicio';
 import { Login } from './paginas/Login';
 import { MiNegocio } from './paginas/MiNegocio';
 import { NoEncontrada } from './paginas/NoEncontrada';
+import { PanelAdmin } from './paginas/PanelAdmin';
 import { PerfilNegocio } from './paginas/PerfilNegocio';
 import { RecuperarContrasena } from './paginas/RecuperarContrasena';
 import { RegistroCliente } from './paginas/RegistroCliente';
@@ -53,6 +57,19 @@ export function App() {
             </RutaDeEmprendedor>
           }
         />
+        <Route
+          path="/admin"
+          element={
+            <RutaDeAdmin>
+              <PanelAdmin />
+            </RutaDeAdmin>
+          }
+        >
+          {/* `/admin` a secas abre la primera cola, la de negocios. */}
+          <Route index element={<Navigate to="/admin/negocios" replace />} />
+          <Route path="negocios" element={<AdminNegocios />} />
+          <Route path="negocios/:id" element={<AdminRevisarNegocio />} />
+        </Route>
         <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
         <Route path="/informacion-personal" element={<InformacionPersonal />} />
         <Route path="*" element={<NoEncontrada />} />

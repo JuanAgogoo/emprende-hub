@@ -76,7 +76,8 @@ Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 ## Las pantallas
 
 Las rutas, todas declaradas en `src/App.tsx`: las nueve de la fase 1, las dos
-que añade la recuperación de contraseña y el catálogo de cursos.
+que añade la recuperación de contraseña, el catálogo de cursos y el panel de
+administración.
 
 | Ruta | Pantalla | Quién entra |
 |---|---|---|
@@ -90,6 +91,9 @@ que añade la recuperación de contraseña y el catálogo de cursos.
 | `/recuperar` | Pide el correo y manda el enlace | Cualquiera |
 | `/recuperar/:token` | Elegir la contraseña nueva, desde el enlace del correo | Quien tenga el enlace |
 | `/mi-negocio` | El negocio propio: sus cifras, sus avisos y su buzón | `EMPRENDEDOR` |
+| `/admin` | El panel: abre la primera cola, la de negocios | `ADMIN` |
+| `/admin/negocios` | Negocios esperando su primera revisión, los más antiguos primero | `ADMIN` |
+| `/admin/negocios/:id` | Vista previa del perfil, con sus fotos sin aprobar, y la decisión | `ADMIN` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 
@@ -109,12 +113,18 @@ pedir nada—, los
 poder responderle. La plataforma no responde desde dentro (D2), así que cada
 consulta lleva su enlace de correo.
 
-Lo que **no** entra todavía, para que nadie lo busque: el panel de
-administración y denunciar una opinión, que existe en el backend pero se queda
-fuera hasta que haya quien resuelva las denuncias.
+El **panel de administración** es una ruta por cola, con pestañas encima. Quien
+entra como administrador aterriza en él y la cabecera le enseña el enlace
+«Admin». Aprobar y rechazar solo se puede desde la vista previa, no desde la
+lista: así no se publica nada sin haberlo mirado. Rechazar pide el motivo en un
+diálogo, y el dueño lo recibe en su panel y por correo (I1-ter).
 
-> `/mi-negocio` comprueba el rol **por comodidad de la interfaz, no por
-> seguridad**. Quien mande la petición a mano se topa igual con el backend, que
+Lo que **no** entra todavía, para que nadie lo busque: denunciar una opinión, que
+existe en el backend pero se queda fuera hasta que haya quien resuelva las
+denuncias.
+
+> `/mi-negocio` y `/admin` comprueban el rol **por comodidad de la interfaz, no
+> por seguridad**. Quien mande la petición a mano se topa igual con el backend, que
 > es donde se comprueba de verdad.
 
 ### El asistente de registro

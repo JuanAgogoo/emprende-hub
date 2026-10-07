@@ -137,6 +137,8 @@ export interface MiNegocio {
   readonly numeroOpiniones: number;
   readonly instagram: string | null;
   readonly linkedin: string | null;
+  /** Cuándo se registró: la cola del administrador ordena y cuenta la espera por ella. */
+  readonly fechaCreacion: string;
   /** La edición esperando revisión, o `null` si no hay ninguna en cola. */
   readonly cambioPendiente: CambioPropuesto | null;
 }

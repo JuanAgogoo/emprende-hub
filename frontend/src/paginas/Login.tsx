@@ -72,9 +72,9 @@ function destino(rol: Rol): string {
     // ya ha visto para llegar hasta aquí.
     case 'CLIENTE':
       return '/directorio';
-    // El panel de administración no es de esta fase.
+    // Directo al panel (HU-035): el administrador no viene a ver el directorio.
     case 'ADMIN':
-      return '/';
+      return '/admin';
   }
 }
 
