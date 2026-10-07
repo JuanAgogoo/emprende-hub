@@ -109,14 +109,29 @@ ya estaba clonado de antes, `git rm -r --cached . && git checkout .` lo recoloca
 ficheros del anfitrión. Y `./scripts/cifras.sh` pide bash, que viene con Git
 Bash; no es parte de levantar el proyecto.
 
-`MODERACION_AUTOMATICA` está puesta a `true` en `docker-compose.yml` **mientras se
-construye**, para no tener que aprobar cada negocio a mano: con ella puesta no
-hay nada que moderar, porque el negocio nace publicado, sus fotos aprobadas y lo
-que el dueño edita se publica al momento. Se quita esa línea para volver a la
-moderación de verdad, que es lo que hay que enseñar el día de la sustentación: el
+### Dos cosas que muerden al levantarlo
+
+- **Los `container_name` son fijos**, así que el proyecto **no se puede levantar
+  dos veces en la misma máquina**: el segundo falla con «container name already
+  in use» y el mensaje no dice que ese sea el problema. Si hay otro checkout del
+  repositorio, solo uno puede estar arriba.
+- **Si un puerto está ocupado, el servicio no arranca** y el resto queda a
+  medias. Los cinco son variables (`DB_PORT`, `API_PORT`, `WEB_PORT`,
+  `MAILPIT_PORT`, `SMTP_PORT`): se cambian en un `.env` junto a
+  `docker-compose.yml`. Y si tras el choque el contenedor sigue sin ir, quedó
+  creado sin red: hace falta `docker compose up -d --force-recreate <servicio>`,
+  porque `up -d` a secas solo lo arranca.
+
+`MODERACION_AUTOMATICA` **ya no está puesta**: el proyecto modera de verdad. El
 negocio nace `PENDIENTE` (B6), el administrador lo publica, y lo que su dueño
 edite después espera en la cola de cambios (B2-bis) mientras el público sigue
 viendo la versión aprobada.
+
+Durante el desarrollo estuvo a `true` en `docker-compose.yml`, para no aprobar
+cada negocio a mano. Si vuelve a hacer falta, se añade esa variable al servicio
+`backend`: con ella el negocio nace publicado, sus fotos aprobadas y lo que el
+dueño edita se publica al momento. **Pero entonces no hay nada que moderar**, y
+el recorrido de abajo pierde su paso más vistoso.
 
 Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
 mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
@@ -143,10 +158,13 @@ Las demás se crean al registrarse. La carpeta **1 · Acceso y datos de partida*
 de la colección de Postman las crea en orden —una clienta, una emprendedora y su
 negocio— y guarda cada token en su variable.
 
-## El recorrido de la sustentación
+## El recorrido de una demostración
 
-El guion de punta a punta, con las dos mitades arriba. Son quince minutos y se
-puede ensayar entero antes del día.
+El guion de punta a punta, con las dos mitades arriba. Son quince minutos.
+
+> Es el que se usó en la sustentación del **29 de septiembre de 2026**, y sirve
+> igual para enseñar el proyecto a cualquiera: lo único atado a aquel día era la
+> fecha.
 
 ### Antes: preparar la vitrina
 
@@ -166,7 +184,7 @@ entre todos, porque es lo que la interfaz enseña:
 | **Uno con 5 opiniones o más** | Sin eso no hay destacados: es la regla C7 |
 | Uno sin ninguna opinión | Se ve «Sin opiniones» y no «0,0», que no es lo mismo (C5) |
 | Uno sin fotos | Sale el marcador con la inicial, no una imagen rota |
-| Uno dejado en `PENDIENTE` | Hay algo que aprobar en directo el día de la sustentación |
+| Uno dejado en `PENDIENTE` | Hay algo que aprobar en directo durante el recorrido |
 
 La forma rápida de crearlos es la carpeta **1 · Acceso y datos de partida** de la
 colección de Postman, y después repetir su petición de alta cambiando los datos.
@@ -191,7 +209,7 @@ docker compose up -d
 docker compose logs -f backend    # esperar a «Started EmprendeHubApplication»
 ```
 
-> Hacerlo **antes** de que empiece la sustentación, no delante de nadie: aunque
+> Hacerlo **antes** de empezar, no delante de nadie: aunque
 > las imágenes ya estén construidas, el backend tarda unos segundos en responder
 > y la portada enseña su mensaje de error mientras tanto.
 
@@ -325,6 +343,25 @@ descargan de `/fotos/{archivo}`, sin token.
 
 **El contrato completo, con los 65 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
+
+## Ver las peticiones según llegan
+
+`docker compose logs -f backend` enseña el arranque y los errores, pero **no las
+peticiones**: Spring Boot no las registra por defecto, y eso despista. Para que
+salgan, añade al servicio `backend`:
+
+```yaml
+LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: DEBUG
+```
+
+Y filtra, porque son unas seis líneas por petición:
+
+```bash
+docker compose logs -f backend | grep DispatcherServlet
+```
+
+Quedan dos por petición: `GET "/api/v1/directorio"` y `Completed 200 OK`. En
+PowerShell el filtro es `| Select-String DispatcherServlet`.
 
 ## Swagger
 

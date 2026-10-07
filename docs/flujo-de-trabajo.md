@@ -81,6 +81,32 @@ No hace falta terminal ni IDE. Desde github.com, con la sesión iniciada:
 
 El commit queda a nombre de quien tiene la sesión abierta.
 
+## El backend está entregado: los cambios son excepciones
+
+El backend se entregó y se sustentó el **25 de agosto de 2026**. Desde entonces
+no está congelado del todo, pero tampoco abierto: **cada cambio se acuerda antes
+de escribirlo**, uno a uno, y queda anotado. No se dan por supuestos ni se
+cuelan dentro de un PR de frontend.
+
+Las ocho acordadas hasta hoy:
+
+| # | Qué | Por qué no se pudo evitar |
+|---|---|---|
+| 1 | Alta de emprendedor con su negocio en una petición | Encadenar dos dejaba a medias a quien fallara en la segunda |
+| 2 | Foto obligatoria por producto (F4) | Un escaparate con huecos no es un escaparate |
+| 3 | Reordenar la galería | Elegir portada es reordenar: la primera manda (B9) |
+| 4 | Interruptor `MODERACION_AUTOMATICA` | Aprobar a mano cada negocio al desarrollar |
+| 5 | Recuperación de contraseña | Reabre I1, que había cerrado el dominio sin correos |
+| 6 | Edición del negocio: categoría editable, el interruptor gobernando también la edición, y el cambio pendiente visible para su dueño | El dueño no podía ver su propia propuesta en cola y creía que se perdía |
+| 7 | `PATCH /negocios/mio/productos/{id}/foto` | El `PUT` del contrato no cambia la imagen |
+| 8 | Cierre de sesión al caducar el token | Un token caducado dejaba la interfaz en un estado imposible |
+
+**La prueba de si algo es una excepción legítima** es la misma regla que gobierna
+el resto: ¿lo pide un requisito, o es una mejora que nadie pidió? Lo segundo no
+entra. Y si entra, se documenta en el mismo PR —`docs/api.md` si toca el
+contrato, `docs/decisiones-dominio.md` si toca una regla— porque un cambio de
+backend sin su documento es el que nadie encuentra seis semanas después.
+
 ## Release
 
 `semantic-release` sobre `main`, sin changelog. Configuración (`.releaserc.json`):
