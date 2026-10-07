@@ -96,6 +96,9 @@ administración.
 | `/admin/negocios/:id` | Vista previa del perfil, con sus fotos sin aprobar, y la decisión | `ADMIN` |
 | `/admin/cambios` | Ediciones de negocios ya publicados: lo de ahora al lado de lo propuesto | `ADMIN` |
 | `/admin/usuarios` | Las cuentas con su correo, rol y estado; suspender y reactivar | `ADMIN` |
+| `/admin/cursos` | Los cursos, borradores incluidos: publicar, retirar y eliminar | `ADMIN` |
+| `/admin/cursos/nuevo` | Alta de un curso, como borrador o ya publicado | `ADMIN` |
+| `/admin/cursos/:id` | Editar un curso, también su estado | `ADMIN` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import com.emprendehub.dto.ActualizarCursoRequest;
@@ -16,6 +18,7 @@ import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.Curso;
+import com.emprendehub.model.TipoEventoModeracion;
 import com.emprendehub.model.EstadoCurso;
 import com.emprendehub.model.NivelCurso;
 import com.emprendehub.repository.CursoRepository;
@@ -38,6 +41,10 @@ class CursoServiceTest {
 
     @Mock
     private CursoRepository repositorio;
+
+    /** Publicar deja constancia en el log, que escribe la moderación (L). */
+    @Mock
+    private ModeracionService moderacionService;
 
     @InjectMocks
     private CursoService service;
@@ -258,7 +265,9 @@ class CursoServiceTest {
         when(repositorio.findById(1L)).thenReturn(Optional.of(crearCursoGratuitoDePrueba()));
         when(repositorio.save(any(Curso.class))).thenAnswer(i -> i.getArgument(0));
 
-        assertEquals("PUBLICADO", service.publicar(1L).estado());
+        assertEquals("PUBLICADO", service.publicar(1L, null).estado());
+        verify(moderacionService).registrar(eq(TipoEventoModeracion.CURSO_PUBLICADO),
+                eq("Marketing Digital Básico"), isNull(), isNull());
     }
 
     @Test
@@ -268,7 +277,7 @@ class CursoServiceTest {
         curso.setEstado(EstadoCurso.PUBLICADO);
         when(repositorio.findById(1L)).thenReturn(Optional.of(curso));
 
-        assertThrows(ReglaDeNegocioException.class, () -> service.publicar(1L));
+        assertThrows(ReglaDeNegocioException.class, () -> service.publicar(1L, null));
         verify(repositorio, never()).save(any(Curso.class));
     }
 

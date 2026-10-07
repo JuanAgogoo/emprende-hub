@@ -755,6 +755,11 @@ Regla que cruza dos campos y vive en el servicio: **un curso gratuito no puede
 llevar precio y uno de pago está obligado a llevarlo.** Publicar dos veces
 devuelve `400`.
 
+Publicar queda en el **log de moderación** como `CURSO_PUBLICADO` (sección L).
+El estado no viaja en el cuerpo del `POST` ni del `PUT`: cambia solo por sus dos
+rutas, así que guardar un curso ya publicado es una petición y crearlo
+publicado son dos.
+
 ## Moderación · `/admin/moderacion`
 
 Solo **ADMIN**.

@@ -35,3 +35,13 @@ export interface FiltrosCursos {
   readonly page?: number;
   readonly size?: number;
 }
+
+/** Los dos estados de un curso (E4). Solo los publicados salen en el catálogo. */
+export type EstadoCurso = Curso['estado'];
+
+/**
+ * Lo que el administrador escribe al crear o editar un curso: el curso sin su
+ * identificador ni su estado, que no se envían en el cuerpo. El estado cambia
+ * con sus propias rutas (`/publicar` y `/borrador`).
+ */
+export type DatosCurso = Omit<Curso, 'id' | 'estado'>;
