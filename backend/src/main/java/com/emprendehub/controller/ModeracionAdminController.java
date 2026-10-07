@@ -6,6 +6,7 @@ import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
+import com.emprendehub.dto.UsuarioResponse;
 import com.emprendehub.model.DecisionModeracion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ModeracionService;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -123,6 +125,14 @@ public class ModeracionAdminController {
                                                    @AuthenticationPrincipal Usuario admin) {
         moderacionService.desestimarDenuncia(id, admin);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Las cuentas, las más recientes primero (HU-038). */
+    @GetMapping("/usuarios")
+    public Page<UsuarioResponse> usuarios(
+            @PageableDefault(size = 20, sort = "fechaRegistro", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return moderacionService.listarUsuarios(pageable);
     }
 
     @PatchMapping("/usuarios/{id}/suspender")

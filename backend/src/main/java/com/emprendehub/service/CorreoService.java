@@ -107,6 +107,37 @@ public class CorreoService {
     }
 
     /**
+     * Avisa de que la cuenta está suspendida (B4).
+     *
+     * <p>De todos los avisos es el que más falta hace por correo: una cuenta
+     * suspendida no puede entrar, así que no vería nada en su panel.
+     */
+    public void avisarCuentaSuspendida(Usuario usuario) {
+        enviarAviso(usuario, "Tu cuenta de EmprendeHub está suspendida", """
+                Hola, %s:
+
+                La administración de EmprendeHub suspendió tu cuenta. Mientras
+                siga así no podrás entrar, y si tienes un negocio no se verá en
+                el directorio. Las opiniones que escribiste se mantienen.
+
+                Si crees que es un error, ponte en contacto con la administración
+                de la plataforma.
+                """.formatted(usuario.getNombre()));
+    }
+
+    /** Avisa de que la cuenta vuelve a funcionar. */
+    public void avisarCuentaReactivada(Usuario usuario) {
+        enviarAviso(usuario, "Tu cuenta de EmprendeHub está activa otra vez", """
+                Hola, %s:
+
+                Tu cuenta vuelve a estar activa. Ya puedes entrar con tu correo y
+                tu contraseña de siempre:
+
+                %s/entrar
+                """.formatted(usuario.getNombre(), urlBase));
+    }
+
+    /**
      * Manda un aviso sin que su fallo tumbe la decisión que lo provoca.
      *
      * <p>El aviso informa de algo que ya pasó: si el servidor de correo no

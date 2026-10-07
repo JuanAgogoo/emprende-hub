@@ -771,6 +771,7 @@ Solo **ADMIN**.
 | `GET` | `/denuncias` | Cola de opiniones denunciadas, las más antiguas primero |
 | `PATCH` | `/denuncias/{id}/eliminar-opinion` | Borra la opinión. **Motivo obligatorio** (`204`) |
 | `PATCH` | `/denuncias/{id}/desestimar` | La deja publicada (`204`) |
+| `GET` | `/usuarios` | Las cuentas, las más recientes primero |
 | `PATCH` | `/usuarios/{id}/suspender` | Suspende la cuenta (`204`) |
 | `PATCH` | `/usuarios/{id}/reactivar` | La reactiva (`204`) |
 | `GET` | `/log` | Historial, filtrable por fechas |
@@ -784,8 +785,15 @@ escaparate— para cualquier estado, y con **todas** las fotos, cada una con su
 negocio pendiente responde `404` (B6), así que sin esta ruta se aprobaría a
 ciegas. `fechaAprobacion` llega nula si nunca se aprobó.
 
-Aprobar y rechazar **avisan al dueño por correo** (I1-ter), además del aviso del
-panel. Si el servidor de correo no responde, la decisión se mantiene y el fallo
+`GET /usuarios` trae de cada cuenta el nombre, **el correo**, el rol, la fecha
+de registro y `activo`, que es `false` mientras está suspendida. Es la única
+respuesta de la API con el correo de cualquiera, y por eso solo vive aquí:
+quien suspende tiene que saber a quién, y dos personas pueden llamarse igual. El
+administrador sale en la lista, pero no puede suspenderse a sí mismo (`400`).
+
+Aprobar y rechazar un negocio, y suspender y reactivar una cuenta, **avisan por
+correo** (I1-ter); los dos primeros, además del aviso del panel. Para una cuenta
+suspendida el correo es el único aviso posible: no puede entrar. Si el servidor de correo no responde, la decisión se mantiene y el fallo
 queda en el registro del backend: deshacer la decisión porque no salió un correo
 sería peor que el correo perdido. El motivo del rechazo sigue viviendo en
 `GET /negocios/mio`, que es donde el dueño corrige y reenvía.
@@ -916,7 +924,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**66 endpoints** en 77 peticiones, agrupadas por quién las usa. Su primera
+**67 endpoints** en 78 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,

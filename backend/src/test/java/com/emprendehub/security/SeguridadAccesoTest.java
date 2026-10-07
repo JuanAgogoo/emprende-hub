@@ -137,6 +137,14 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("El listado de cuentas, con sus correos, es solo del administrador")
+    void usuarios_conTokenDeCliente_devuelve403() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/usuarios")
+                        .header("Authorization", "Bearer " + tokenCliente))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("La vista previa de un negocio sin publicar es solo del administrador")
     void vistaPrevia_conTokenDeCliente_devuelve403() throws Exception {
         // Es la única ruta que enseña fotos todavía sin revisar: un cliente que

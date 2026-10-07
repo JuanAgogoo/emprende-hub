@@ -206,13 +206,17 @@ ninguna otra entidad del sistema.
     respuesta dejaría cambiar la contraseña de cualquiera sabiendo su
     dirección— y **pedirlo responde igual exista la cuenta o no**, para que el
     formulario no sirva de lista de qué correos están registrados.
-- **I1-ter** **Las decisiones del administrador sobre un negocio también avisan
-  por correo.** El backlog del panel de administración lo pide en su criterio
-  de aceptación (HU-037), y la infraestructura de I1-bis ya estaba: es un
-  método más en `CorreoService`, no una pieza nueva. Lo que cambia y lo que no:
+- **I1-ter** **Las decisiones del administrador sobre un negocio o una cuenta
+  también avisan por correo.** El backlog del panel de administración lo pide
+  en dos criterios de aceptación (HU-037 y HU-038), y la infraestructura de
+  I1-bis ya estaba: son métodos nuevos en `CorreoService`, no una pieza nueva.
+  Lo que cambia y lo que no:
   - **Aprobar y rechazar un negocio mandan un correo a su dueño**, de texto
     plano, con el enlace a su perfil publicado o, al rechazar, con el motivo y
     el enlace a su panel.
+  - **Suspender y reactivar una cuenta mandan un correo a esa cuenta.** Es el
+    aviso que más falta hacía: una cuenta suspendida no puede entrar (B4), así
+    que el panel no le serviría de nada.
   - **El panel sigue siendo donde se actúa.** El aviso de H2 se crea igual, y el
     motivo del rechazo sigue guardado en el negocio: es lo que el dueño tiene
     delante cuando corrige y reenvía, haya leído el correo o no.

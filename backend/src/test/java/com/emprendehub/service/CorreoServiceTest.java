@@ -136,4 +136,35 @@ class CorreoServiceTest {
         //assert
         assertDoesNotThrow(() -> service.avisarNegocioAprobado(negocioDe(duena)));
     }
+
+    @Test
+    @DisplayName("avisarCuentaSuspendida: va a la cuenta y explica qué deja de funcionar")
+    void avisarCuentaSuspendida_componeElMensaje() {
+        //arrange
+        Usuario maria = new Usuario("María García", "maria@gmail.com", "hash", Rol.CLIENTE);
+
+        //act
+        service.avisarCuentaSuspendida(maria);
+
+        //assert
+        SimpleMailMessage mensaje = mensajeEnviado();
+        assertArrayEquals(new String[] {"maria@gmail.com"}, mensaje.getTo());
+        assertNotNull(mensaje.getText());
+        assertTrue(mensaje.getText().contains("no podrás entrar"));
+    }
+
+    @Test
+    @DisplayName("avisarCuentaReactivada: lleva el enlace para volver a entrar")
+    void avisarCuentaReactivada_llevaElEnlace() {
+        //arrange
+        Usuario maria = new Usuario("María García", "maria@gmail.com", "hash", Rol.CLIENTE);
+
+        //act
+        service.avisarCuentaReactivada(maria);
+
+        //assert
+        SimpleMailMessage mensaje = mensajeEnviado();
+        assertNotNull(mensaje.getText());
+        assertTrue(mensaje.getText().contains("http://localhost:5173/entrar"));
+    }
 }

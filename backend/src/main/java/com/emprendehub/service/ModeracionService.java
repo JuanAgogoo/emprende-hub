@@ -5,6 +5,7 @@ import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
+import com.emprendehub.dto.UsuarioResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CambioPendiente;
@@ -292,6 +293,18 @@ public class ModeracionService {
     // ---------- Cuentas ----------
 
     /**
+     * Todas las cuentas, en el orden que pida quien llama (HU-038).
+     *
+     * <p>El administrador sale también: es una cuenta registrada más, aunque
+     * no se pueda suspender a sí mismo.
+     */
+    public Page<UsuarioResponse> listarUsuarios(Pageable pageable) {
+        return usuarioRepository.findAll(pageable)
+                .map(u -> new UsuarioResponse(u.getId(), u.getNombre(), u.getCorreo(),
+                        u.getRol().name(), u.getFechaRegistro(), u.isActivo()));
+    }
+
+    /**
      * Suspende una cuenta (B4).
      *
      * <p>Su negocio deja de verse en el directorio porque
@@ -310,6 +323,8 @@ public class ModeracionService {
         }
         usuario.setActivo(false);
         usuarioRepository.save(usuario);
+        // Es el único aviso que le puede llegar: suspendido, no entra al panel.
+        correoService.avisarCuentaSuspendida(usuario);
         registrar(TipoEventoModeracion.CUENTA_SUSPENDIDA, usuario.getCorreo(), null, admin);
     }
 
@@ -321,6 +336,7 @@ public class ModeracionService {
         }
         usuario.setActivo(true);
         usuarioRepository.save(usuario);
+        correoService.avisarCuentaReactivada(usuario);
         registrar(TipoEventoModeracion.CUENTA_REACTIVADA, usuario.getCorreo(), null, admin);
     }
 
