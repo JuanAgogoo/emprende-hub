@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ErrorApi } from '../api/cliente';
 import { obtenerMiNegocio } from '../api/negocios';
@@ -10,6 +10,7 @@ import {
   publicarOpinion,
 } from '../api/opiniones';
 import { useSesion } from '../estado/SesionContext';
+import { DialogoDenuncia } from './DialogoDenuncia';
 import { EsqueletoLista } from './Esqueleto';
 import { Estrellas } from './Estrellas';
 import { FormularioOpinion } from './FormularioOpinion';
@@ -105,6 +106,11 @@ export function Opiniones({ negocioId, alCambiarOpiniones }: Props) {
   const [modo, setModo] = useState<ModoPropia>('LECTURA');
   const [enviando, setEnviando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
+  const [porDenunciar, setPorDenunciar] = useState<Opinion | null>(null);
+  // Las que esta persona ya denunció en esta visita: el botón cambia por un
+  // «Denunciada» para que no lo vuelva a pulsar. Tras recargar, el backend
+  // responde 400 a la segunda, y el diálogo lo dice.
+  const [denunciadas, setDenunciadas] = useState<ReadonlySet<number>>(new Set());
 
   useEffect(() => {
     let vigente = true;
@@ -244,9 +250,27 @@ export function Opiniones({ negocioId, alCambiarOpiniones }: Props) {
 
       <Listado
         carga={carga}
+        // Se denuncia con sesión y nunca la propia (C3): para la propia está borrarla.
+        puedeDenunciar={(opinion) =>
+          sesion !== null &&
+          !(participacion.estado === 'YA_OPINO' && participacion.mia.id === opinion.id)
+        }
+        denunciadas={denunciadas}
+        alDenunciar={setPorDenunciar}
         alPaginar={setPagina}
         alReintentar={() => setIntento((valor) => valor + 1)}
       />
+
+      {porDenunciar !== null && (
+        <DialogoDenuncia
+          opinion={porDenunciar}
+          alDenunciar={() => {
+            setDenunciadas((previas) => new Set(previas).add(porDenunciar.id));
+            setPorDenunciar(null);
+          }}
+          alCancelar={() => setPorDenunciar(null)}
+        />
+      )}
     </section>
   );
 }
@@ -435,11 +459,21 @@ function TuOpinion({
 
 interface PropsListado {
   readonly carga: EstadoCarga<Pagina<Opinion>>;
+  readonly puedeDenunciar: (opinion: Opinion) => boolean;
+  readonly denunciadas: ReadonlySet<number>;
+  readonly alDenunciar: (opinion: Opinion) => void;
   readonly alPaginar: (pagina: number) => void;
   readonly alReintentar: () => void;
 }
 
-function Listado({ carga, alPaginar, alReintentar }: PropsListado) {
+function Listado({
+  carga,
+  puedeDenunciar,
+  denunciadas,
+  alDenunciar,
+  alPaginar,
+  alReintentar,
+}: PropsListado) {
   switch (carga.estado) {
     case 'CARGANDO':
       return (
@@ -473,7 +507,24 @@ function Listado({ carga, alPaginar, alReintentar }: PropsListado) {
         <>
           <ul className={estilos.lista}>
             {pagina.content.map((opinion) => (
-              <OpinionPublicada key={opinion.id} opinion={opinion} />
+              <OpinionPublicada key={opinion.id} opinion={opinion}>
+                {denunciadas.has(opinion.id) ? (
+                  <p className={estilos.denunciada} role="status">
+                    Denunciada. La administración la revisará.
+                  </p>
+                ) : (
+                  puedeDenunciar(opinion) && (
+                    <button
+                      type="button"
+                      className={estilos.denunciar}
+                      onClick={() => alDenunciar(opinion)}
+                      aria-label={`Denunciar la opinión de ${opinion.autor}`}
+                    >
+                      Denunciar
+                    </button>
+                  )
+                )}
+              </OpinionPublicada>
             ))}
           </ul>
           <Paginacion
@@ -490,7 +541,13 @@ function Listado({ carga, alPaginar, alReintentar }: PropsListado) {
   }
 }
 
-function OpinionPublicada({ opinion }: { readonly opinion: Opinion }) {
+interface PropsOpinion {
+  readonly opinion: Opinion;
+  /** Lo que va debajo del texto: hoy, el botón de denunciar. */
+  readonly children?: ReactNode;
+}
+
+function OpinionPublicada({ opinion, children }: PropsOpinion) {
   return (
     <li className={estilos.opinion}>
       <div className={estilos.cabecera}>
@@ -510,6 +567,8 @@ function OpinionPublicada({ opinion }: { readonly opinion: Opinion }) {
       {opinion.comentario !== null && opinion.comentario !== '' && (
         <p className={estilos.comentario}>{opinion.comentario}</p>
       )}
+
+      {children}
     </li>
   );
 }

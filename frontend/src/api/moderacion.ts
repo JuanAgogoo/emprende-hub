@@ -5,6 +5,7 @@ import type {
   NegocioEnRevision,
   VistaPreviaNegocio,
 } from '../types/moderacion';
+import type { Denuncia } from '../types/denuncia';
 import type { Pagina } from '../types/pagina';
 
 /**
@@ -74,4 +75,22 @@ export function suspenderUsuario(id: number): Promise<void> {
 
 export function reactivarUsuario(id: number): Promise<void> {
   return parchear<void>(`${BASE}/usuarios/${id}/reactivar`, undefined, true);
+}
+
+/** Las denuncias sin resolver, las más antiguas primero (HU-040). */
+export function listarDenuncias(pagina: number): Promise<Pagina<Denuncia>> {
+  return obtener<Pagina<Denuncia>>(`${BASE}/denuncias?page=${pagina}`, true);
+}
+
+/**
+ * Da la razón a la denuncia y borra la opinión. El motivo es obligatorio y va
+ * al log; el promedio del negocio se recalcula. Responde `204`.
+ */
+export function eliminarOpinionDenunciada(denunciaId: number, motivo: string): Promise<void> {
+  return parchear<void>(`${BASE}/denuncias/${denunciaId}/eliminar-opinion`, { motivo }, true);
+}
+
+/** La opinión se queda publicada, y queda constancia de que se miró. */
+export function desestimarDenuncia(denunciaId: number): Promise<void> {
+  return parchear<void>(`${BASE}/denuncias/${denunciaId}/desestimar`, undefined, true);
 }

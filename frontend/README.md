@@ -95,6 +95,7 @@ administración.
 | `/admin/negocios` | Negocios esperando su primera revisión, los más antiguos primero | `ADMIN` |
 | `/admin/negocios/:id` | Vista previa del perfil, con sus fotos sin aprobar, y la decisión | `ADMIN` |
 | `/admin/cambios` | Ediciones de negocios ya publicados: lo de ahora al lado de lo propuesto | `ADMIN` |
+| `/admin/denuncias` | Opiniones denunciadas, con el texto entero: borrarla o desestimar | `ADMIN` |
 | `/admin/usuarios` | Las cuentas con su correo, rol y estado; suspender y reactivar | `ADMIN` |
 | `/admin/cursos` | Los cursos, borradores incluidos: publicar, retirar y eliminar | `ADMIN` |
 | `/admin/cursos/nuevo` | Alta de un curso, como borrador o ya publicado | `ADMIN` |
@@ -106,7 +107,9 @@ El perfil público lleva además dos cosas que no son rutas aparte, porque viven
 dentro de `/negocios/:id`:
 
 - **Las opiniones**: se leen sin sesión, y con sesión se califica con estrellas,
-  se escribe la reseña y se edita o se borra la propia.
+  se escribe la reseña y se edita o se borra la propia. Las ajenas se pueden
+  **denunciar** con un motivo de la lista cerrada (C6); siguen publicadas hasta
+  que el administrador decide.
 - **Escribirle al negocio**: con sesión, asunto y mensaje van a su buzón. El
   nombre y el correo los pone la cuenta, no un campo del formulario.
 
@@ -123,10 +126,6 @@ entra como administrador aterriza en él y la cabecera le enseña el enlace
 «Admin». Aprobar y rechazar solo se puede desde la vista previa, no desde la
 lista: así no se publica nada sin haberlo mirado. Rechazar pide el motivo en un
 diálogo, y el dueño lo recibe en su panel y por correo (I1-ter).
-
-Lo que **no** entra todavía, para que nadie lo busque: denunciar una opinión, que
-existe en el backend pero se queda fuera hasta que haya quien resuelva las
-denuncias.
 
 > `/mi-negocio` y `/admin` comprueban el rol **por comodidad de la interfaz, no
 > por seguridad**. Quien mande la petición a mano se topa igual con el backend, que
