@@ -1,6 +1,7 @@
 import { obtener, parchear } from './cliente';
 import type {
   CambioPendiente,
+  CuentaUsuario,
   NegocioEnRevision,
   VistaPreviaNegocio,
 } from '../types/moderacion';
@@ -56,4 +57,21 @@ export function rechazarCambio(negocioId: number, motivo: string): Promise<Negoc
     { motivo },
     true,
   );
+}
+
+/** Todas las cuentas, las más recientes primero. */
+export function listarUsuarios(pagina: number): Promise<Pagina<CuentaUsuario>> {
+  return obtener<Pagina<CuentaUsuario>>(`${BASE}/usuarios?page=${pagina}`, true);
+}
+
+/**
+ * Suspende la cuenta (B4): no podrá entrar y su negocio sale del directorio.
+ * Responde `204`, sin cuerpo.
+ */
+export function suspenderUsuario(id: number): Promise<void> {
+  return parchear<void>(`${BASE}/usuarios/${id}/suspender`, undefined, true);
+}
+
+export function reactivarUsuario(id: number): Promise<void> {
+  return parchear<void>(`${BASE}/usuarios/${id}/reactivar`, undefined, true);
 }
