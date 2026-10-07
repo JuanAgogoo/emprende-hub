@@ -5,6 +5,7 @@ import com.emprendehub.dto.CrearCursoRequest;
 import com.emprendehub.dto.CursoResponse;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.NivelCurso;
+import com.emprendehub.model.Usuario;
 import com.emprendehub.service.CursoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -69,8 +71,9 @@ public class CursoAdminController {
     }
 
     @PatchMapping("/{id}/publicar")
-    public CursoResponse publicar(@PathVariable Long id) {
-        return cursoService.publicar(id);
+    public CursoResponse publicar(@PathVariable Long id,
+                                  @AuthenticationPrincipal Usuario admin) {
+        return cursoService.publicar(id, admin);
     }
 
     @PatchMapping("/{id}/borrador")

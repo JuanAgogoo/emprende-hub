@@ -4,6 +4,8 @@ import com.emprendehub.dto.ActualizarCursoRequest;
 import com.emprendehub.dto.CrearCursoRequest;
 import com.emprendehub.dto.CursoResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
+import com.emprendehub.model.TipoEventoModeracion;
+import com.emprendehub.model.Usuario;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CategoriaCurso;
 import com.emprendehub.model.Curso;
@@ -32,9 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CursoService {
 
     private final CursoRepository repositorio;
+    private final ModeracionService moderacionService;
 
-    public CursoService(CursoRepository repositorio) {
+    public CursoService(CursoRepository repositorio, ModeracionService moderacionService) {
         this.repositorio = repositorio;
+        this.moderacionService = moderacionService;
     }
 
     // ---------- Catálogo público ----------
@@ -98,15 +102,22 @@ public class CursoService {
         return aRespuesta(repositorio.save(curso));
     }
 
-    /** Publicar es un acto deliberado: un curso nace siempre en borrador. */
+    /**
+     * Publicar es un acto deliberado: un curso nace siempre en borrador.
+     *
+     * <p>Queda en el log de moderación (sección L), que es quien escribe ahí.
+     */
     @Transactional
-    public CursoResponse publicar(Long id) {
+    public CursoResponse publicar(Long id, Usuario admin) {
         Curso curso = buscarEntidad(id);
         if (curso.estaPublicado()) {
             throw new ReglaDeNegocioException("El curso ya estaba publicado");
         }
         curso.setEstado(EstadoCurso.PUBLICADO);
-        return aRespuesta(repositorio.save(curso));
+        CursoResponse publicado = aRespuesta(repositorio.save(curso));
+        moderacionService.registrar(TipoEventoModeracion.CURSO_PUBLICADO, curso.getTitulo(),
+                null, admin);
+        return publicado;
     }
 
     /** Retirar del catálogo sin borrar: vuelve a borrador. */

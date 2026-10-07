@@ -113,7 +113,7 @@ class CursoAdminControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("PATCH /{id}/publicar devuelve 200 con el curso publicado")
     void publicar_devuelve200() throws Exception {
-        when(cursoService.publicar(1L)).thenReturn(new CursoResponse(1L, "Curso", "D", "4 horas",
+        when(cursoService.publicar(eq(1L), any())).thenReturn(new CursoResponse(1L, "Curso", "D", "4 horas",
                 "MARKETING", "BASICO", true, null, "https://ejemplo.co", "📱", "PUBLICADO"));
 
         mockMvc.perform(patch("/api/v1/admin/cursos/1/publicar"))
@@ -124,7 +124,7 @@ class CursoAdminControllerTest extends ControllerTestBase {
     @Test
     @DisplayName("PATCH /{id}/publicar sobre uno ya publicado devuelve 400")
     void publicar_yaPublicado_devuelve400() throws Exception {
-        when(cursoService.publicar(1L))
+        when(cursoService.publicar(eq(1L), any()))
                 .thenThrow(new ReglaDeNegocioException("El curso ya estaba publicado"));
 
         mockMvc.perform(patch("/api/v1/admin/cursos/1/publicar"))
