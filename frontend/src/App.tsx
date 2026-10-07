@@ -4,6 +4,8 @@ import { RutaDeAdmin } from './componentes/RutaDeAdmin';
 import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
 import { Pie } from './componentes/Pie';
 import { AdminCambios } from './paginas/AdminCambios';
+import { AdminCursos } from './paginas/AdminCursos';
+import { AdminFormularioCurso } from './paginas/AdminFormularioCurso';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
 import { AdminUsuarios } from './paginas/AdminUsuarios';
@@ -73,6 +75,9 @@ export function App() {
           <Route path="negocios/:id" element={<AdminRevisarNegocio />} />
           <Route path="cambios" element={<AdminCambios />} />
           <Route path="usuarios" element={<AdminUsuarios />} />
+          <Route path="cursos" element={<AdminCursos />} />
+          <Route path="cursos/nuevo" element={<AdminFormularioCurso />} />
+          <Route path="cursos/:id" element={<AdminFormularioCurso />} />
         </Route>
         <Route path="/tratamiento-de-datos" element={<TratamientoDeDatos />} />
         <Route path="/informacion-personal" element={<InformacionPersonal />} />

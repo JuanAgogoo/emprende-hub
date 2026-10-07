@@ -486,3 +486,73 @@
 .correo {
   overflow-wrap: anywhere;
 }
+
+/* ── Cursos ────────────────────────────────────────────────────────────── */
+
+.cabeceraSeccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+/* El primario de la vista: en la lista de cursos, crear uno. */
+.primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.primario:hover {
+  background: var(--color-acento-fuerte);
+}
+
+.insigniaNeutra {
+  border-color: var(--color-borde-control);
+  background: var(--color-lienzo-alt);
+  color: var(--color-cuerpo);
+}
+
+.formularioCurso {
+  max-width: 40rem;
+}
+
+/* Un campo por fila en móvil (diseno.md); dos a partir de 40rem. */
+.dosColumnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-4);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.grupo legend {
+  margin-bottom: var(--e-1);
+  padding: 0;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+@media (min-width: 40rem) {
+  .dosColumnas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
