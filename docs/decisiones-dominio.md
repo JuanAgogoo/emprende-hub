@@ -199,13 +199,30 @@ ninguna otra entidad del sistema.
   - **Sigue sin haber verificación del correo al registrarse.** Ampliarlo
     cambiaría los dos registros y nadie lo pidió.
   - **El panel sigue siendo el canal de avisos** (H2): el motivo del rechazo y
-    las notificaciones no se mandan por correo.
+    las notificaciones no se mandan por correo. *Lo matiza I1-ter.*
   - El token es **aleatorio, de un solo uso y caduca a los 30 minutos**. Se
     guarda sin cifrar, y es una simplificación consciente: quien pueda leer esa
     tabla ya tiene la de usuarios. **Sale solo por correo** —devolverlo en la
     respuesta dejaría cambiar la contraseña de cualquiera sabiendo su
     dirección— y **pedirlo responde igual exista la cuenta o no**, para que el
     formulario no sirva de lista de qué correos están registrados.
+- **I1-ter** **Las decisiones del administrador sobre un negocio también avisan
+  por correo.** El backlog del panel de administración lo pide en su criterio
+  de aceptación (HU-037), y la infraestructura de I1-bis ya estaba: es un
+  método más en `CorreoService`, no una pieza nueva. Lo que cambia y lo que no:
+  - **Aprobar y rechazar un negocio mandan un correo a su dueño**, de texto
+    plano, con el enlace a su perfil publicado o, al rechazar, con el motivo y
+    el enlace a su panel.
+  - **El panel sigue siendo donde se actúa.** El aviso de H2 se crea igual, y el
+    motivo del rechazo sigue guardado en el negocio: es lo que el dueño tiene
+    delante cuando corrige y reenvía, haya leído el correo o no.
+  - **Un correo que no sale no deshace la decisión.** Si el servidor de correo
+    no responde, el negocio queda aprobado o rechazado igual y el fallo se anota
+    en el registro del backend. Deshacer lo que decidió el administrador por un
+    aviso perdido sería peor que el aviso perdido, y el panel lo cuenta de todas
+    formas.
+  - **Las propuestas de cambio (B2-bis) no avisan por correo**: el negocio sigue
+    publicado todo el tiempo y nadie lo pidió.
 
 ## J. Datos personales
 
@@ -250,6 +267,7 @@ Explícito, para que nadie los espere en la entrega. Ninguno está en el prototi
 ## Puntos abiertos
 
 Ninguno. El dominio quedó cerrado el 23 de agosto de 2026, y la única decisión
-reabierta desde entonces es I1, con I1-bis.
+reabierta desde entonces es I1: con I1-bis para la recuperación de contraseña y
+con I1-ter para los avisos de las decisiones del administrador.
 
 Cualquier decisión nueva se añade a la sección que le corresponda, no aquí.

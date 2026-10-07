@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.emprendehub.dto.NegocioResponse;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.service.NegocioService;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ class NegocioControllerTest extends ControllerTestBase {
     private NegocioResponse respuesta() {
         return new NegocioResponse(1L, "Panadería La Tradicional", DESCRIPCION, "3001234567",
                 "Gastronomía", "Medellín", "El Poblado", "MEDIO", "PENDIENTE", null, null, 0,
-                null, null, null);
+                null, null, Instant.parse("2026-08-24T15:00:00Z"), null);
     }
 
     @Test
@@ -67,7 +68,9 @@ class NegocioControllerTest extends ControllerTestBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(cuerpo("3001234567", DESCRIPCION)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.estado").value("PENDIENTE"));
+                .andExpect(jsonPath("$.estado").value("PENDIENTE"))
+                // Viaja como texto ISO-8601, no como número: es lo que lee el frontend.
+                .andExpect(jsonPath("$.fechaCreacion").value("2026-08-24T15:00:00Z"));
     }
 
     @Test

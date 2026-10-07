@@ -4,6 +4,7 @@ import com.emprendehub.dto.CambioPendienteResponse;
 import com.emprendehub.dto.DecisionRequest;
 import com.emprendehub.dto.DenunciaResponse;
 import com.emprendehub.dto.NegocioResponse;
+import com.emprendehub.dto.PerfilNegocioResponse;
 import com.emprendehub.dto.RegistroModeracionResponse;
 import com.emprendehub.model.DecisionModeracion;
 import com.emprendehub.model.Usuario;
@@ -47,6 +48,12 @@ public class ModeracionAdminController {
     public Page<NegocioResponse> pendientes(
             @PageableDefault(size = 20) Pageable pageable) {
         return moderacionService.negociosPendientes(pageable);
+    }
+
+    /** La vista previa del perfil, con las fotos que esperan revisión. */
+    @GetMapping("/negocios/{id}")
+    public PerfilNegocioResponse vistaPrevia(@PathVariable Long id) {
+        return moderacionService.vistaPrevia(id);
     }
 
     @PatchMapping("/negocios/{id}/aprobar")

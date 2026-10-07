@@ -137,6 +137,24 @@ class SeguridadAccesoTest {
     }
 
     @Test
+    @DisplayName("La vista previa de un negocio sin publicar es solo del administrador")
+    void vistaPrevia_conTokenDeCliente_devuelve403() throws Exception {
+        // Es la única ruta que enseña fotos todavía sin revisar: un cliente que
+        // la alcanzara vería lo que B6 dice que no existe para él.
+        mockMvc.perform(get("/api/v1/admin/moderacion/negocios/1")
+                        .header("Authorization", "Bearer " + tokenCliente))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("La vista previa de un negocio que no existe responde 404 al administrador")
+    void vistaPrevia_inexistente_devuelve404() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/moderacion/negocios/999999")
+                        .header("Authorization", "Bearer " + tokenAdmin))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Las opiniones de un negocio se leen sin sesión")
     void opiniones_sinToken_noDevuelve401() throws Exception {
         // El negocio 999999 no existe: un 404 es correcto, un 401 diría que la
