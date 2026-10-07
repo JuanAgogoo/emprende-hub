@@ -1,0 +1,161 @@
+.pagina {
+  padding-block: var(--e-6) var(--e-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.entrada {
+  max-width: var(--ancho-lectura);
+}
+
+/* Mobile first: un control por fila. Pocos filtros y cortos, así que no
+   necesitan la columna lateral del directorio: van encima de los resultados. */
+.filtros {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-cuerpo);
+}
+
+.campo input,
+.campo select {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+}
+
+.campo input::placeholder {
+  color: var(--color-apagado);
+}
+
+.campo:has(:focus-visible) label {
+  color: var(--color-acento);
+}
+
+/* La etiqueta entera es pulsable: 44px de alto, no solo el cuadrito. */
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: var(--toque-min);
+  font-weight: 600;
+  color: var(--color-tinta);
+  cursor: pointer;
+}
+
+.casilla input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-acento);
+}
+
+.resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  min-height: var(--toque-min);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-4);
+}
+
+.vacio,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--e-3);
+  max-width: var(--ancho-lectura);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+.tituloVacio {
+  font-size: var(--texto-lg);
+}
+
+.error {
+  border-color: color-mix(in srgb, var(--color-error) 40%, var(--color-borde));
+  color: var(--color-error);
+}
+
+.limpiar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-4);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-md);
+  background: transparent;
+  color: var(--color-acento);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-rapida) var(--curva);
+}
+
+.limpiar:hover {
+  background: var(--color-acento-suave);
+}
+
+@media (min-width: 40rem) {
+  .filtros {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .campoTexto {
+    grid-column: 1 / -1;
+  }
+
+  .rejilla {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* En escritorio caben en una fila: el buscador ocupa lo que sobra. */
+@media (min-width: 64rem) {
+  .filtros {
+    grid-template-columns: 2fr 1fr 1fr auto;
+    align-items: end;
+  }
+
+  .campoTexto {
+    grid-column: auto;
+  }
+
+  .rejilla {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

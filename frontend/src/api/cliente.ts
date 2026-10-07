@@ -200,9 +200,12 @@ export function eliminar(ruta: string, conSesion = false): Promise<void> {
 
 /**
  * Convierte los filtros en cadena de consulta. `URLSearchParams` codifica los
- * acentos, que es lo que evita el 400 de `?texto=café`.
+ * acentos, que es lo que evita el 400 de `?texto=café`. Un booleano viaja como
+ * `true` o `false`, que es como lo lee Spring.
  */
-export function consulta(filtros: Readonly<Record<string, string | number | undefined>>): string {
+export function consulta(
+  filtros: Readonly<Record<string, string | number | boolean | undefined>>,
+): string {
   const parametros = new URLSearchParams();
   for (const [clave, valor] of Object.entries(filtros)) {
     if (valor !== undefined && valor !== '') parametros.set(clave, String(valor));
