@@ -285,6 +285,36 @@ que le dan, no al tamaño de la pantalla»*.
 Se definen aquí una vez y se reutilizan. Cada uno vive en su
 `componentes/<Nombre>/` con su módulo CSS.
 
+### Lo que el reset global **no** hace, y hay que hacer a mano
+
+`global.css` pone `margin: 0` a todos los elementos, **pero no `padding: 0`**.
+Es una decisión deliberada —así un `padding` propio no pelea con el reset—, pero
+tiene dos consecuencias que no avisan y que se descubren mirando la pantalla, no
+compilando:
+
+- **Una `<ul>` o una `<ol>` conservan su sangrado de lista.** La lista arranca
+  desviada respecto al título de su sección y parece un fallo de maquetación.
+  **Toda lista lleva su `padding: 0`**, junto al `list-style: none` que ya se le
+  pone. Hoy lo hacen dieciséis hojas del proyecto: si una nueva se olvida, se
+  nota enseguida.
+- **Un `<dialog>` abierto con `showModal()` pierde su centrado.** El navegador lo
+  centra con `margin: auto`, y el reset se lo quita: sale pegado arriba a la
+  izquierda. Se le devuelve con:
+
+```css
+.dialogo {
+  position: fixed;
+  inset: 0;          /* los cuatro bordes contra los que repartir el margen */
+  margin: auto;
+  height: fit-content; /* sin esto, con inset:0 se estiraría hasta llenarlos */
+  max-height: calc(100dvh - 2 * var(--e-4));
+}
+```
+
+Las dos se comprueban **en el CSS compilado de `dist/`**, no suponiéndolas: las
+clases de CSS Modules se hashean por fichero y leer el `.module.css` no dice si
+la regla llegó a aplicarse.
+
 ### Botones
 
 | Variante | Fondo | Texto | Borde | Cuándo |
