@@ -56,8 +56,21 @@ export function Cursos() {
 
   const [catalogos, setCatalogos] = useState<Catalogos | null>(null);
   const [carga, setCarga] = useState<EstadoCarga<Pagina<Curso>>>({ estado: 'CARGANDO' });
-  const [texto, setTexto] = useState(parametros.get('texto') ?? '');
+  const textoEnUrl = parametros.get('texto') ?? '';
+  const [texto, setTexto] = useState(textoEnUrl);
+  const [textoVisto, setTextoVisto] = useState(textoEnUrl);
   const temporizador = useRef<number | undefined>(undefined);
+
+  // Si el texto de la URL cambia por fuera del buscador —con «atrás», o con el
+  // enlace «Cursos» de la cabecera—, el campo lo adopta; si no, enseñaría un
+  // texto que la lista ya no aplica. Se compara con el texto recortado: el
+  // cambio que provoca el propio buscador no debe comerse el espacio que se
+  // está escribiendo. Es el patrón de React de ajustar el estado al cambiar un
+  // dato de entrada, sin un efecto de por medio.
+  if (textoEnUrl !== textoVisto) {
+    setTextoVisto(textoEnUrl);
+    if (textoEnUrl !== texto.trim()) setTexto(textoEnUrl);
+  }
 
   // Los catálogos no cambian: se piden una vez. Sin ellos no se puede validar
   // lo que trae la URL, así que la búsqueda espera a que lleguen.
