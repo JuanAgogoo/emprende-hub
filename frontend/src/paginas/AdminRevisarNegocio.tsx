@@ -236,7 +236,8 @@ function Revision({ negocio }: { readonly negocio: VistaPreviaNegocio }) {
               disabled={ocupado}
               onClick={aprobar}
             >
-              <span aria-hidden="true">✓</span> {ocupado && !rechazando ? 'Aprobando…' : 'Aprobar y publicar'}
+              <span aria-hidden="true">✓</span>{' '}
+              {ocupado && !rechazando ? 'Aprobando…' : 'Aprobar y publicar'}
             </button>
             <button
               type="button"

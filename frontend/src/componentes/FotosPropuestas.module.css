@@ -1,0 +1,44 @@
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.titulo {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+}
+
+.fotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  padding: 0;
+  list-style: none;
+}
+
+.fotos a {
+  display: block;
+  border-radius: var(--radio-md);
+}
+
+.fotos img {
+  width: 6rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+  border: 1px solid var(--color-borde);
+}
+
+.esqueleto {
+  width: 12.5rem;
+  height: 4.5rem;
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo-alt);
+}
+
+.error {
+  font-size: var(--texto-sm);
+  color: var(--color-error);
+}

@@ -370,3 +370,87 @@
     top: calc(60px + var(--e-4));
   }
 }
+
+/* ── Cambios propuestos ────────────────────────────────────────────────── */
+
+.tarjetaCambio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+.comparacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.filaComparacion {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e-2);
+}
+
+.filaComparacion dt {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+}
+
+.filaComparacion dd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+  margin: 0;
+  padding: var(--e-3);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+/* Lo de ahora en gris y lo propuesto con el acento: además de la palabra que
+   encabeza cada uno, el color nunca va solo. */
+.filaComparacion dd:first-of-type {
+  background: var(--color-lienzo-alt);
+}
+
+.filaComparacion dd:last-of-type {
+  background: var(--color-acento-suave);
+}
+
+.etiquetaComparacion {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-apagado);
+}
+
+.filaComparacion dd:last-of-type .etiquetaComparacion {
+  color: var(--color-acento);
+}
+
+.valorActual {
+  color: var(--color-cuerpo);
+}
+
+.valorPropuesto {
+  color: var(--color-tinta);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+@media (min-width: 48rem) {
+  .filaComparacion {
+    grid-template-columns: 8rem 1fr 1fr;
+    align-items: start;
+  }
+}

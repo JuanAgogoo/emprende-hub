@@ -19,3 +19,22 @@ export type NegocioEnRevision = MiNegocio;
 export type VistaPreviaNegocio = Omit<PerfilNegocio, 'fechaAprobacion'> & {
   readonly fechaAprobacion: string | null;
 };
+
+/**
+ * Una propuesta de cambio sobre un negocio ya publicado (B2-bis).
+ *
+ * Trae el valor actual junto al propuesto porque revisar es comparar. Una
+ * propuesta puede ser solo de fotos: entonces los textos coinciden y
+ * `categoriaPropuesta` llega nula.
+ */
+export interface CambioPendiente {
+  readonly negocioId: number;
+  readonly nombreActual: string;
+  readonly nombrePropuesto: string;
+  readonly descripcionActual: string;
+  readonly descripcionPropuesta: string;
+  readonly categoriaActual: string;
+  readonly categoriaPropuesta: string | null;
+  readonly fotosPendientes: number;
+  readonly fechaSolicitud: string;
+}
