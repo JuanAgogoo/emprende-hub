@@ -21,3 +21,15 @@ export interface Ciudad {
   readonly nombre: string;
   readonly barrios: readonly Barrio[];
 }
+
+/**
+ * Una opción de un catálogo cerrado del backend: el código que viaja en las
+ * peticiones y el nombre que se enseña.
+ *
+ * El código se tipa con la unión de cada catálogo, así que un `Opcion<NivelCurso>`
+ * no admite un código que el backend no tenga.
+ */
+export interface Opcion<C extends string> {
+  readonly codigo: C;
+  readonly nombre: string;
+}

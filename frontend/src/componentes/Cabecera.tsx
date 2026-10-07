@@ -6,6 +6,7 @@ import estilos from './Cabecera.module.css';
 const ENLACES = [
   { a: '/', texto: 'Inicio' },
   { a: '/directorio', texto: 'Directorio' },
+  { a: '/cursos', texto: 'Cursos' },
 ] as const;
 
 export function Cabecera() {

@@ -2,6 +2,7 @@ import { Outlet, Route, Routes } from 'react-router-dom';
 import { Cabecera } from './componentes/Cabecera';
 import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
 import { Pie } from './componentes/Pie';
+import { Cursos } from './paginas/Cursos';
 import { Directorio } from './paginas/Directorio';
 import { InformacionPersonal } from './paginas/InformacionPersonal';
 import { Inicio } from './paginas/Inicio';
@@ -38,6 +39,7 @@ export function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/directorio" element={<Directorio />} />
         <Route path="/negocios/:id" element={<PerfilNegocio />} />
+        <Route path="/cursos" element={<Cursos />} />
         <Route path="/entrar" element={<Login />} />
         <Route path="/registro" element={<RegistroCliente />} />
         <Route path="/recuperar" element={<RecuperarContrasena />} />

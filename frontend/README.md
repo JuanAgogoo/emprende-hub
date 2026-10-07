@@ -75,14 +75,15 @@ Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 
 ## Las pantallas
 
-Las once rutas, todas declaradas en `src/App.tsx`: las nueve de la fase 1 más
-las dos que añade la recuperación de contraseña.
+Las rutas, todas declaradas en `src/App.tsx`: las nueve de la fase 1, las dos
+que añade la recuperación de contraseña y el catálogo de cursos.
 
 | Ruta | Pantalla | Quién entra |
 |---|---|---|
 | `/` | Portada: cifras, destacados y buscador | Cualquiera |
 | `/directorio` | Listado con seis filtros, ordenación y paginación | Cualquiera |
 | `/negocios/:id` | Perfil público: galería, escaparate y redes | Cualquiera |
+| `/cursos` | Catálogo de cursos: búsqueda según se escribe, categoría, nivel y «solo gratuitos» | Cualquiera |
 | `/entrar` | Un solo acceso que deriva según el rol | Cualquiera |
 | `/registro` | Alta de cliente: el formulario corto | Cualquiera |
 | `/registro-emprendedor` | El asistente de cuatro pasos | Cualquiera |
@@ -109,9 +110,8 @@ poder responderle. La plataforma no responde desde dentro (D2), así que cada
 consulta lleva su enlace de correo.
 
 Lo que **no** entra todavía, para que nadie lo busque: el panel de
-administración, editar el negocio, los cursos y denunciar una opinión, que
-existe en el backend pero se queda fuera hasta que haya quien resuelva las
-denuncias.
+administración y denunciar una opinión, que existe en el backend pero se queda
+fuera hasta que haya quien resuelva las denuncias.
 
 > `/mi-negocio` comprueba el rol **por comodidad de la interfaz, no por
 > seguridad**. Quien mande la petición a mano se topa igual con el backend, que
