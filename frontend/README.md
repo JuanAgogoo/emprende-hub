@@ -100,6 +100,7 @@ administración.
 | `/admin/cursos` | Los cursos, borradores incluidos: publicar, retirar y eliminar | `ADMIN` |
 | `/admin/cursos/nuevo` | Alta de un curso, como borrador o ya publicado | `ADMIN` |
 | `/admin/cursos/:id` | Editar un curso, también su estado | `ADMIN` |
+| `/admin/historial` | Todas las acciones de moderación, filtrables por fechas. Solo lectura | `ADMIN` |
 | `/tratamiento-de-datos` | Texto legal | Cualquiera |
 | `/informacion-personal` | Texto legal | Cualquiera |
 
