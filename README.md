@@ -160,11 +160,11 @@ negocio— y guarda cada token en su variable.
 
 ## El recorrido de una demostración
 
-El guion de punta a punta, con las dos mitades arriba. Son quince minutos.
+El guion de punta a punta, con las dos mitades arriba. Son unos veinte minutos.
 
-> Es el que se usó en la sustentación del **29 de septiembre de 2026**, y sirve
-> igual para enseñar el proyecto a cualquiera: lo único atado a aquel día era la
-> fecha.
+> Parte del que se usó en la sustentación del **29 de septiembre de 2026**. Desde
+> entonces la moderación ya no se hace desde Postman sino desde el **panel de
+> administración**, y el guion lo enseña.
 
 ### Antes: preparar la vitrina
 
@@ -185,6 +185,7 @@ entre todos, porque es lo que la interfaz enseña:
 | Uno sin ninguna opinión | Se ve «Sin opiniones» y no «0,0», que no es lo mismo (C5) |
 | Uno sin fotos | Sale el marcador con la inicial, no una imagen rota |
 | Uno dejado en `PENDIENTE` | Hay algo que aprobar en directo durante el recorrido |
+| Una foto subida a uno **ya aprobado** | Hay un cambio esperando en la pestaña «Cambios» del panel (B2-bis) |
 
 La forma rápida de crearlos es la carpeta **1 · Acceso y datos de partida** de la
 colección de Postman, y después repetir su petición de alta cambiando los datos.
@@ -221,6 +222,9 @@ docker compose logs -f backend    # esperar a «Started EmprendeHubApplication»
   barrio se repuebla solo— y ordenar por calificación.
 - Entrar a un negocio: la foto de la tarjeta crece hasta ser la del detalle.
   Galería, precios en pesos y enlaces a las redes.
+- **Cursos**, en la cabecera: escribir en el buscador filtra según se escribe,
+  sin pulsar nada, y «Solo gratuitos» se combina con la categoría y el nivel.
+  Cada tarjeta dice «Gratis» o su precio antes de abrirla.
 
 **3. El alta de emprendedor, de punta a punta.** «Publicar mi negocio», en la
 portada:
@@ -237,26 +241,25 @@ El negocio nace `PENDIENTE` (B6): buscarlo en el directorio no lo encuentra, y s
 identificador responde `404`. **No es un fallo, es la regla**, y conviene decirlo
 antes de que lo pregunten.
 
-**4. Aprobarlo, con el administrador.** Desde la carpeta **5 · Administración**
-de Postman, o con `curl`:
+**4. Aprobarlo, con el administrador.** Cerrar sesión y entrar en `/entrar` con
+la cuenta del administrador: **aterriza directamente en el panel**, y la cabecera
+enseña «Admin».
 
-```bash
-A=http://localhost:8080/api/v1
-
-TA=$(curl -s -X POST $A/auth/login -H 'Content-Type: application/json' \
-  -d '{"correo":"admin@emprendehub.co","contrasena":"admin12345"}' | jq -r .token)
-
-curl -s -H "Authorization: Bearer $TA" $A/admin/moderacion/negocios-pendientes
-curl -X PATCH $A/admin/moderacion/negocios/<id>/aprobar -H "Authorization: Bearer $TA"
-```
+| Qué hacer | Qué se ve |
+|---|---|
+| Pestaña «Negocios» | La cola, la más antigua primero, con cuántos esperan |
+| «Revisar» el negocio recién creado | **La vista previa**: su perfil tal como se publicará, con las fotos que aún nadie ha aprobado |
+| «Rechazar» sin escribir nada | El motivo es obligatorio: el diálogo no se cierra |
+| Cancelar y «Aprobar y publicar» | Vuelve a la cola con el aviso, y hay uno menos |
+| Abrir Mailpit en <http://localhost:8025> | **El correo de aviso a la dueña** ya está ahí (I1-ter) |
 
 Como el negocio todavía no estaba aprobado, **sus fotos se publican con él**: no
 hay que aprobar nada más.
 
 **5. Volver a la web y recargar el directorio.** El negocio recién creado ya
 aparece, con su foto de portada, y las cifras de la portada han subido. Con eso
-el círculo se cierra: se registró desde el navegador, se moderó desde la API y se
-publicó.
+el círculo se cierra: se registró, se moderó y se publicó, todo desde el
+navegador.
 
 **6. Opinar sobre un negocio, con la cuenta de clienta.** Entrar en `/entrar` y
 abrir un negocio que **no** sea el suyo:
@@ -268,6 +271,7 @@ abrir un negocio que **no** sea el suyo:
 | Cambiarla a cinco estrellas | La fila se actualiza y queda marcada como «Editada» |
 | Borrarla | Pide confirmación, y al aceptar vuelve el formulario de publicar |
 | Abrir el negocio propio con la cuenta de la emprendedora | **No hay formulario**: el dueño no opina sobre lo suyo (A4) |
+| «Denunciar» la opinión de otra persona | Se elige el motivo de una lista cerrada (C6). La opinión **sigue publicada** hasta que decida el administrador |
 
 > Si era la única opinión del negocio, al borrarla la ficha vuelve a decir «Sin
 > opiniones» y **no «0,0»**. Es C5, y merece nombrarlo: son dos cosas distintas.
@@ -291,13 +295,24 @@ cruza las dos mitades y el servidor de correo:
 > Probarlo con la cuenta de la clienta y no con la del administrador: si algo
 > sale mal, la moderación del paso 4 sigue estando disponible.
 
+**8. El resto del panel, con el administrador.** Cada pestaña es una cola de
+trabajo, y todo lo que se decide queda escrito:
+
+| Pestaña | Qué enseñar |
+|---|---|
+| Cambios | La foto subida al negocio ya aprobado espera aquí, con lo de ahora al lado de lo propuesto. Aprobarla la publica |
+| Denuncias | La opinión denunciada en el paso 6, entera. Borrarla pide un motivo y **recalcula el promedio** del negocio |
+| Usuarios | Suspender una cuenta pide confirmación; su dueño ya no puede entrar y le llega un correo. Reactivarla |
+| Cursos | Crear uno de pago y publicado: sale al momento en el catálogo público. Pasarlo a borrador lo retira |
+| Historial | Todo lo anterior, con quién lo hizo y cuándo, filtrable por fechas. Es de solo lectura (L) |
+
 ### Si algo falla en directo
 
 | Síntoma | Qué es | Qué hacer |
 |---|---|---|
 | La web carga pero no hay datos | El backend todavía no responde | `docker compose logs -f backend` y esperar |
-| Las fichas salen sin foto | Se subieron **después** de aprobar y esperan revisión | Aprobar el cambio pendiente |
-| El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto | Aprobarlo con el administrador |
+| Las fichas salen sin foto | Se subieron **después** de aprobar y esperan revisión | Aprobarlas en el panel, pestaña «Cambios» |
+| El negocio nuevo no sale | Está `PENDIENTE`. Es lo correcto | Aprobarlo en el panel, pestaña «Negocios» |
 | Un puerto ya está ocupado | Hay otro backend o otro Vite corriendo en el equipo | Pararlo, o `API_PORT=8081 docker compose up -d` |
 | Tras un fallo de puerto, sigue sin ir | El contenedor quedó creado **sin red**: ni publica puertos ni resuelve `postgres` | `docker compose up -d --force-recreate backend`. Un `up -d` a secas solo lo arranca |
 | Todas las fotos rotas | La base apunta a ficheros que no están en `backend/uploads/` | Recuperar el directorio; la base y el disco van por separado |
