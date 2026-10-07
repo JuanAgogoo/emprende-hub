@@ -425,7 +425,7 @@ cd backend
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**498 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**502 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |
