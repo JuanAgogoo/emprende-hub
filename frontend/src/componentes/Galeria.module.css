@@ -4,8 +4,12 @@
   gap: var(--e-3);
 }
 
+/* `height: auto` no sobra: el <img> lleva width="1200" height="900" para
+   reservar su hueco, y sin esto el atributo valdría como 900px fijos y la
+   proporción 4:3 se ignoraría. */
 .principal {
   width: 100%;
+  height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: var(--radio-lg);
