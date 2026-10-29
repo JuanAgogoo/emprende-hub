@@ -1,0 +1,6003 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EmprendeHub",
+    "description": "Portal de emprendimientos: directorio público, panel del emprendedor y moderación.\n\nLas reglas de negocio viven en `docs/decisiones-dominio.md` y se nombran por su código (B2-bis, F4, G7…). Este documento describe el contrato; el porqué de cada regla está allí.\n\n**Para probar lo protegido:** primero `POST /api/v1/auth/login`, y después pega el `token` de la respuesta en «Authorize», arriba a la derecha. No hace falta escribir «Bearer».",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "La API en local, con docker compose o con bootRun"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Consultas",
+      "description": "Escribir al negocio y el buzón de su dueño"
+    },
+    {
+      "name": "Acceso",
+      "description": "Registro, inicio de sesión y recuperación de contraseña"
+    },
+    {
+      "name": "Cursos · admin",
+      "description": "Alta, edición y publicación del catálogo de formación"
+    },
+    {
+      "name": "Productos",
+      "description": "El escaparate del negocio propio (F1)"
+    },
+    {
+      "name": "Cursos",
+      "description": "El catálogo de formación, solo lo publicado"
+    },
+    {
+      "name": "Moderación · admin",
+      "description": "Las colas de revisión: negocios, cambios, denuncias y cuentas"
+    },
+    {
+      "name": "Directorio",
+      "description": "La exploración pública de negocios"
+    },
+    {
+      "name": "Catálogos",
+      "description": "Las listas cerradas: categorías, ciudades, barrios y motivos"
+    },
+    {
+      "name": "Notificaciones",
+      "description": "Los avisos de quien tiene la sesión abierta"
+    },
+    {
+      "name": "Estadísticas",
+      "description": "Las cuatro cifras de la portada, calculadas (H4)"
+    },
+    {
+      "name": "Fotos del negocio",
+      "description": "La galería del dueño: subir, ordenar y quitar (B9)"
+    },
+    {
+      "name": "Negocios",
+      "description": "El negocio propio: registro y edición de sus datos"
+    },
+    {
+      "name": "Opiniones",
+      "description": "Leerlas es público, escribirlas exige sesión (C1)"
+    },
+    {
+      "name": "Métricas",
+      "description": "Las visitas del negocio propio, por semana y por mes"
+    },
+    {
+      "name": "Denuncias",
+      "description": "Denunciar una opinión (C3)"
+    }
+  ],
+  "paths": {
+    "/api/v1/negocios/{negocioId}/opiniones/mia": {
+      "get": {
+        "tags": [
+          "Opiniones"
+        ],
+        "summary": "Ver la opinión propia sobre un negocio",
+        "operationId": "obtenerLaMia",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Todavía no ha opinado sobre ese negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpinionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Opiniones"
+        ],
+        "summary": "Editar la opinión propia",
+        "operationId": "actualizar",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarOpinionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Todavía no ha opinado sobre ese negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpinionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Opiniones"
+        ],
+        "summary": "Borrar la opinión propia",
+        "operationId": "eliminar",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Opinión borrada"
+          },
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Todavía no ha opinado sobre ese negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio": {
+      "get": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Ver el negocio propio",
+        "operationId": "obtenerElMio",
+        "responses": {
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Editar nombre, descripción y categoría (B2-bis)",
+        "operationId": "proponerCambio",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarNegocioPublicoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida o el negocio está rechazado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio o no existe la categoría",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/productos/{id}": {
+      "put": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Editar un producto",
+        "operationId": "actualizar_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarProductoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es un producto de su negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Borrar un producto",
+        "operationId": "eliminar_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Producto borrado, con su foto"
+          },
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es un producto de su negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cursos/{id}": {
+      "get": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Ver un curso, en cualquier estado",
+        "operationId": "obtener",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el curso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Editar un curso",
+        "operationId": "actualizar_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActualizarCursoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida o el precio no cuadra con «gratuito»",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el curso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Borrar un curso",
+        "operationId": "eliminar_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Curso borrado"
+          },
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el curso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/opiniones/{opinionId}/denuncias": {
+      "post": {
+        "tags": [
+          "Denuncias"
+        ],
+        "summary": "Denunciar una opinión (C3)",
+        "operationId": "denunciar",
+        "parameters": [
+          {
+            "name": "opinionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenunciarOpinionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Denuncia registrada; la opinión sigue publicada"
+          },
+          "400": {
+            "description": "La petición no es válida, es su propia opinión o ya la denunció",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la opinión",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios": {
+      "post": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Registrar el negocio propio",
+        "operationId": "registrar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrarNegocioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Negocio creado, pendiente de revisión (B6)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, la cuenta ya tiene negocio o es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la categoría, la ciudad o el barrio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/{negocioId}/opiniones": {
+      "get": {
+        "tags": [
+          "Opiniones"
+        ],
+        "summary": "Leer las opiniones de un negocio",
+        "operationId": "listar",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio o no está publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOpinionResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": [
+          "Opiniones"
+        ],
+        "summary": "Opinar sobre un negocio",
+        "operationId": "crear",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearOpinionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Opinión publicada (C4)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpinionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La petición no es válida, es su propio negocio o ya opinó (C2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio o no está publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/{negocioId}/consultas": {
+      "post": {
+        "tags": [
+          "Consultas"
+        ],
+        "summary": "Escribir a un negocio",
+        "operationId": "enviar",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnviarConsultaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Consulta enviada al buzón del negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La petición no es válida o es su propio negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio o no está publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/reenviar": {
+      "post": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Corregir un negocio rechazado y reenviarlo",
+        "operationId": "corregirYReenviar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarNegocioPublicoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida o el negocio no está rechazado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio o no existe la categoría",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/productos": {
+      "get": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Ver el escaparate propio",
+        "operationId": "listar_1",
+        "responses": {
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Añadir un producto, con su foto",
+        "operationId": "crearProducto",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearProductoPeticion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado, con su foto (F4)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La petición no es válida, falta la foto o no es JPG o PNG de hasta 5 MB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/fotos": {
+      "get": {
+        "tags": [
+          "Fotos del negocio"
+        ],
+        "summary": "Ver la galería propia",
+        "operationId": "listar_2",
+        "responses": {
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FotoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Fotos del negocio"
+        ],
+        "summary": "Subir una foto a la galería",
+        "operationId": "subir",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubirPeticion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Foto subida; pendiente de revisión si el negocio ya está publicado (B2)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FotoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta la imagen, no es JPG o PNG de hasta 5 MB o la galería está llena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/registro": {
+      "post": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Registrarse como cliente",
+        "operationId": "registrar_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroClienteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Cuenta creada; devuelve el token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La petición no es válida o el correo ya tiene cuenta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/registro-emprendedor": {
+      "post": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Registrarse como emprendedor, con el negocio",
+        "operationId": "registrarEmprendedor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroEmprendedorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Cuenta y negocio creados; el negocio nace pendiente (B6)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistroEmprendedorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, correo con cuenta o barrio de otra ciudad",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la categoría, la ciudad o el barrio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/recuperacion": {
+      "post": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Pedir el enlace para recuperar la contraseña",
+        "operationId": "solicitarRecuperacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitarRecuperacionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Siempre igual, exista la cuenta o no: el enlace sale por correo"
+          },
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/recuperacion/{token}": {
+      "get": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Comprobar si un enlace de recuperación todavía vale",
+        "operationId": "comprobarRecuperacion",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "El enlace todavía vale"
+          },
+          "410": {
+            "description": "Enlace caducado, ya usado o inexistente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Cambiar la contraseña con el enlace",
+        "operationId": "restablecerContrasena",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestablecerContrasenaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Contraseña cambiada; el enlace deja de valer"
+          },
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Enlace caducado, ya usado o inexistente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Acceso"
+        ],
+        "summary": "Iniciar sesión",
+        "operationId": "iniciarSesion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales incorrectas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta está suspendida (B4)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/cursos": {
+      "get": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Buscar entre todos los cursos",
+        "operationId": "buscar",
+        "parameters": [
+          {
+            "name": "categoria",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MARKETING",
+                "FINANZAS",
+                "VENTAS",
+                "DIGITAL",
+                "GESTION"
+              ]
+            }
+          },
+          {
+            "name": "nivel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BASICO",
+                "INTERMEDIO",
+                "AVANZADO"
+              ]
+            }
+          },
+          {
+            "name": "gratuito",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCursoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Crear un curso",
+        "operationId": "crear_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCursoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Curso creado, en borrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La petición no es válida o el precio no cuadra con «gratuito»",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notificaciones/{id}/lectura": {
+      "patch": {
+        "tags": [
+          "Notificaciones"
+        ],
+        "summary": "Marcar un aviso como leído o pendiente",
+        "operationId": "marcarLectura",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "leida",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el aviso o no es suyo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificacionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notificaciones/leer-todas": {
+      "patch": {
+        "tags": [
+          "Notificaciones"
+        ],
+        "summary": "Marcar todos los avisos como leídos",
+        "operationId": "marcarTodasLeidas",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarcarTodasLeidasRespuesta"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/redes": {
+      "patch": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Cambiar las redes sociales",
+        "operationId": "actualizarRedes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarRedesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/productos/{id}/foto": {
+      "patch": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Cambiar la foto de un producto",
+        "operationId": "cambiarFoto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CambiarFotoPeticion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Falta la foto, o no es JPG o PNG de hasta 5 MB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es un producto de su negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/productos/{id}/disponibilidad": {
+      "patch": {
+        "tags": [
+          "Productos"
+        ],
+        "summary": "Marcar un producto como disponible o no",
+        "operationId": "cambiarDisponibilidad",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "disponible",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es un producto de su negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/fotos/orden": {
+      "patch": {
+        "tags": [
+          "Fotos del negocio"
+        ],
+        "summary": "Reordenar la galería; la primera es la portada",
+        "operationId": "reordenar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReordenarFotosRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida o la lista no coincide con la galería",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FotoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/contacto": {
+      "patch": {
+        "tags": [
+          "Negocios"
+        ],
+        "summary": "Cambiar el teléfono",
+        "operationId": "actualizarContacto",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarContactoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/consultas/{id}/lectura": {
+      "patch": {
+        "tags": [
+          "Consultas"
+        ],
+        "summary": "Marcar una consulta como leída o pendiente",
+        "operationId": "marcarLectura_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "leida",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es una consulta de su buzón",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/usuarios/{id}/suspender": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Suspender una cuenta",
+        "operationId": "suspender",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cuenta suspendida"
+          },
+          "400": {
+            "description": "Ya estaba suspendida, o es la propia cuenta del administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la cuenta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/usuarios/{id}/reactivar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Reactivar una cuenta",
+        "operationId": "reactivar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cuenta reactivada"
+          },
+          "400": {
+            "description": "La cuenta ya estaba activa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la cuenta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios/{id}/rechazar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Rechazar un negocio, con motivo",
+        "operationId": "rechazarNegocio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Falta el motivo o el negocio no está pendiente de revisión",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios/{id}/cambio/rechazar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Rechazar un cambio propuesto",
+        "operationId": "rechazarCambio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La petición no es válida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ese negocio no tiene ningún cambio pendiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios/{id}/cambio/aprobar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Aprobar un cambio propuesto",
+        "operationId": "aprobarCambio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ese negocio no tiene ningún cambio pendiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios/{id}/aprobar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Aprobar y publicar un negocio",
+        "operationId": "aprobarNegocio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "El negocio no está pendiente de revisión",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/denuncias/{id}/eliminar-opinion": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Borrar la opinión denunciada",
+        "operationId": "eliminarOpinion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Opinión borrada y promedio recalculado"
+          },
+          "400": {
+            "description": "Falta el motivo o la denuncia ya estaba resuelta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la denuncia",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/denuncias/{id}/desestimar": {
+      "patch": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Desestimar una denuncia",
+        "operationId": "desestimarDenuncia",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Denuncia desestimada; la opinión sigue publicada"
+          },
+          "400": {
+            "description": "La denuncia ya estaba resuelta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la denuncia",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cursos/{id}/publicar": {
+      "patch": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Publicar un curso",
+        "operationId": "publicar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "El curso ya estaba publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el curso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/cursos/{id}/borrador": {
+      "patch": {
+        "tags": [
+          "Cursos · admin"
+        ],
+        "summary": "Retirar un curso al borrador",
+        "operationId": "pasarABorrador",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "El curso ya estaba en borrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el curso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notificaciones": {
+      "get": {
+        "tags": [
+          "Notificaciones"
+        ],
+        "summary": "Ver los avisos propios",
+        "operationId": "mias",
+        "parameters": [
+          {
+            "name": "leida",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageNotificacionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/metricas/visitas": {
+      "get": {
+        "tags": [
+          "Métricas"
+        ],
+        "summary": "Visitas del negocio propio, por semana y por mes",
+        "operationId": "visitas",
+        "responses": {
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricasVisitasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/consultas": {
+      "get": {
+        "tags": [
+          "Consultas"
+        ],
+        "summary": "Ver el buzón del negocio propio",
+        "operationId": "buzon",
+        "parameters": [
+          {
+            "name": "leida",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La cuenta no tiene negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageConsultaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/estadisticas/portada": {
+      "get": {
+        "tags": [
+          "Estadísticas"
+        ],
+        "summary": "Las cifras de la portada (H4)",
+        "operationId": "portada",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstadisticasPortadaResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/directorio": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Buscar en el directorio",
+        "operationId": "buscar_1",
+        "parameters": [
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoriaId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "ciudadId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "barrioId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "calificacionMinima",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "nivelPrecio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BAJO",
+                "MEDIO",
+                "ALTO"
+              ]
+            }
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CALIFICACION",
+                "NOMBRE",
+                "RECIENTES"
+              ]
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageNegocioPublicoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/directorio/{id}": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Ver el perfil público de un negocio",
+        "operationId": "obtenerPerfil",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe o no está publicado (B6)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerfilNegocioResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/directorio/destacados": {
+      "get": {
+        "tags": [
+          "Directorio"
+        ],
+        "summary": "Negocios destacados (C7)",
+        "operationId": "destacados",
+        "parameters": [
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NegocioPublicoResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/cursos": {
+      "get": {
+        "tags": [
+          "Cursos"
+        ],
+        "summary": "Buscar en el catálogo de cursos publicados",
+        "operationId": "buscar_2",
+        "parameters": [
+          {
+            "name": "categoria",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MARKETING",
+                "FINANZAS",
+                "VENTAS",
+                "DIGITAL",
+                "GESTION"
+              ]
+            }
+          },
+          {
+            "name": "nivel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BASICO",
+                "INTERMEDIO",
+                "AVANZADO"
+              ]
+            }
+          },
+          {
+            "name": "gratuito",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCursoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/cursos/{id}": {
+      "get": {
+        "tags": [
+          "Cursos"
+        ],
+        "summary": "Ver un curso publicado",
+        "operationId": "obtener_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe o no está publicado (E4)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/catalogos/niveles-curso": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Niveles de curso",
+        "operationId": "nivelesCurso",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpcionResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/catalogos/motivos-denuncia": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Motivos para denunciar una opinión",
+        "operationId": "motivosDenuncia",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpcionResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/catalogos/ciudades": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Ciudades, con sus barrios",
+        "operationId": "ciudades",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CiudadResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/catalogos/categorias-negocio": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Categorías de negocio",
+        "operationId": "categoriasNegocio",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaNegocioResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/catalogos/categorias-curso": {
+      "get": {
+        "tags": [
+          "Catálogos"
+        ],
+        "summary": "Categorías de curso",
+        "operationId": "categoriasCurso",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OpcionResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/admin/moderacion/usuarios": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Ver las cuentas",
+        "operationId": "usuarios",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageUsuarioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios/{id}": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Vista previa de un negocio, con las fotos sin aprobar",
+        "operationId": "vistaPrevia",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerfilNegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/negocios-pendientes": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Cola de negocios pendientes",
+        "operationId": "pendientes",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageNegocioResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/log": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Historial de moderación",
+        "operationId": "log",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageRegistroModeracionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/denuncias": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Cola de denuncias abiertas",
+        "operationId": "denunciasPendientes",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un filtro con un valor no válido, u orden por un campo que no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDenunciaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/moderacion/cambios-pendientes": {
+      "get": {
+        "tags": [
+          "Moderación · admin"
+        ],
+        "summary": "Cola de cambios propuestos",
+        "operationId": "cambiosPendientes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CambioPendienteResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no es de administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/mio/fotos/{id}": {
+      "delete": {
+        "tags": [
+          "Fotos del negocio"
+        ],
+        "summary": "Quitar una foto de la galería",
+        "operationId": "eliminar_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto borrada"
+          },
+          "400": {
+            "description": "Un identificador o un filtro con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es una foto de su negocio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActualizarOpinionRequest": {
+        "type": "object",
+        "properties": {
+          "calificacion": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 0
+          }
+        }
+      },
+      "OpinionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "autor": {
+            "type": "string"
+          },
+          "calificacion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "type": "string"
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "editada": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EditarNegocioPublicoRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 80
+          },
+          "categoriaId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "descripcion",
+          "nombre"
+        ]
+      },
+      "CambioPropuestoResponse": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "fechaSolicitud": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NegocioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "ciudad": {
+            "type": "string"
+          },
+          "barrio": {
+            "type": "string"
+          },
+          "nivelPrecio": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "motivoRechazo": {
+            "type": "string"
+          },
+          "calificacionPromedio": {
+            "type": "number"
+          },
+          "numeroOpiniones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instagram": {
+            "type": "string"
+          },
+          "linkedin": {
+            "type": "string"
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cambioPendiente": {
+            "$ref": "#/components/schemas/CambioPropuestoResponse"
+          }
+        }
+      },
+      "ActualizarProductoRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2
+          },
+          "precio": {
+            "type": "number",
+            "minimum": 0.0
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "disponible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "nombre",
+          "precio"
+        ]
+      },
+      "ProductoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "precio": {
+            "type": "number"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "disponible": {
+            "type": "boolean"
+          },
+          "foto": {
+            "type": "string"
+          }
+        }
+      },
+      "ActualizarCursoRequest": {
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "duracion": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 0
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "MARKETING",
+              "FINANZAS",
+              "VENTAS",
+              "DIGITAL",
+              "GESTION"
+            ]
+          },
+          "nivel": {
+            "type": "string",
+            "enum": [
+              "BASICO",
+              "INTERMEDIO",
+              "AVANZADO"
+            ]
+          },
+          "gratuito": {
+            "type": "boolean"
+          },
+          "precio": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "urlRecurso": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "emoji": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "categoria",
+          "descripcion",
+          "duracion",
+          "emoji",
+          "gratuito",
+          "nivel",
+          "titulo",
+          "urlRecurso"
+        ]
+      },
+      "CursoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "duracion": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "nivel": {
+            "type": "string"
+          },
+          "gratuito": {
+            "type": "boolean"
+          },
+          "precio": {
+            "type": "number"
+          },
+          "urlRecurso": {
+            "type": "string"
+          },
+          "emoji": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "DenunciarOpinionRequest": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "enum": [
+              "LENGUAJE_INAPROPIADO",
+              "INFORMACION_FALSA",
+              "SPAM",
+              "NO_ES_SOBRE_EL_NEGOCIO",
+              "DATOS_PERSONALES"
+            ]
+          }
+        },
+        "required": [
+          "motivo"
+        ]
+      },
+      "RegistrarNegocioRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 80
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(3\\d{9}|60\\d{8})$"
+          },
+          "categoriaId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ciudadId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "barrioId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nivelPrecio": {
+            "type": "string",
+            "enum": [
+              "BAJO",
+              "MEDIO",
+              "ALTO"
+            ]
+          }
+        },
+        "required": [
+          "categoriaId",
+          "ciudadId",
+          "descripcion",
+          "nivelPrecio",
+          "nombre",
+          "telefono"
+        ]
+      },
+      "CrearOpinionRequest": {
+        "type": "object",
+        "properties": {
+          "calificacion": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 0
+          }
+        }
+      },
+      "EnviarConsultaRequest": {
+        "type": "object",
+        "properties": {
+          "asunto": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 0
+          },
+          "mensaje": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "asunto",
+          "mensaje"
+        ]
+      },
+      "ConsultaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "asunto": {
+            "type": "string"
+          },
+          "mensaje": {
+            "type": "string"
+          },
+          "nombreCliente": {
+            "type": "string"
+          },
+          "correoCliente": {
+            "type": "string"
+          },
+          "leida": {
+            "type": "boolean"
+          },
+          "fechaEnvio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaLectura": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CrearProductoRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2
+          },
+          "precio": {
+            "type": "number",
+            "minimum": 0.0
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "disponible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "nombre",
+          "precio"
+        ]
+      },
+      "FotoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "url": {
+            "type": "string"
+          },
+          "orden": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "principal": {
+            "type": "boolean"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "RegistroClienteRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 0
+          },
+          "correo": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 180,
+            "minLength": 0
+          },
+          "contrasena": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 8
+          }
+        },
+        "required": [
+          "contrasena",
+          "correo",
+          "nombre"
+        ]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "expiraEnMillis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          }
+        }
+      },
+      "EditarRedesRequest": {
+        "type": "object",
+        "properties": {
+          "instagram": {
+            "type": "string",
+            "pattern": "^$|^https://(www\\.)?instagram\\.com/[A-Za-z0-9._]{1,60}/?$"
+          },
+          "linkedin": {
+            "type": "string",
+            "pattern": "^$|^https://(www\\.)?linkedin\\.com/(in|company)/[A-Za-z0-9\\-]{1,80}/?$"
+          }
+        }
+      },
+      "RegistroEmprendedorRequest": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 0
+          },
+          "correo": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 180,
+            "minLength": 0
+          },
+          "contrasena": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 8
+          },
+          "negocio": {
+            "$ref": "#/components/schemas/RegistrarNegocioRequest"
+          },
+          "redes": {
+            "$ref": "#/components/schemas/EditarRedesRequest"
+          }
+        },
+        "required": [
+          "contrasena",
+          "correo",
+          "negocio",
+          "nombre"
+        ]
+      },
+      "RegistroEmprendedorResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "expiraEnMillis": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "negocioId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SolicitarRecuperacionRequest": {
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 180,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "correo"
+        ]
+      },
+      "RestablecerContrasenaRequest": {
+        "type": "object",
+        "properties": {
+          "contrasena": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 8
+          }
+        },
+        "required": [
+          "contrasena"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "correo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contrasena": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "contrasena",
+          "correo"
+        ]
+      },
+      "CrearCursoRequest": {
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "duracion": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 0
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "MARKETING",
+              "FINANZAS",
+              "VENTAS",
+              "DIGITAL",
+              "GESTION"
+            ]
+          },
+          "nivel": {
+            "type": "string",
+            "enum": [
+              "BASICO",
+              "INTERMEDIO",
+              "AVANZADO"
+            ]
+          },
+          "gratuito": {
+            "type": "boolean"
+          },
+          "precio": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "urlRecurso": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "emoji": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "categoria",
+          "descripcion",
+          "duracion",
+          "emoji",
+          "gratuito",
+          "nivel",
+          "titulo",
+          "urlRecurso"
+        ]
+      },
+      "NotificacionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "leida": {
+            "type": "boolean"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReordenarFotosRequest": {
+        "type": "object",
+        "properties": {
+          "orden": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "orden"
+        ]
+      },
+      "EditarContactoRequest": {
+        "type": "object",
+        "properties": {
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(3\\d{9}|60\\d{8})$"
+          }
+        },
+        "required": [
+          "telefono"
+        ]
+      },
+      "DecisionRequest": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "motivo"
+        ]
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PageNotificacionResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificacionResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageOpinionResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpinionResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MetricasVisitasResponse": {
+        "type": "object",
+        "properties": {
+          "totalHistorico": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "semana": {
+            "$ref": "#/components/schemas/PeriodoMetricaResponse"
+          },
+          "mes": {
+            "$ref": "#/components/schemas/PeriodoMetricaResponse"
+          },
+          "serie": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PuntoSerieResponse"
+            }
+          }
+        }
+      },
+      "PeriodoMetricaResponse": {
+        "type": "object",
+        "properties": {
+          "actual": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "anterior": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "variacionPorcentual": {
+            "type": "number"
+          }
+        }
+      },
+      "PuntoSerieResponse": {
+        "type": "object",
+        "properties": {
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "visitas": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PageConsultaResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsultaResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EstadisticasPortadaResponse": {
+        "type": "object",
+        "properties": {
+          "negociosActivos": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categorias": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usuariosRegistrados": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "calificacionPromedio": {
+            "type": "number"
+          }
+        }
+      },
+      "NegocioPublicoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "ciudad": {
+            "type": "string"
+          },
+          "barrio": {
+            "type": "string"
+          },
+          "nivelPrecio": {
+            "type": "string"
+          },
+          "calificacionPromedio": {
+            "type": "number"
+          },
+          "numeroOpiniones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaAprobacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fotoPrincipal": {
+            "type": "string"
+          }
+        }
+      },
+      "PageNegocioPublicoResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NegocioPublicoResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PerfilNegocioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "ciudad": {
+            "type": "string"
+          },
+          "barrio": {
+            "type": "string"
+          },
+          "nivelPrecio": {
+            "type": "string"
+          },
+          "calificacionPromedio": {
+            "type": "number"
+          },
+          "numeroOpiniones": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaAprobacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "instagram": {
+            "type": "string"
+          },
+          "linkedin": {
+            "type": "string"
+          },
+          "fotos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FotoResponse"
+            }
+          },
+          "productos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductoResponse"
+            }
+          }
+        }
+      },
+      "PageCursoResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CursoResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OpcionResponse": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "BarrioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "CiudadResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "barrios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BarrioResponse"
+            }
+          }
+        }
+      },
+      "CategoriaNegocioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "icono": {
+            "type": "string"
+          }
+        }
+      },
+      "PageUsuarioResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UsuarioResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UsuarioResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "fechaRegistro": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "activo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageNegocioResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NegocioResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageRegistroModeracionResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistroModeracionResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RegistroModeracionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "descripcionTipo": {
+            "type": "string"
+          },
+          "afectado": {
+            "type": "string"
+          },
+          "detalle": {
+            "type": "string"
+          },
+          "administrador": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DenunciaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "opinionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "negocio": {
+            "type": "string"
+          },
+          "autorOpinion": {
+            "type": "string"
+          },
+          "calificacion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "type": "string"
+          },
+          "motivo": {
+            "type": "string"
+          },
+          "motivoDescripcion": {
+            "type": "string"
+          },
+          "denunciante": {
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PageDenunciaResponse": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DenunciaResponse"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CambioPendienteResponse": {
+        "type": "object",
+        "properties": {
+          "negocioId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nombreActual": {
+            "type": "string"
+          },
+          "nombrePropuesto": {
+            "type": "string"
+          },
+          "descripcionActual": {
+            "type": "string"
+          },
+          "descripcionPropuesta": {
+            "type": "string"
+          },
+          "categoriaActual": {
+            "type": "string"
+          },
+          "categoriaPropuesta": {
+            "type": "string"
+          },
+          "fotosPendientes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fechaSolicitud": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Un campo inválido y su mensaje: «nombre»: «El nombre es obligatorio»"
+        },
+        "description": "Cuerpo de cualquier error. Con validación por campo, cada campo inválido llega como una clave más con su mensaje.",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Su nombre: «Bad Request»…"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Cuándo ocurrió"
+          },
+          "message": {
+            "type": "string",
+            "description": "Qué pasó, en español (GlobalExceptionHandler)"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "El código HTTP"
+          },
+          "path": {
+            "type": "string",
+            "description": "La ruta pedida. Solo en los errores que corta Spring antes del controlador"
+          }
+        },
+        "required": [
+          "error",
+          "status",
+          "timestamp"
+        ]
+      },
+      "CrearProductoPeticion": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CrearProductoRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "foto": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "required": [
+              "foto"
+            ]
+          }
+        ]
+      },
+      "SubirPeticion": {
+        "type": "object",
+        "properties": {
+          "archivo": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "archivo"
+        ]
+      },
+      "MarcarTodasLeidasRespuesta": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "CambiarFotoPeticion": {
+        "type": "object",
+        "properties": {
+          "foto": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "foto"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearer-jwt": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

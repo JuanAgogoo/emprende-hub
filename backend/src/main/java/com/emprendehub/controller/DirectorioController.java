@@ -7,6 +7,9 @@ import com.emprendehub.model.NivelPrecio;
 import com.emprendehub.model.OrdenDirectorio;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.DirectorioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -33,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
  * que un {@code nivelPrecio=REGALADO} devuelve 400 sin llegar al servicio.
  */
 @Tag(name = "Directorio", description = "La exploración pública de negocios")
+// Público: no pide token (SecurityConfig).
+@SecurityRequirements
 @RestController
 @RequestMapping("/api/v1/directorio")
 public class DirectorioController {
@@ -44,6 +49,9 @@ public class DirectorioController {
     }
 
     @GetMapping
+    @Operation(summary = "Buscar en el directorio")
+    @ApiResponse(responseCode = "400",
+            description = "Un filtro con un valor no válido, u orden por un campo que no existe")
     public Page<NegocioPublicoResponse> buscar(
             @RequestParam(required = false) String texto,
             @RequestParam(required = false) Long categoriaId,
@@ -61,6 +69,9 @@ public class DirectorioController {
 
     /** Los mejor calificados con al menos cinco opiniones (C7). */
     @GetMapping("/destacados")
+    @Operation(summary = "Negocios destacados (C7)")
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador o un filtro con un valor que no es del tipo esperado")
     public List<NegocioPublicoResponse> destacados(
             @RequestParam(required = false) Integer limite) {
         return directorioService.destacados(limite);
@@ -79,6 +90,10 @@ public class DirectorioController {
      * dueño; si no, se distingue la sesión por la propia petición.
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Ver el perfil público de un negocio")
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador o un filtro con un valor que no es del tipo esperado")
+    @ApiResponse(responseCode = "404", description = "No existe o no está publicado (B6)")
     public PerfilNegocioResponse obtenerPerfil(@PathVariable Long id,
                                                @AuthenticationPrincipal Usuario visitante,
                                                HttpServletRequest peticion) {

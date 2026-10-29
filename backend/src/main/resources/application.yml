@@ -87,6 +87,11 @@ emprendehub:
     # nombre del fichero. El directorio se publica en /fotos/**.
     directorio: ${FOTOS_DIR:./uploads}
 
+springdoc:
+  # Sin esto, springdoc anuncia `*/*` en todas las respuestas. La API responde
+  # JSON siempre.
+  default-produces-media-type: application/json
+
 server:
   port: ${PORT:8080}
 

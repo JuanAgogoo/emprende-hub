@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /**
@@ -164,6 +165,21 @@ public class GlobalExceptionHandler {
             MaxUploadSizeExceededException ex) {
         return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST,
                 "Cada imagen puede pesar 5 MB como mucho"));
+    }
+
+    /**
+     * Una subida de imagen que ni siquiera es un formulario {@code multipart}.
+     *
+     * <p>Respondía 500, y no es un fallo del servidor sino de quien envía. Lo
+     * destapó la comprobación de {@code openapi.json} contra la API, al llamar a
+     * {@code POST /negocios/mio/fotos} sin cuerpo. El caso de la imagen
+     * demasiado grande también es una {@code MultipartException}, pero tiene su
+     * propio manejador, más específico, y sigue diciendo lo suyo.
+     */
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<Map<String, Object>> noEsMultipart(MultipartException ex) {
+        return ResponseEntity.badRequest().body(cuerpo(HttpStatus.BAD_REQUEST,
+                "La imagen tiene que llegar en un formulario multipart"));
     }
 
     /**

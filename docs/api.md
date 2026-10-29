@@ -2,11 +2,17 @@
 
 Todas las rutas cuelgan de `/api/v1`. Los cuerpos son JSON.
 
-> **Con el backend levantado, esto mismo se explora y se prueba** en
-> <http://localhost:8080/swagger-ui.html>, y el documento OpenAPI está en
-> `/v3/api-docs`. Lo genera springdoc desde los controladores, así que no puede
-> contradecir al código; este documento es el que explica **por qué** cada regla
-> es como es, que es lo que un esquema generado no sabe.
+> **La especificación está en [`openapi.json`](../openapi.json)**, en la raíz del
+> repositorio: OpenAPI 3.1, con cada operación, sus parámetros, sus cuerpos y
+> todos sus códigos, los de error incluidos. Con el backend levantado, lo mismo
+> se explora y se prueba en <http://localhost:8080/swagger-ui.html>. Lo genera
+> springdoc desde los controladores, así que no puede contradecir al código; este
+> documento es el que explica **por qué** cada regla es como es, que es lo que un
+> esquema generado no sabe.
+>
+> **Un PR que añade o cambia un endpoint vuelve a exportar `openapi.json`** con
+> `./scripts/exportar-openapi.sh`, y lo comprueba con
+> `python3 scripts/comprobar-openapi.py`, los dos con la API levantada.
 
 Este documento es la fuente de la colección de Postman del PR 14 y el guion para
 explicar el flujo de datos en la sustentación.
