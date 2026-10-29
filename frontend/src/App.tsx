@@ -1,4 +1,5 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { AvisoSesionCaducada } from './componentes/AvisoSesionCaducada';
 import { Cabecera } from './componentes/Cabecera';
 import { RutaDeAdmin } from './componentes/RutaDeAdmin';
 import { RutaDeEmprendedor } from './componentes/RutaDeEmprendedor';
@@ -34,6 +35,7 @@ function Estructura() {
         Saltar al contenido
       </a>
       <Cabecera />
+      <AvisoSesionCaducada />
       <main id="contenido">
         <Outlet />
       </main>
