@@ -118,21 +118,54 @@ El umbral está **activo desde el PR 4** y colgado de la tarea `check`: un
 `cd backend && ./gradlew build` que baje del 80% en `service/**` falla. Es más barato escribir
 la prueba en su incremento que recuperar cobertura al final.
 
-## El frontend no tiene pruebas automáticas, y es a propósito
+## Las pruebas del frontend
 
-Nadie las pidió, y añadir Vitest y Testing Library significaría dos dependencias,
-una configuración y un patrón más que defender, para cubrir vistas que cambian en
-cada incremento. Lo que sí hay es un cierre obligatorio en cada rebanada:
-
-> **Esto cambia con la entrega final.** La
-> [rúbrica de la entrega del frontend](https://jpcc1217.github.io/upb_contenidos_cursos/2026_2/plataformas/entregas_calificables/entrega_frontend.html)
-> no las exigía en esa entrega y avisa de que **se evaluarán en la final**. Hoy
-> no hay nada instalado para ello: la herramienta se elegirá con lo que enseñe el
-> curso cuando llegue, igual que en el backend se eligió JUnit con Mockito.
+**Vitest con jsdom**, desde la entrega final. Hasta entonces el frontend no tenía
+pruebas a propósito: la rúbrica de la entrega del frontend no las pedía. La de la
+final sí, y dice qué tienen que cubrir: «el servicio de autenticación, el
+interceptor que adjunta el token y al menos un servicio que consume la API en el
+CRUD», con un comando que se ejecute «sin interfaz gráfica» y «sin quedarse
+esperando cambios».
 
 ```bash
 cd frontend
-npm run build      # tipos y compilación: 0 errores y 0 advertencias
+npm test           # vitest run: una pasada, sin modo vigilancia, y termina
+```
+
+**Por qué Vitest y jsdom.** El material del curso no trata las pruebas de
+frontend. Vitest es el runner que acompaña a Vite —lee su misma configuración,
+así que no hay que enseñarle TypeScript ni los alias— y es también el que usa
+Angular por defecto desde su versión 21 en `ng test`. jsdom es el navegador
+simulado que nombra el enunciado: da `localStorage`, `FormData` y `File` sin
+abrir ninguna ventana. Son las dos únicas dependencias nuevas, y solo de
+desarrollo. **Testing Library no entra**: lo exigido son servicios, no
+componentes, y no hace falta pintar nada.
+
+| Fichero | Qué prueba |
+|---|---|
+| `src/almacenSesion.test.ts` | Guardar, leer y borrar la sesión; descartar una corrupta o con otra forma |
+| `src/api/auth.test.ts` | El servicio de autenticación: login, registro y el 200 sin cuerpo de la recuperación |
+| `src/api/cliente.test.ts` | **El interceptor**: la cabecera `Authorization` solo con sesión y en peticiones con sesión, el 401 con token que cierra la sesión (y el 401 sin token, o el 403, que no), la red caída, los 502–504 y los errores por campo |
+| `src/api/negocios.test.ts` | El CRUD del escaparate: listar, crear con su foto, editar y borrar, con su método, URL, cuerpo y cabecera |
+
+Mismas convenciones que en el backend: nombres en español y el patrón AAA con
+los comentarios `//arrange`, `//act` y `//assert` escritos tal cual. **`fetch` se
+sustituye en cada prueba** por una respuesta preparada (`src/pruebas/respuestas.ts`),
+así que no hace falta backend: lo que se prueba es lo que el frontend manda y cómo
+lee lo que le devuelven. Que el backend responda de verdad lo comprueban `curl` y
+el navegador.
+
+Se comprobó que las pruebas vigilan algo: quitando la línea que pone la cabecera
+`Authorization` en `cliente.ts` caen seis, justo las que dependen del token.
+
+### El cierre de cada rebanada
+
+Las pruebas no sustituyen el cierre que ya había:
+
+```bash
+cd frontend
+npm test           # las pruebas, sin modo vigilancia
+npm run build      # tipos y compilación, pruebas incluidas: 0 errores y 0 advertencias
 npm run contraste  # las 21 combinaciones de los tokens contra WCAG 2.2
 ```
 

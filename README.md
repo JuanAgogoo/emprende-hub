@@ -477,12 +477,15 @@ porque la cobertura se mide sobre el paquete entero; para eso usa `cd backend &&
 
 ### Verificar el frontend
 
-No tiene pruebas automáticas a propósito: nadie las pidió, y las vistas cambian
-en cada incremento. **Cambia con la entrega final**, que según la rúbrica las
-evalúa. Lo que sí tiene es un cierre obligatorio.
+Las pruebas del frontend son de **Vitest con jsdom**, un navegador simulado: no
+abren ninguna ventana ni necesitan el backend, porque `fetch` se sustituye por
+respuestas preparadas. Cubren el servicio de autenticación, el interceptor que
+adjunta el token y el CRUD del escaparate. Necesitan Node, no Docker.
 
 ```bash
 cd frontend
+npm ci             # solo la primera vez: instala las dependencias del package-lock
+npm test           # las pruebas, en una sola pasada
 npm run build      # tipos y compilación: 0 errores y 0 advertencias
 npm run contraste  # las 21 combinaciones de la paleta contra WCAG 2.2
 ```
@@ -495,7 +498,7 @@ hay cinco insignias pendientes que no llegan al mínimo: están listadas en
 
 Y lo que ningún script sustituye: **abrirlo en el navegador**, mirarlo a 360 px
 de ancho y recorrerlo con el tabulador. El detalle está en
-[docs/pruebas.md](docs/pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito).
+[docs/pruebas.md](docs/pruebas.md#las-pruebas-del-frontend).
 
 ## Configuración
 

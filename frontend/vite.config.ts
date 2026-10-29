@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -39,5 +40,11 @@ export default defineConfig({
       '/api/v1': { target: BACKEND, changeOrigin: true },
       '/fotos': { target: BACKEND, changeOrigin: true },
     },
+  },
+  // `npm test`: Vitest con jsdom, un navegador simulado. `localStorage`,
+  // `FormData` y `File` existen sin abrir ninguna ventana, y `fetch` lo
+  // sustituye cada prueba por una respuesta preparada: no hace falta backend.
+  test: {
+    environment: 'jsdom',
   },
 });

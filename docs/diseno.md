@@ -554,7 +554,7 @@ deshabilitado y en silencio.
 ## Antes de dar un incremento por terminado
 
 A las comprobaciones de código que fija
-[pruebas.md](pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito)
+[pruebas.md](pruebas.md#las-pruebas-del-frontend)
 se suman estas cinco, que son su parte visual:
 
 1. `npm run contraste` en verde. Si se añadió un token, se añadió su fila.
