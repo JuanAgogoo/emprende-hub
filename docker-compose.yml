@@ -65,6 +65,9 @@ services:
       # base es `postgres:5432`.
       MAIL_HOST: mailpit
       MAIL_PORT: "1025"
+      # Los datos de prueba, que se siembran la primera vez con la base vacía.
+      # `SEMILLA_DEMO=false docker compose up -d` arranca sin ellos.
+      SEMILLA_DEMO: ${SEMILLA_DEMO:-true}
     ports:
       - "${API_PORT:-8080}:8080"
     volumes:

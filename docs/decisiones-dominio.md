@@ -162,8 +162,9 @@ ninguna otra entidad del sistema.
 ## H. Métricas
 
 - **H1** Visitas **reales**: cada visita a un perfil se registra, y el cálculo de
-  semana, mes y variación porcentual se computa de verdad. Se siembra histórico
-  para que la gráfica no salga vacía en la demo. Las visitas del propio dueño a su
+  semana, mes y variación porcentual se computa de verdad. Los datos de prueba
+  siembran tres meses de histórico para que la gráfica no salga vacía, con la
+  misma regla de una visita por perfil, sesión y día. Las visitas del propio dueño a su
   perfil no cuentan. **Una visita por perfil, sesión y día**: recargar la página no
   suma. Como el directorio es público, solo se descarta al dueño cuando hay sesión
   iniciada; las visitas anónimas siempre cuentan.
