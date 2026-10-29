@@ -68,6 +68,37 @@ test(metricas): cubrir la agregación semanal de visitas
 6. Squash and merge. La rama se borra.
 7. `semantic-release` etiqueta la versión en `main` si el commit lo justifica.
 
+## Varias rebanadas seguidas: ramas encadenadas y squash
+
+Cuando una rebanada necesita la anterior —el panel de administración se hizo en
+siete—, cada rama sale de la anterior y no de `main`. Funciona, pero choca con el
+squash: al fusionar la rama N, `main` recibe **un commit nuevo** con su contenido,
+y la rama N+1 sigue arrastrando los commits originales de la N, con otros
+identificadores. GitHub los ve como cambios repetidos sobre los mismos ficheros y
+el PR de la N+1 sale **con conflictos**.
+
+Se resuelve antes de abrir cada PR, no en la interfaz de GitHub:
+
+```bash
+git fetch origin
+git diff origin/main feat/rama-N          # vacío: el squash es idéntico a la rama
+git rebase --onto origin/main feat/rama-N feat/rama-N+1
+git push --force-with-lease               # nunca --force a secas
+```
+
+El `diff` vacío es la condición para seguir: si alguien retocó la rama N al
+fusionarla, el `--onto` perdería ese retoque. Y después hay que **reencadenar las
+ramas de detrás** sobre la N+1 nueva, o la siguiente repetirá el problema.
+
+Dos reglas que lo evitan casi todo:
+
+- **Abrir el PR de la N+1 solo cuando la N ya esté fusionada.** Abierto antes,
+  nace con conflictos o, peor, se lleva dentro la rama N: el #57 (denuncias) se
+  abrió sin que existiera el de cursos, y fusionado así habría metido los cursos
+  dentro del squash de las denuncias.
+- **El autor de un PR es la cuenta que lo abre**, no el correo de los commits. Los
+  commits pueden ir firmados por una persona y el PR aparecer abierto por otra.
+
 ## Abrir un PR sin usar git
 
 No hace falta terminal ni IDE. Desde github.com, con la sesión iniciada:

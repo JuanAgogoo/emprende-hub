@@ -204,13 +204,14 @@ Tomadas por el equipo de desarrollo. No requieren validación del cliente.
   «una visita por sesión y día» depende de dónde cae la medianoche.
 - **El consentimiento de datos guarda versión de política** (`1.0`). Sin versión,
   la fecha de aceptación no dice a qué se aceptó.
-- **Datos sembrados** como entregable, no como añadido: los 12 negocios y 8 cursos
-  del prototipo, el admin, algunos clientes, opiniones e histórico de visitas. Sin
-  ellos la demo con Postman no demuestra nada y la gráfica de H1 sale vacía.
+- **Datos sembrados** como entregable, no como añadido: los catálogos, la cuenta
+  de administrador y los 8 cursos. **Los negocios se sembraban al principio y se
+  dejaron de sembrar**: se crean a mano o con Postman, porque la vitrina es parte
+  de lo que se enseña y doce negocios generados por un bucle se notan.
 
 ### Decisiones tomadas durante la implementación
 
-Las anteriores se tomaron antes de escribir código. Estas seis salieron de
+Las anteriores se tomaron antes de escribir código. Estas siete salieron de
 construirlo, y son las que más fácil se preguntan en una revisión.
 
 - **El reloj es un bean `Clock`**, publicado en la zona `America/Bogota`. Con
@@ -218,9 +219,9 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   los siete anteriores» dependería del día en que se ejecutara la prueba; con el
   reloj inyectado se le pasa un `Clock.fixed`. La zona no es cosmética: en UTC, el
   día de un negocio de Medellín cortaría a las siete de la tarde.
-- **Los cuatro `CommandLineRunner` llevan `@Order`** (catálogos → admin → cursos →
-  demostración). Spring no garantiza el orden entre ellos, y sin esto la siembra
-  arranca antes que los catálogos y falla buscando una categoría que aún no existe.
+- **Los tres `CommandLineRunner` llevan `@Order`** (catálogos → admin → cursos).
+  Spring no garantiza el orden entre ellos, y sin esto los cursos se cargan antes
+  que los catálogos y la carga falla buscando una categoría que aún no existe.
 - **Unicidad en el esquema para opiniones y denuncias, deliberadamente no para
   visitas.** Una opinión duplicada rompe C2 y hay que impedirla en la base de
   datos, porque el servicio no ve dos peticiones simultáneas. Una visita duplicada
@@ -237,6 +238,17 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   borrado de una opinión por moderación **se delega en `OpinionService`**: allí el
   recálculo del promedio es imposible de saltarse, y es el momento que más fácil
   se olvida porque no lo dispara su autor.
+- **El correo va a un SMTP local y un aviso que no sale no deshace nada.** Con
+  `spring-boot-starter-mail` contra [Mailpit](https://github.com/axllent/mailpit),
+  un servicio más del `docker-compose.yml`: funciona sin internet ni cuenta de
+  correo, y lo enviado se ve llegar en su bandeja web. Hay dos usos con reglas
+  distintas. El enlace de recuperación (I1-bis) es la operación entera, así que
+  su fallo se registra pero la respuesta no cambia, para no delatar qué correos
+  existen. Los avisos de las decisiones del administrador (I1-ter) informan de
+  algo que **ya pasó**: si el servidor de correo no responde, el negocio queda
+  aprobado o la cuenta suspendida igual, y el fallo se anota en el registro.
+  Deshacer la decisión por un aviso perdido sería peor que el aviso perdido. Todo
+  vive en `CorreoService`; ningún otro servicio construye un mensaje.
 
 - **El Swagger se genera, no se escribe.** `springdoc-openapi` publica
   `/v3/api-docs` y `/swagger-ui.html` a partir de los propios controladores: las
@@ -292,7 +304,9 @@ frontend/src/
 ├── estado/      Un contexto por dominio
 ├── componentes/ Piezas reutilizables y bloques de pantalla, con su módulo CSS
 ├── paginas/     Una por ruta
-└── estilos/     tokens.css manda: ningún color se escribe fuera
+├── estilos/     tokens.css manda: ningún color se escribe fuera
+└── *.ts         Módulos sueltos que usa media aplicación: el almacén de la
+                 sesión, el formato de fechas y precios, el título de la pestaña
 ```
 
 **En `componentes/` hay dos clases de cosas**, y conviene saberlo antes de buscar
@@ -307,6 +321,28 @@ por delante el resto de la pantalla.
 Tres reglas que se verifican con `grep` antes de cerrar cada incremento: ninguna
 llamada a `fetch` fuera de `api/`, ningún `any`, y ningún color fuera de
 `tokens.css`.
+
+**Las rutas por rol son una comodidad, no la seguridad.** `RutaDeEmprendedor` y
+`RutaDeAdmin` envuelven sus páginas y devuelven al login, o a la portada, a quien
+no tiene ese rol: así nadie ve una pantalla que no le va a funcionar. Quien llame
+a la API a mano se encuentra igual con el backend, que es donde se comprueba el
+rol de verdad (`/api/v1/admin/**` responde 403 a cualquier otro).
+
+**El panel de administración es una ruta por cola de trabajo**, anidadas bajo
+`/admin`: negocios, cambios, denuncias, usuarios, cursos e historial. Un armazón
+común (`PanelAdmin`) pinta las pestañas y un `<Outlet>`, así que cada cola se
+puede enlazar, recargar y recorrer con el botón de volver. Dos patrones se
+repiten en todas:
+
+- **Decidir pide el motivo en un `<dialog>`** (`DialogoMotivo`), el mismo para
+  rechazar un negocio, rechazar un cambio y borrar una opinión. Es el único
+  componente que se extrajo por la regla de tres: tres usos idénticos.
+- **Lo que se decidió viaja de vuelta en el `state` de la navegación**, como el
+  «cuenta creada» del login, y se lee comprobando su forma: es dato externo, que
+  sobrevive a una recarga.
+
+Aprobar un negocio solo se puede desde su vista previa, no desde la lista: así no
+se publica nada sin haberlo mirado.
 
 ### Las tres decisiones que hay que saber defender
 
@@ -365,8 +401,8 @@ Además del código, la entrega incluye:
   cursos. **Los negocios no se siembran**, se crean: doce generados por un bucle
   se notan, y la vitrina es parte de lo que se enseña.
 - **`docker-compose.yml`** que levanta el proyecto entero con un solo comando:
-  PostgreSQL, la API y la web, las dos últimas en modo desarrollo y con el código
-  montado desde el host. `docker compose up -d postgres` levanta solo la base,
+  PostgreSQL, la API, la web y Mailpit para el correo; la API y la web en modo
+  desarrollo y con el código montado desde el host. `docker compose up -d postgres` levanta solo la base,
   para quien prefiera `bootRun` y `npm run dev` a mano; los dos modos usan los
   mismos puertos y no pueden convivir.
 - **README** con los pasos para arrancar las dos mitades y verificarlas.

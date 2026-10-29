@@ -8,6 +8,22 @@ Programación Empresarial.
 | **API REST** | [`backend/`](backend) | Java 25 · Spring Boot 4.1.1 · Gradle · PostgreSQL · Spring Data JPA · Spring Security |
 | **Interfaz web** | [`frontend/`](frontend) | React · Vite · TypeScript |
 
+## Qué hace
+
+Un directorio de negocios del Valle de Aburrá, con su catálogo de cursos para
+emprendedores. Cuatro perfiles, cada uno con lo suyo:
+
+| Perfil | Qué puede hacer |
+|---|---|
+| **Visitante**, sin cuenta | Buscar y filtrar el directorio, ver perfiles con galería y escaparate, leer opiniones y recorrer el catálogo de cursos |
+| **Cliente** | Además: calificar y opinar, denunciar una opinión ajena y escribirle a un negocio |
+| **Emprendedor** | Registrar su negocio con un asistente de cuatro pasos y gestionarlo: datos, fotos, escaparate, buzón de consultas, visitas y avisos |
+| **Administrador** | Un panel con sus colas: aprobar negocios y cambios con vista previa, resolver denuncias, suspender cuentas, publicar cursos y consultar el historial de moderación |
+
+Un negocio nuevo no se ve hasta que el administrador lo aprueba, y sus cambios
+posteriores esperan revisión sin sacarlo del directorio. Las reglas, con su
+porqué, están en [docs/decisiones-dominio.md](docs/decisiones-dominio.md).
+
 ## Arrancar
 
 Hace falta **solo Docker**. Ni Gradle, ni el JDK 25, ni Node: van dentro de las
@@ -462,7 +478,8 @@ porque la cobertura se mide sobre el paquete entero; para eso usa `cd backend &&
 ### Verificar el frontend
 
 No tiene pruebas automáticas a propósito: nadie las pidió, y las vistas cambian
-en cada incremento. Lo que sí tiene es un cierre obligatorio.
+en cada incremento. **Cambia con la entrega final**, que según la rúbrica las
+evalúa. Lo que sí tiene es un cierre obligatorio.
 
 ```bash
 cd frontend
@@ -472,7 +489,9 @@ npm run contraste  # las 21 combinaciones de la paleta contra WCAG 2.2
 
 `npm run contraste` lee los colores de `src/estilos/tokens.css` y falla si alguna
 combinación baja de su mínimo: 4,5:1 en texto y 3:1 en bordes de control. Si se
-añade un token, se añade su fila.
+añade un token, se añade su fila. **No mide las mezclas con `color-mix()`**, y ahí
+hay cinco insignias pendientes que no llegan al mínimo: están listadas en
+[docs/pruebas.md](docs/pruebas.md#el-contraste-de-los-tintes-no-lo-mide-ningún-script).
 
 Y lo que ningún script sustituye: **abrirlo en el navegador**, mirarlo a 360 px
 de ancho y recorrerlo con el tabulador. El detalle está en
@@ -550,3 +569,4 @@ porqué está en [docs/arquitectura.md](docs/arquitectura.md#el-frontend).
 | [docs/plan-de-entrega.md](docs/plan-de-entrega.md) | Los 14 incrementos del backend |
 | [docs/diseno.md](docs/diseno.md) | Paleta, tipografía y accesibilidad del frontend |
 | [docs/plan-de-entrega-frontend-fase-1.md](docs/plan-de-entrega-frontend-fase-1.md) | Los 13 incrementos de la fase 1 del frontend |
+| [docs/plan-de-entrega-frontend-fase-2.md](docs/plan-de-entrega-frontend-fase-2.md) | Los 6 de la fase 2: opiniones y recuperar la contraseña |
