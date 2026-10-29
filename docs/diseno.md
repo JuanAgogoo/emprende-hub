@@ -106,6 +106,12 @@ luminancia relativa de WCAG 2.2. **Ejecutado, no estimado:**
 `npm run contraste`. Si alguien añade un token, añade su fila; si el script falla,
 el incremento no se cierra.
 
+**Lo que el script no mide son las mezclas.** Una insignia con texto de su color
+sobre su propio tinte de `color-mix()` es otra combinación, y con tintes del 12 al
+15 % hay **cinco que hoy no llegan a 4,5:1**. El tinte máximo de cada señal y la
+lista de las pendientes están en
+[pruebas.md](pruebas.md#el-contraste-de-los-tintes-no-lo-mide-ningún-script).
+
 **Dos cosas que costaron una corrección y conviene no repetir:**
 
 - **El borde de los campos no puede ser gris claro.** El `#E2E8F0` que se usa
@@ -315,6 +321,11 @@ Las dos se comprueban **en el CSS compilado de `dist/`**, no suponiéndolas: las
 clases de CSS Modules se hashean por fichero y leer el `.module.css` no dice si
 la regla llegó a aplicarse.
 
+Una tercera no viene del reset, pero muerde igual y tampoco la ve el build: **una
+imagen con atributos `width` y `height` necesita `height: auto`** en el CSS. Sin
+él, el atributo cuenta como alto fijo y el `aspect-ratio` se ignora; la foto
+principal del perfil salió a 900 px de alto por eso.
+
 ### Botones
 
 | Variante | Fondo | Texto | Borde | Cuándo |
@@ -380,7 +391,9 @@ El paso completado se marca con un check, no solo con color. El actual lleva
 Una píldora pequeña con su palabra y su señal, en el color que le toca al hecho:
 la opinión en `--color-aviso`, la consulta en `--color-acento`, lo aprobado en
 `--color-exito` y lo rechazado en `--color-error`, cada una sobre su propio color
-rebajado con `color-mix`.
+rebajado con `color-mix`. **Rebajado de verdad: al 6 %.** Con más tinte el texto
+deja de contrastar con su fondo —el aviso no pasa del 6 % ni el éxito del 8 %— y
+ningún script lo avisa.
 
 **La señal va en `aria-hidden` y el nombre se escribe siempre.** El color y el
 dibujo solos no sirven para quien no los distingue, así que la insignia es

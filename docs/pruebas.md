@@ -124,20 +124,30 @@ Nadie las pidió, y añadir Vitest y Testing Library significaría dos dependenc
 una configuración y un patrón más que defender, para cubrir vistas que cambian en
 cada incremento. Lo que sí hay es un cierre obligatorio en cada rebanada:
 
+> **Esto cambia con la entrega final.** La
+> [rúbrica de la entrega del frontend](https://jpcc1217.github.io/upb_contenidos_cursos/2026_2/plataformas/entregas_calificables/entrega_frontend.html)
+> no las exigía en esa entrega y avisa de que **se evaluarán en la final**. Hoy
+> no hay nada instalado para ello: la herramienta se elegirá con lo que enseñe el
+> curso cuando llegue, igual que en el backend se eligió JUnit con Mockito.
+
 ```bash
 cd frontend
 npm run build      # tipos y compilación: 0 errores y 0 advertencias
-npm run contraste  # las 21 combinaciones de la paleta contra WCAG 2.2
+npm run contraste  # las 21 combinaciones de los tokens contra WCAG 2.2
 ```
 
-Más cuatro comprobaciones por `grep`, que son las reglas que un build en verde no
+Más tres comprobaciones por `grep`, que son las reglas que un build en verde no
 detecta:
 
 ```bash
 grep -rn ': any\|as any' src/                                        # vacío
 grep -rn 'fetch(' src --include=*.tsx | grep -v '^src/api/'          # vacío
-grep -rnE '#[0-9a-fA-F]{3,8}|rgb\(' src --include=*.css | grep -v tokens.css   # vacío
+grep -rnE '#[0-9a-fA-F]{3,8}|rgb\(' src --include=*.css | grep -v tokens.css   # una excepción conocida
 ```
+
+La del color tiene **una excepción conocida**: el fondo del diálogo de
+`ConfirmarBorrado.module.css` se escribe con `rgb()`. Los diálogos posteriores
+sacan ese velo de un token con `color-mix()`.
 
 Y la que ningún script sustituye: **abrir el navegador**. En el backend la regla
 es no fiarse de las pruebas y llamar al endpoint con `curl`; aquí es mirar la
@@ -174,6 +184,54 @@ grep -o '\.[A-Za-z0-9_-]*zonaFoto[^{]*{[^}]*}' dist/assets/*.css
 
 Si el selector no aparece con las dos clases hasheadas juntas, la regla no está
 casando con lo que se cree.
+
+### El contraste de los tintes no lo mide ningún script
+
+`npm run contraste` comprueba los tokens puros. Una insignia con su color sobre
+**su propio tinte** —`color-mix(in srgb, var(--color-aviso) 14%, var(--color-lienzo))`
+de fondo y `--color-aviso` de texto— es otra combinación, y nadie la calcula. Con
+texto del mismo color, cada señal aguanta el 4,5:1 hasta este tinte:
+
+| Señal | Tinte máximo | Al 8 % | Al 14 % |
+|---|---|---|---|
+| `--color-exito` | 8 % | 4,51 | 4,14 |
+| `--color-aviso` | 6 % | 4,42 | 4,09 |
+| `--color-error` | 20 % | 5,66 | 5,08 |
+| `--color-acento` | 14 % | 4,90 | 4,50 |
+
+Lo nuevo usa el 6 %. **Cinco combinaciones anteriores incumplen el mínimo**, entre
+4,03 y 4,27:1, y siguen pendientes:
+
+| Fichero | Regla | Combinación |
+|---|---|---|
+| `componentes/EscaparateEditable.module.css` | `.agotado` | aviso sobre aviso al 15 % |
+| `paginas/PerfilNegocio.module.css` | `.etiquetaAgotado` | aviso sobre aviso al 14 % |
+| `componentes/Notificaciones.module.css` | `.opinion` | aviso sobre aviso al 14 % |
+| `componentes/Notificaciones.module.css` | `.aprobado` | éxito sobre éxito al 12 % |
+| `paginas/MiNegocio.module.css` | `.pendientes` | aviso sobre aviso al 14 % |
+
+### Las fechas sueltas son medianoche UTC
+
+`new Date('2026-08-30')` no es el 30 de agosto en Colombia: es medianoche UTC,
+que aquí cae el día anterior desde las siete de la tarde. Una serie de días se
+dibuja corrida uno, y un filtro «hasta el 6» se come las últimas horas del 6. Un
+día suelto se construye por partes —`new Date(anio, mes - 1, dia)`—, como hacen
+`formato.ts` y el historial de moderación. Las fechas con hora y zona, como
+`fechaCreacion`, no tienen el problema.
+
+### Una imagen con `width` y `height` necesita `height: auto`
+
+Los atributos de un `<img>` reservan su hueco antes de que cargue, pero el alto
+cuenta como un alto fijo: con `width: 100%` y `aspect-ratio` en el CSS, sin
+`height: auto` la proporción se ignora. La foto principal del perfil midió 900 px
+de alto durante semanas, y el build no tenía forma de verlo.
+
+### El estado de error tarda en verse
+
+Para ver el error de una vista se para el backend, pero el proxy de Vite tarda
+unos 5 s por petición en rendirse con un 502. Una página que pide los catálogos y
+luego los datos encadena dos esperas: **unos 10 s** antes de que aparezca el
+mensaje. No es que falte el estado de error, es que todavía no ha llegado.
 
 ## Lo que depende del reloj se inyecta
 
