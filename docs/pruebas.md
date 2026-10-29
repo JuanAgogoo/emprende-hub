@@ -53,6 +53,18 @@ contenedor al terminar cada clase de prueba, así que la segunda clase que hered
 de `PostgresTestBase` lo encontraría parado. Se usa el patrón de contenedor único:
 un bloque `static` que llama a `start()` una vez para toda la ejecución.
 
+**Las tres de `@SpringBootTest` heredan de `AplicacionTestBase`**
+(`EmprendeHubApplicationTests`, `SeguridadAccesoTest` y `SeguridadHttpRealTest`),
+con el mismo patrón y **otro contenedor**. Hasta la entrega final conectaban con la
+base de `application.yml`, en el 5433: en un clon limpio, sin esa base levantada,
+caían 38 pruebas con *Unable to determine Dialect*. Ahora `./gradlew check` solo
+necesita Docker.
+
+No comparten contenedor con las de repositorio a propósito, y se probó: la
+aplicación entera ejecuta sus cargas iniciales al arrancar —catálogos, admin y
+cursos—, y las pruebas de repositorio, que crean sus propias ciudades, chocaban
+con «Medellín ya existe». Con una sola base caían 80.
+
 **Los parámetros de texto opcionales necesitan `CAST` en las consultas.** Cuando un
 parámetro llega nulo, PostgreSQL lo infiere como `bytea` y revienta con
 *function lower(bytea) does not exist*. Hay que escribir
