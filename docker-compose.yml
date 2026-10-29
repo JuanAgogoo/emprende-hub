@@ -12,15 +12,19 @@ services:
     container_name: emprendehub-db
     environment:
       POSTGRES_DB: emprendehub
-      POSTGRES_USER: emprendehub
-      POSTGRES_PASSWORD: emprendehub
+      # Las credenciales salen del `.env` de la raíz, que no está en git:
+      # `cp .env.example .env` y elegir usuario y contraseña. Si faltan, Compose
+      # se niega a arrancar con este mensaje en vez de crear una base sin ellas.
+      POSTGRES_USER: ${DB_USER:?Falta DB_USER. Copia .env.example a .env y elige un usuario}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD. Copia .env.example a .env y elige una contraseña}
       TZ: America/Bogota
     ports:
       - "${DB_PORT:-5433}:5432"
     volumes:
       - emprendehub-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U emprendehub -d emprendehub"]
+      # `$$` para que lo expanda el contenedor y no Compose.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d emprendehub"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -53,6 +57,9 @@ services:
       # Dentro de la red de compose la base es `postgres:5432`. El 5433 es el
       # puerto que se publica al host, y aquí no pinta nada.
       DB_URL: jdbc:postgresql://postgres:5432/emprendehub
+      # Las mismas del servicio `postgres`, del mismo `.env`.
+      DB_USER: ${DB_USER:?Falta DB_USER. Copia .env.example a .env y elige un usuario}
+      DB_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD. Copia .env.example a .env y elige una contraseña}
       TZ: America/Bogota
       # Dentro de la red de compose el correo es `mailpit:1025`, igual que la
       # base es `postgres:5432`.
