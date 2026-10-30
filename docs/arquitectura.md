@@ -259,20 +259,32 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   Deshacer la decisión por un aviso perdido sería peor que el aviso perdido. Todo
   vive en `CorreoService`; ningún otro servicio construye un mensaje.
 
-- **El Swagger se genera, no se escribe.** `springdoc-openapi` publica
-  `/v3/api-docs` y `/swagger-ui.html` a partir de los propios controladores: las
-  rutas, los cuerpos, los códigos y las reglas de Bean Validation de cada DTO
-  salen del código. La alternativa era un `openapi.yaml` a mano, y habría sido un
-  **segundo sitio donde decir lo mismo**: exactamente lo que `scripts/cifras.sh`
-  existe para evitar. Que las 67 operaciones que genera coincidan con los 67
-  endpoints que ese script cuenta en `docs/api.md` es la comprobación de que
-  ninguno de los dos miente. Lo único escrito a mano es la portada, el esquema de
-  seguridad —ningún tipo de Java dice «esto se autentica con un JWT»— y el nombre
-  de cada grupo, con un `@Tag` por controlador; sin él la interfaz los llama
-  `producto-controller`. **Los métodos no llevan ni una anotación de Swagger**:
-  describir en un texto lo que ya dice la firma solo crea algo que se queda atrás.
-  Es la versión 3.x, que es la de Spring Boot 4; la 2.x es de Boot 3 y aquí no
-  arranca.
+- **El Swagger se genera, y se exporta a `openapi.json`.** `springdoc-openapi`
+  publica `/v3/api-docs` y `/swagger-ui.html` a partir de los propios
+  controladores: las rutas, los parámetros, los cuerpos y las reglas de Bean
+  Validation de cada DTO salen del código. La alternativa era un `openapi.yaml` a
+  mano, y habría sido un **segundo sitio donde decir lo mismo**, con 67
+  operaciones que se quedarían atrás. `scripts/exportar-openapi.sh` lo vuelca a
+  `openapi.json`, en la raíz, que es lo que pide la entrega final.
+
+  Hasta la entrega final **los métodos no llevaban ni una anotación de Swagger**,
+  y el documento declaraba `200` en las 67 operaciones y el candado sobre todas,
+  también las públicas. La rúbrica de la final exige otra cosa: cada operación
+  con **todos** sus códigos, los de error incluidos, y la seguridad aplicada en
+  las protegidas. Eso no está en ninguna firma, así que se anota, repartido así:
+
+  | Qué | Dónde |
+  |---|---|
+  | `201`, `204` y los 400, 404 y 410 propios de cada operación | `@ApiResponse` en el método, sacados de su servicio y de `GlobalExceptionHandler` |
+  | El candado | `@SecurityRequirement` en los controladores protegidos; `@SecurityRequirements` vacío en los públicos |
+  | El 401 de toda operación con candado y el 403 de `/admin` | `OpenApiConfig`, que los deduce del candado: es la regla de `SecurityConfig` |
+  | El `200` cuando no hay otro éxito, el cuerpo `Error` de los 4xx y los esquemas que springdoc dejaba en línea | `OpenApiConfig`, un `OpenApiCustomizer` |
+
+  `scripts/comprobar-openapi.py` contrasta el fichero con la API en marcha:
+  ninguna operación responde 404 de ruta inexistente ni 405, las protegidas
+  responden 401 sin token y las públicas no. La primera pasada destapó un 500:
+  subir una foto sin formulario `multipart`, que ahora es un 400. Es la versión
+  3.x de springdoc, la de Spring Boot 4; la 2.x es de Boot 3 y aquí no arranca.
 
 ## Primer vertical
 

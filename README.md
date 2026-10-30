@@ -441,25 +441,39 @@ docker compose logs -f backend | grep DispatcherServlet
 Quedan dos por petición: `GET "/api/v1/directorio"` y `Completed 200 OK`. En
 PowerShell el filtro es `| Select-String DispatcherServlet`.
 
-## Swagger
+## OpenAPI y Swagger
+
+**La especificación es [`openapi.json`](openapi.json), en la raíz del
+repositorio**: OpenAPI 3.1, con las 67 operaciones, sus parámetros, sus cuerpos y
+todos sus códigos de respuesta, los de error incluidos, y el JWT declarado en
+`components/securitySchemes` y aplicado solo en las operaciones protegidas.
 
 Con el backend levantado, la API se explora y se prueba desde el navegador:
 
 | Dirección | Qué es |
 |---|---|
 | <http://localhost:8080/swagger-ui.html> | La interfaz, con los 67 endpoints agrupados |
-| <http://localhost:8080/v3/api-docs> | El documento OpenAPI en JSON |
+| <http://localhost:8080/v3/api-docs> | El mismo documento, en vivo |
 
 Las dos son **públicas**: describen el contrato, que ya es público, y no
 devuelven ni un dato. Para probar lo protegido, `POST /api/v1/auth/login` y
 pegar el `token` de la respuesta en **Authorize**, arriba a la derecha; no hace
 falta escribir «Bearer».
 
-**El documento lo genera springdoc a partir de los propios controladores**, así
-que no hay un fichero que mantener al día: las rutas, los cuerpos, los códigos
-de respuesta y hasta las reglas de validación de cada DTO salen del código. Lo
-único escrito a mano es la portada, el candado del token y el nombre de cada
-grupo, en `OpenApiConfig` y en un `@Tag` por controlador.
+`openapi.json` lo genera springdoc desde los controladores y se exporta con un
+script. Validarlo y contrastarlo con la API no instala nada en el proyecto:
+
+```bash
+./scripts/exportar-openapi.sh                        # vuelve a escribir openapi.json (API levantada)
+npx --yes @redocly/cli@2.63.0 lint openapi.json      # válido según el estándar
+python3 scripts/comprobar-openapi.py                 # ni 404 de ruta ni 405; el candado, el declarado
+```
+
+`redocly lint` da por válido el fichero y deja ocho avisos a sabiendas: seis
+operaciones sin ningún 4xx —los catálogos y las cifras de la portada, que no
+fallan—, el proyecto sin licencia y el servidor en `localhost`, que es donde
+corre. Qué se anota y dónde está en
+[docs/arquitectura.md](docs/arquitectura.md).
 
 ## Colección de Postman
 
@@ -504,7 +518,7 @@ Las pruebas que necesitan base de datos levantan su propio PostgreSQL con
 Testcontainers, así que Docker tiene que estar corriendo. No usan la base de
 `docker compose`: pasan sin nada escuchando en el 5433.
 
-**510 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**511 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |
