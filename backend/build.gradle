@@ -14,6 +14,13 @@ java {
 	}
 }
 
+// En Docker, la compilación del contenedor va fuera del código montado desde el
+// host: el Dockerfile del backend pone BUILD_DIR. Sin ella, la de siempre,
+// backend/build.
+if (System.getenv('BUILD_DIR')) {
+	layout.buildDirectory = file(System.getenv('BUILD_DIR'))
+}
+
 repositories {
 	mavenCentral()
 }

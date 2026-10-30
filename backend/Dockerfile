@@ -17,17 +17,26 @@ FROM eclipse-temurin:25-jdk
 # el repositorio.
 ENV GRADLE_USER_HOME=/gradle
 
+# La compilación del contenedor va a /build, fuera del código montado: la lee
+# `build.gradle`. Junto con `--project-cache-dir`, abajo, el contenedor no escribe
+# ni `build/` ni `.gradle/` dentro de `backend/`. Antes eran volúmenes montados
+# dentro del montaje, y para montarlos Docker creaba esos dos directorios en el
+# disco del host, vacíos y de root: un `./gradlew check` en el host, después de
+# haber levantado el sistema, fallaba sin poder escribir en ellos.
+ENV BUILD_DIR=/build
+
 WORKDIR /app
 
-# Los tres directorios que docker-compose monta como volumen, creados aquí a
+# Los directorios que docker-compose monta como volumen, creados aquí a
 # propósito: un volumen con nombre hereda el dueño de la ruta que tapa, y si la
 # ruta no existe en la imagen nace siendo de root. El contenedor corre como
-# 1000 y Gradle se quedaría sin poder escribir su caché.
-RUN mkdir -p /gradle /app/build /app/.gradle \
-    && chown -R 1000:1000 /gradle /app
+# 1000 y Gradle se quedaría sin poder escribir.
+RUN mkdir -p /gradle /build /app \
+    && chown -R 1000:1000 /gradle /build /app
 
 EXPOSE 8080
 
 # Sin demonio: el contenedor ya es el proceso de larga vida, y un demonio dentro
-# solo deja un proceso huérfano al parar.
-CMD ["./gradlew", "--no-daemon", "bootRun"]
+# solo deja un proceso huérfano al parar. La caché del proyecto, en el volumen
+# de Gradle y no en `backend/.gradle`.
+CMD ["./gradlew", "--no-daemon", "--project-cache-dir", "/gradle/proyecto", "bootRun"]
