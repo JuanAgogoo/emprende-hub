@@ -205,9 +205,18 @@ Tomadas por el equipo de desarrollo. No requieren validación del cliente.
 - **El consentimiento de datos guarda versión de política** (`1.0`). Sin versión,
   la fecha de aceptación no dice a qué se aceptó.
 - **Datos sembrados** como entregable, no como añadido: los catálogos, la cuenta
-  de administrador y los 8 cursos. **Los negocios se sembraban al principio y se
-  dejaron de sembrar**: se crean a mano o con Postman, porque la vitrina es parte
-  de lo que se enseña y doce negocios generados por un bucle se notan.
+  de administrador, los 8 cursos y, desde la entrega final, **los datos de
+  prueba** (`CargaInicialDemo`). Los negocios se sembraron al principio, se
+  dejaron de sembrar en la fase 1 del frontend —doce generados por un bucle se
+  notaban y la vitrina se quería hecha a mano— y **vuelven porque la rúbrica de la
+  entrega final lo exige**: al arrancar por primera vez tienen que existir los
+  usuarios y los datos que declara el README, para recorrer los flujos sin crear
+  nada antes. Esta vez se generan **a través de los servicios**, con sus reglas y
+  con Bean Validation sobre cada petición, a partir de una semilla fija:
+  cuarenta negocios repartidos por las doce categorías, treinta clientes,
+  opiniones, consultas, tres meses de visitas y algo en cada cola del
+  administrador. Las fotos se dibujan con Java2D al sembrar, porque `uploads/` no
+  está en git. Se apaga con `SEMILLA_DEMO=false`, y las pruebas lo hacen.
 
 ### Decisiones tomadas durante la implementación
 
@@ -397,9 +406,9 @@ Además del código, la entrega incluye:
   incluidas. La rúbrica evalúa cada endpoint vía Postman o cURL; sin credenciales
   sembradas y una colección lista, el evaluador prueba a ciegas.
 - **Informe de cobertura de JaCoCo**, acotado a `service/**`, como evidencia del 80%.
-- **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador y
-  cursos. **Los negocios no se siembran**, se crean: doce generados por un bucle
-  se notan, y la vitrina es parte de lo que se enseña.
+- **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador,
+  cursos y los datos de prueba que declara el README (`CargaInicialDemo`), que
+  exige la rúbrica de la entrega final.
 - **`docker-compose.yml`** que levanta el proyecto entero con un solo comando:
   PostgreSQL, la API, la web y Mailpit para el correo; la API y la web en modo
   desarrollo y con el código montado desde el host. `docker compose up -d postgres` levanta solo la base,

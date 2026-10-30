@@ -1,6 +1,7 @@
 package com.emprendehub;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
@@ -16,7 +17,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <strong>no el mismo contenedor</strong>: la aplicación entera ejecuta sus
  * cargas iniciales al arrancar, y las pruebas de repositorio cuentan con las
  * tablas vacías. Compartiendo base, cada una pisaría a la otra.
+ *
+ * <p>Los datos de prueba de {@code CargaInicialDemo} se apagan: estas pruebas
+ * hablan de seguridad y de que el contexto arranca, no de la demostración, y
+ * algunas sustituyen {@code UsuarioRepository} por un simulacro con el que la
+ * siembra no podría registrar a nadie.
  */
+@TestPropertySource(properties = "emprendehub.semilla-demo=false")
 public abstract class AplicacionTestBase {
 
     @ServiceConnection

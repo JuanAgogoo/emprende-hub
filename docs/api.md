@@ -924,13 +924,18 @@ curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 
 ## Datos de la demostración
 
-La aplicación arranca solo con lo que no tiene sentido escribir a mano: los
-catálogos, la cuenta de administrador y los 8 cursos. **Los negocios no se
-siembran**, se crean, y por eso el recorrido de arriba empieza por crearlos.
+La primera vez que arranca con la base vacía, la aplicación siembra, además de
+los catálogos, la cuenta de administrador y los 8 cursos, **los datos de prueba**
+de `CargaInicialDemo`: 40 negocios —37 publicados, 2 pendientes y 1 rechazado—,
+31 clientes, opiniones, consultas, tres meses de visitas, dos cambios propuestos
+y dos denuncias abiertas. Las cuentas y las cifras exactas están en el README.
+Se apaga con `SEMILLA_DEMO=false`, y entonces `GET /directorio` devuelve una
+página vacía y `/estadisticas/portada` ceros con `calificacionPromedio` nulo.
 
-Con la base recién levantada, `GET /directorio` devuelve una página vacía y
-`/estadisticas/portada` devuelve ceros con `calificacionPromedio` nulo. Es lo
-correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
+**El recorrido de arriba supone una base sin negocios**: crea el suyo y lo llama
+por el identificador 1. Con los datos de prueba, el 1 es «Café Pergamino», ya
+publicado, y el paso de rechazarlo respondería 400. Para seguirlo al pie de la
+letra, arrancar con la base vacía y `SEMILLA_DEMO=false`.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
 **67 endpoints** en 78 peticiones, agrupadas por quién las usa. Su primera

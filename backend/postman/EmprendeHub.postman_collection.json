@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "EmprendeHub API",
-		"description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedor**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nTodas las cuentas sembradas usan la contraseña `contrasena123`; el administrador usa `admin12345`.",
+		"description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedor**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nEl administrador usa `admin12345`. Las cuentas de los datos de prueba están en el README; la colección crea las suyas.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -33,7 +33,7 @@
 	"item": [
 		{
 			"name": "1 · Acceso y datos de partida",
-			"description": "Empieza por aquí y **en orden**. Ya no hay negocios sembrados: estas peticiones crean las cuentas y el negocio con los que trabaja el resto de la colección, y guardan cada token en su variable.",
+			"description": "Empieza por aquí y **en orden**. Estas peticiones crean sus propias cuentas y su negocio, aparte de los datos de prueba sembrados, y guardan cada token en su variable: el resto de la colección trabaja con ellos.",
 			"item": [
 				{
 					"name": "Entrar como administrador",

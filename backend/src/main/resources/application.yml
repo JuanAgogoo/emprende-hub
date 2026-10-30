@@ -85,6 +85,11 @@ emprendehub:
     # enlace que cambia una contraseña.
     minutos: ${RECUPERACION_MINUTOS:30}
 
+  # Los datos de prueba de CargaInicialDemo: negocios, clientes, opiniones,
+  # consultas, visitas y las colas del administrador, sembrados la primera vez
+  # que arranca con la base vacía. Las pruebas lo apagan.
+  semilla-demo: ${SEMILLA_DEMO:true}
+
   fotos:
     # Las imágenes se guardan en disco y en la base de datos solo queda el
     # nombre del fichero. El directorio se publica en /fotos/**.

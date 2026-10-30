@@ -172,30 +172,77 @@ cada negocio a mano. Si vuelve a hacer falta, se añade esa variable al servicio
 dueño edita se publica al momento. **Pero entonces no hay nada que moderar**, y
 el recorrido de abajo pierde su paso más vistoso.
 
-Al arrancar por primera vez se siembra **lo que no tiene sentido escribir a
-mano**: los catálogos —12 categorías, las ciudades del Valle de Aburrá con sus
-barrios y los catálogos de formación—, la cuenta de administrador y los 8 cursos.
-La carga es idempotente: si ya hay datos no toca nada, así que reiniciar no
-duplica. Para empezar de cero, `docker compose down -v`.
+### Datos de prueba
 
-**Los negocios no se siembran.** Antes había doce generados por código y se
-retiraron: la vitrina es parte del entregable y un catálogo escrito por un bucle
-se nota. Se crean uno a uno, con sus fotos y sus precios, desde la colección de
-Postman o desde el registro de emprendedor del frontend.
+**Al arrancar por primera vez, con la base vacía, ya hay con qué recorrer todo**,
+sin crear nada antes. Se siembran los catálogos —12 categorías y las 4 ciudades
+del Valle de Aburrá, Medellín con 2 barrios—, la cuenta de administrador, los 8
+cursos y **los datos de prueba**, generados por código a partir de una semilla
+fija: cada base nueva tiene los mismos negocios, cuentas y cifras. Las fechas se
+anclan al día del arranque.
 
-Consecuencia al arrancar de cero: el directorio sale vacío y la portada muestra
-ceros con la calificación media nula. **Es lo correcto, no un fallo** — las
-cifras se calculan (H4) y todavía no hay nada que contar.
+Pasan por los mismos servicios que la API, con sus reglas: una opinión por
+persona y negocio (C2), la foto obligatoria de cada producto (F4) y las fotos
+subidas **antes** de aprobar (B2). Las imágenes se dibujan al sembrar —el color
+de la categoría y la inicial— y se guardan en `FOTOS_DIR`, porque `uploads/` no
+está en git.
 
-### La única cuenta sembrada
+La siembra es idempotente: si ya hay negocios no toca nada, así que reiniciar no
+duplica. Para empezar de cero, `docker compose down -v`. Tarda unos 12 segundos,
+solo el primer arranque, y durante ese rato la API ya responde pero el directorio
+sale vacío: esperar en los logs a la línea `Sembrados 40 negocios`.
+
+| Qué | Cuánto, medido sobre una base nueva |
+|---|---|
+| Negocios | **40**: 37 publicados, 2 pendientes y 1 rechazado, repartidos por las 12 categorías, las 4 ciudades y los 3 niveles de precio |
+| Cuentas | **72**: el administrador, 31 clientes y 40 emprendedores |
+| Productos del escaparate | 179, cada uno con su foto |
+| Fotos de galería | 96: 90 publicadas y 6 pendientes de revisión |
+| Opiniones | 216 |
+| Consultas al buzón | 69, las de más de una semana ya leídas |
+| Visitas | Unas 5 400 en los últimos 90 días: 5 362 arrancando el 29 de octubre de 2026. Es la única cifra que cambia con el día del arranque, porque depende de dónde caen los fines de semana |
+| Avisos | 324 |
+| Cola de negocios | 2 pendientes de aprobar |
+| Cola de cambios | 2: uno de texto y una foto nueva |
+| Cola de denuncias | 2 abiertas, y 1 ya desestimada |
+| Historial de moderación | 40 entradas |
+
+Los que tienen un papel en el recorrido:
+
+| Negocio | Para qué está |
+|---|---|
+| **Café Pergamino** | El de la emprendedora fija: 4 fotos, 6 productos, 10 opiniones, buzón, visitas y avisos sin leer |
+| **Estudio Arrayán** y **Tienda deportiva Mandarina** | Pendientes: hay algo que aprobar en directo (B6) |
+| **Casa El Mirador** | Rechazado, con su motivo a la vista de su dueño |
+| **Academia Aurora** | Propone una descripción nueva (B2-bis) |
+| **Fotografía Tierra Viva** | Subió una foto ya publicado, que espera en «Cambios» (B2) |
+| **Peluquería canina Trapiche** y **Tienda Buen Viaje** | Tienen una opinión denunciada, en «Denuncias» (C3) |
+| **Laboratorio Siete Cueros** | Recién publicado y sin opiniones: se ve «Sin opiniones» y no «0,0» (C5) |
+| **Estudio Santa Elena** | Sin fotos de galería: sale el marcador con la inicial |
+| **Barbería El Roble** | El primer destacado de la portada: 9 opiniones (C7) |
+
+**Para arrancar sin datos de prueba**, con la base vacía:
+`SEMILLA_DEMO=false docker compose up -d`. Entonces el directorio sale vacío y la
+portada muestra ceros con la calificación media nula, que es lo correcto: las
+cifras se calculan (H4).
+
+### Cuentas de prueba
 
 | Cuenta | Correo | Contraseña | Para qué sirve |
 |---|---|---|---|
-| Administrador | `admin@emprendehub.co` | `admin12345` | Moderación y cursos |
+| Administrador | `admin@emprendehub.co` | `admin12345` | El panel: colas de moderación, usuarios, cursos e historial |
+| Clienta | `cliente@emprendehub.co` | `cliente12345` | Opinar, denunciar y escribir a un negocio. Ya opinó en tres, pero no en Café Pergamino |
+| Emprendedora | `emprendedora@emprendehub.co` | `emprende12345` | El panel de Café Pergamino |
+| Clientes generados | `cliente01@emprendehub.co` … `cliente30@emprendehub.co` | `demo12345` | Autores de las opiniones y las consultas |
+| Emprendedores generados | `emprendedor01@emprendehub.co` … `emprendedor39@emprendehub.co` | `demo12345` | Uno por negocio, en el orden en que se crearon |
 
-Las demás se crean al registrarse. La carpeta **1 · Acceso y datos de partida**
-de la colección de Postman las crea en orden —una clienta, una emprendedora y su
-negocio— y guarda cada token en su variable.
+Los dueños de los negocios con papel en el recorrido: Estudio Arrayán es
+`emprendedor38`, Tienda deportiva Mandarina `emprendedor39`, Casa El Mirador
+`emprendedor37`, Academia Aurora `emprendedor04` y Fotografía Tierra Viva
+`emprendedor05`.
+
+> Con `MODERACION_AUTOMATICA=true` los negocios nacen publicados y **las colas
+> del administrador salen vacías**: no hay pendientes, ni rechazado, ni cambios.
 
 ## El recorrido de una demostración
 
@@ -205,40 +252,18 @@ El guion de punta a punta, con las dos mitades arriba. Son unos veinte minutos.
 > entonces la moderación ya no se hace desde Postman sino desde el **panel de
 > administración**, y el guion lo enseña.
 
-### Antes: preparar la vitrina
+### Antes
 
-**No hay siembra de negocios**, así que una base recién creada enseña la portada
-a ceros y el directorio vacío. Eso es correcto —las cifras se calculan (H4)—,
-pero no es lo que se quiere enseñar. Hay que crear los negocios a mano, y
-conviene hacerlo el día antes y no el mismo día.
+Nada que preparar: los [datos de prueba](#datos-de-prueba) traen un negocio
+pendiente que aprobar, un cambio y una denuncia por resolver, destacados en la
+portada y un panel de emprendedora con métricas. Basta con arrancar el día antes,
+para que la primera compilación y la siembra no ocurran delante de nadie.
 
-Con **siete u ocho negocios** ya se ve un portal lleno. Lo que tienen que cubrir
-entre todos, porque es lo que la interfaz enseña:
-
-| Hace falta | Para que se vea |
-|---|---|
-| Categorías distintas | La rejilla «Explora por categoría» de la portada lleva a alguna parte |
-| Al menos dos ciudades, y una con barrio | El filtro de barrio se repuebla al cambiar de ciudad |
-| Los tres niveles de precio | El filtro de precio deja fuera a alguien |
-| **Uno con 5 opiniones o más** | Sin eso no hay destacados: es la regla C7 |
-| Uno sin ninguna opinión | Se ve «Sin opiniones» y no «0,0», que no es lo mismo (C5) |
-| Uno sin fotos | Sale el marcador con la inicial, no una imagen rota |
-| Uno dejado en `PENDIENTE` | Hay algo que aprobar en directo durante el recorrido |
-| Una foto subida a uno **ya aprobado** | Hay un cambio esperando en la pestaña «Cambios» del panel (B2-bis) |
-
-La forma rápida de crearlos es la carpeta **1 · Acceso y datos de partida** de la
-colección de Postman, y después repetir su petición de alta cambiando los datos.
-
-> **Las cinco opiniones del destacado piden cinco cuentas distintas.** Cada
-> persona tiene como mucho una opinión por negocio (C2), así que no se llega a
-> cinco desde una sola sesión: hay que registrar cinco clientes. Desde la web se
-> puede, pero repetir el alta en Postman es más rápido.
-
-> **El orden importa, y esta es la trampa que más tiempo ha costado.** Hay que
-> **crear el negocio, subirle las fotos y aprobarlo al final**. Al revés no: una
-> foto subida a un negocio **ya aprobado** entra pendiente de revisión (B2), el
-> público no la ve, y el directorio devuelve `fotoPrincipal` nula. Las fichas
-> salen sin imagen y parece un fallo del frontend cuando es la regla funcionando.
+> **El orden de las fotos importa**, por si se crea un negocio en directo: hay que
+> **crearlo, subirle las fotos y aprobarlo al final**. Una foto subida a un
+> negocio **ya aprobado** entra pendiente de revisión (B2), el público no la ve y
+> el directorio devuelve `fotoPrincipal` nula. Parece un fallo del frontend y es
+> la regla funcionando.
 
 ### Durante: el guion
 
@@ -537,6 +562,7 @@ por variables de entorno:
 | `MAIL_FROM` | `no-responder@emprendehub.co` |
 | `APP_URL` | `http://localhost:5173`, que es lo que lleva el enlace del correo |
 | `RECUPERACION_MINUTOS` | `30`, lo que vive un enlace de recuperación |
+| `SEMILLA_DEMO` | `true`: siembra los [datos de prueba](#datos-de-prueba) la primera vez, con la base vacía |
 
 El esquema lo genera Hibernate a partir de las entidades (`ddl-auto: update`), y
 los datos iniciales los carga un `CommandLineRunner` al arrancar.
