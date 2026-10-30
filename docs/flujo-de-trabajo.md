@@ -170,7 +170,7 @@ que según el plan es el PR 3.
 
 `.github/workflows/ci.yml`, con la misma forma del ejemplo de la semana 1
 (`name`, `on.push.branches`, trabajos encadenados con `needs`), adaptado a Gradle
-y JDK 25 en lugar de Maven y JDK 17. Dos trabajos:
+y JDK 25 en lugar de Maven y JDK 17. Tres trabajos:
 
 - **build**: en cada PR y en `main`. Compila, ejecuta las pruebas y publica como
   artefactos los informes de JaCoCo y de pruebas.
@@ -180,9 +180,14 @@ y JDK 25 en lugar de Maven y JDK 17. Dos trabajos:
   Hasta la entrega final había un *service container* en el 5433, y por eso las
   pruebas de `@SpringBootTest` fallaban en un clon limpio sin esa base delante.
 
-- **release**: solo al integrar en `main`, nunca en un PR, y solo si build pasó.
-  Ejecuta `semantic-release` con los permisos mínimos (`contents`, `issues`,
-  `pull-requests`) y `fetch-depth: 0`, que necesita para leer el historial.
+- **frontend**: en cada PR y en `main`. `npm ci`, las pruebas (`npm test`), el
+  contraste de la paleta (`npm run contraste`) y la compilación con sus tipos
+  (`npm run build`).
+
+- **release**: solo al integrar en `main`, nunca en un PR, y solo si los otros
+  dos pasaron. Ejecuta `semantic-release` con los permisos mínimos (`contents`,
+  `issues`, `pull-requests`) y `fetch-depth: 0`, que necesita para leer el
+  historial.
 
 **Cobertura**: JaCoCo genera el informe acotado a `service/**` desde este PR. El
 umbral del 80% se activa en el PR 4, cuando exista lógica de negocio que medir.

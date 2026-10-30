@@ -21,21 +21,21 @@ Por defecto **no hay que configurar nada**: el frontend pide a `/api/v1`, que es
 una ruta relativa, y el proxy de Vite la reenvía a `http://localhost:8080`. Con
 el backend en el mismo equipo y en su puerto de siempre, funciona tal cual.
 
-Si el backend está en otro sitio, hay dos variables y **no se tocan las dos**:
+Si el backend está en otro sitio, **se cambia el destino del proxy**, no la ruta
+que pide el navegador:
 
-| Variable | Por defecto | Cuándo se cambia | Dónde se pone |
+| Variable | Por defecto | Para qué | Dónde se pone |
 |---|---|---|---|
-| `VITE_PROXY_TARGET` | `http://localhost:8080` | El backend está en otra máquina u otro puerto, y se sigue usando el proxy | Variable de entorno al arrancar Vite, que es lo que hace `docker-compose.yml` |
-| `VITE_API_URL` | `/api/v1` | Solo si se quiere llamar al backend **sin** el proxy, con su dirección completa | `frontend/.env`, que Vite lee al arrancar |
+| `VITE_PROXY_TARGET` | `http://localhost:8080` | A dónde reenvía el proxy de Vite la API y las fotos. Se cambia si el backend está en otra máquina u otro puerto | Variable de entorno al arrancar Vite, que es lo que hace `docker-compose.yml` |
+| `VITE_API_URL` | `/api/v1` | La ruta de la API que pide el navegador. **Siempre del mismo origen**: una ruta, no una dirección completa | `frontend/.env`, que Vite lee al arrancar |
 
 ```bash
-# Con el proxy, que es lo normal en desarrollo:
 VITE_PROXY_TARGET=http://192.168.1.50:8080 npm run dev
 ```
 
-> **`VITE_API_URL` deja al frontend fuera del proxy, y entonces hace falta CORS**,
-> que el backend entregado no configura. Salvo que se sepa que el backend lo
-> permite, la opción buena es la primera. El detalle está en
+> **No pongas en `VITE_API_URL` la dirección del backend**, como
+> `http://localhost:8080/api/v1`: el navegador llamaría a otro origen, el backend
+> no tiene CORS y el inicio de sesión fallaría. El detalle está en
 > [Por qué no hay CORS](#por-qué-no-hay-cors).
 
 ### 3. Ejecutar
@@ -47,18 +47,24 @@ npm run dev     # http://localhost:5173
 ### Todo junto, con Docker
 
 Desde la raíz del repositorio, lo más corto —levanta también el backend, la base
-y el correo, con recarga en caliente—:
+y el correo, con recarga en caliente—. Antes hay que elegir las credenciales de la
+base en el `.env`, como explica el [README de la raíz](../README.md):
 
 ```bash
+cp .env.example .env    # y escribir DB_USER y DB_PASSWORD
 docker compose up -d
 ```
 
-O a mano, con el frontend en el host:
+O con el backend y el frontend en el host, cada uno en su terminal y desde la
+raíz:
 
 ```bash
-docker compose up -d postgres mailpit   # base y correo, desde la raíz
-cd backend && ./gradlew bootRun         # API en el 8080
-cd frontend && npm run dev              # la web en el 5173
+docker compose up -d postgres mailpit                 # base y correo
+cd backend && set -a && . ../.env && set +a && ./gradlew bootRun   # API en el 8080
+```
+
+```bash
+cd frontend && npm run dev                            # la web en el 5173
 ```
 
 Mailpit recoge los correos de la recuperación de contraseña y los enseña en

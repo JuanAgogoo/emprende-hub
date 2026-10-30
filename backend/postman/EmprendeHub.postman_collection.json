@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "EmprendeHub API",
-		"description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación: `docker compose up -d` y `./gradlew bootRun`.\n2. Ejecuta **Acceso → Entrar como administrador** y **Entrar como emprendedor**.\n   Cada login guarda su token en una variable de la colección; el resto de\n   peticiones lo heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nEl administrador usa `admin12345`. Las cuentas de los datos de prueba están en el README; la colección crea las suyas.",
+		"description": "Colección completa de la API de EmprendeHub.\n\n## Cómo usarla\n\n1. Levanta la aplicación como dice el README: `cp .env.example .env`, elegir las credenciales y `docker compose up -d`.\n2. Ejecuta **en orden** la carpeta **1 · Acceso y datos de partida**. Sus\n   peticiones guardan los tokens y el negocio en variables de la colección; el\n   resto las heredan y no hay que copiar nada a mano.\n3. A partir de ahí, cualquier carpeta funciona por separado.\n\nLa variable `base` apunta a `http://localhost:8080/api/v1`.\n\nEl administrador usa `admin12345`. Las cuentas de los datos de prueba están en el README; la colección crea las suyas.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -27,6 +27,26 @@
 		},
 		{
 			"key": "tokenRecuperacion",
+			"value": ""
+		},
+		{
+			"key": "fotoId",
+			"value": ""
+		},
+		{
+			"key": "productoId",
+			"value": ""
+		},
+		{
+			"key": "consultaId",
+			"value": ""
+		},
+		{
+			"key": "notificacionId",
+			"value": ""
+		},
+		{
+			"key": "cursoId",
 			"value": ""
 		}
 	],
@@ -142,7 +162,7 @@
 								"negocios"
 							]
 						},
-						"description": "El negocio nace PENDIENTE y no sale en el directorio hasta que el administrador lo apruebe, en la carpeta 5. Se necesita una descripción de al menos 80 caracteres, y esta los tiene de sobra para pasar la validación. Guarda {{negocioId}}.",
+						"description": "El negocio nace PENDIENTE y no sale en el directorio hasta que el administrador lo apruebe, que es la petición siguiente. Se necesita una descripción de al menos 80 caracteres, y esta los tiene de sobra para pasar la validación. Guarda {{negocioId}}.",
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"nombre\": \"Pizzería Napolitana\",\n  \"descripcion\": \"Pizza napolitana de masa madre con fermentación de 48 horas, horneada en horno de leña a 450 grados. Ingredientes de la región y una carta corta que cambia cada temporada.\",\n  \"telefono\": \"3105551234\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
@@ -159,6 +179,43 @@
 									"    pm.collectionVariables.set('negocioId', pm.response.json().id);",
 									"    pm.test('Nace PENDIENTE', () => pm.expect(pm.response.json().estado).to.eql('PENDIENTE'));",
 									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Aprobar el negocio recién registrado",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAdmin}}"
+							}
+						],
+						"url": {
+							"raw": "{{base}}/admin/moderacion/negocios/{{negocioId}}/aprobar",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"admin",
+								"moderacion",
+								"negocios",
+								"{{negocioId}}",
+								"aprobar"
+							]
+						},
+						"description": "El administrador publica el negocio de la petición anterior. Sin este paso sigue PENDIENTE (B6) y las carpetas 2, 3 y 4 —perfil, opiniones, buzón y escaparate— responden 404, porque un negocio sin publicar no existe para el público. En la aplicación se hace desde el panel, pestaña «Negocios»."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Queda APROBADO', () => pm.expect(pm.response.json().estado).to.eql('APROBADO'));"
 								]
 							}
 						}
@@ -187,7 +244,7 @@
 						"description": "El camino de A1-ter: cuenta, negocio, redes y escaparate en una sola transacción. La cuenta nace ya como EMPRENDEDOR y el negocio, PENDIENTE de revisión. Las fotos van aparte, por su endpoint multipart. No guarda variables a propósito: el resto de la colección trabaja sobre el negocio de las dos peticiones de arriba, que son el camino de A1-bis.",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Ana Restrepo\",\n  \"correo\": \"ana.reposteria@emprendehub.co\",\n  \"contrasena\": \"contrasena123\",\n  \"negocio\": {\n    \"nombre\": \"Repostería Ana\",\n    \"descripcion\": \"Tortas y postres por encargo para celebraciones, con masas de mantequilla y relleno hecho el mismo día de la entrega.\",\n    \"telefono\": \"3105557788\",\n    \"categoriaId\": 2,\n    \"ciudadId\": 3,\n    \"barrioId\": 1,\n    \"nivelPrecio\": \"MEDIO\"\n  },\n  \"redes\": {\n    \"instagram\": \"https://instagram.com/reposteriaana\"\n  }\n}"
+							"raw": "{\n  \"nombre\": \"Ana Restrepo\",\n  \"correo\": \"ana.reposteria@emprendehub.co\",\n  \"contrasena\": \"contrasena123\",\n  \"negocio\": {\n    \"nombre\": \"Repostería Ana\",\n    \"descripcion\": \"Tortas y postres por encargo para celebraciones, con masas de mantequilla y relleno hecho el mismo día de la entrega.\",\n    \"telefono\": \"3105557788\",\n    \"categoriaId\": 2,\n    \"ciudadId\": 1,\n    \"barrioId\": 1,\n    \"nivelPrecio\": \"MEDIO\"\n  },\n  \"redes\": {\n    \"instagram\": \"https://instagram.com/reposteriaana\"\n  }\n}"
 						}
 					},
 					"event": [
@@ -653,17 +710,17 @@
 							}
 						],
 						"url": {
-							"raw": "{{base}}/negocios/9/opiniones",
+							"raw": "{{base}}/negocios/{{negocioId}}/opiniones",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"negocios",
-								"9",
+								"{{negocioId}}",
 								"opiniones"
 							]
 						},
-						"description": "Apunta al negocio 9 a propósito, y no a {{negocioId}}.\\n\\nLa clienta de la demostración ya tiene una opinión sembrada en el negocio 1, y la regla C2 permite una sola por persona y negocio. Publicar allí devolvería 400 —correctamente— y parecería que el endpoint falla. El 9 es un negocio aprobado donde todavía no ha opinado.",
+						"description": "Opina sobre el negocio de la carpeta 1, ya aprobado. Las tres peticiones siguientes leen, editan y borran esta misma opinión. Una segunda pasada sin borrarla devolvería 400 por C2, una opinión por persona y negocio: es la regla.",
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"calificacion\": 5,\n  \"comentario\": \"La mejor pizza de Medellín, sin duda.\"\n}"
@@ -761,11 +818,24 @@
 							"mode": "raw",
 							"raw": "{\n  \"motivo\": \"LENGUAJE_INAPROPIADO\"\n}"
 						},
-						"description": "Denuncia la opinión 2, que es de Carlos Rueda.\\n\\nLa 1 es de la propia clienta que tiene la sesión abierta, y el servicio rechaza denunciar la opinión de uno mismo: para eso está borrarla."
+						"description": "Denuncia la opinión 2, una de las de los datos de prueba sobre Café Pergamino, escrita por `cliente06@emprendehub.co`.\n\nDenunciar una opinión propia responde 400: para eso está borrarla. Una segunda pasada también responde 400, porque ya la denunció."
 					}
 				},
 				{
 					"name": "Escribir al buzón del negocio (D1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.collectionVariables.set('consultaId', pm.response.json().id);",
+									"}"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -859,10 +929,10 @@
 								"negocios"
 							]
 						},
-						"description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.\n\nCon el token del emprendedor devuelve **400 a propósito**: su cuenta ya tiene un negocio y la regla A2 permite uno solo. Sirve justo para enseñar esa regla.\n\nPara ver un alta correcta —y el ascenso de CLIENTE a EMPRENDEDOR de A1-bis— ejecuta antes «Registrar un cliente nuevo» en 1 · Acceso y usa el token que deja.",
+						"description": "Ascende a EMPRENDEDOR (A1-bis). Usar con un cliente sin negocio.\n\nCon el token del emprendedor devuelve **400 a propósito**: su cuenta ya tiene un negocio y la regla A2 permite uno solo. Sirve justo para enseñar esa regla.\n\nPara ver un alta correcta —y el ascenso de CLIENTE a EMPRENDEDOR de A1-bis— usa el token de un cliente sin negocio: por ejemplo, el de «Registrar a la clienta» de 1 · Acceso, o el de `cliente01@emprendehub.co` / `demo12345`. El barrio 1, El Poblado, es de la ciudad 1, Medellín.",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Panadería La Tradicional\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\",\n  \"telefono\": \"3001234567\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 2,\n  \"barrioId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
+							"raw": "{\n  \"nombre\": \"Panadería La Tradicional\",\n  \"descripcion\": \"Pan de masa madre horneado cada mañana en horno de leña, con harinas molidas a la piedra y fermentación lenta de 24 horas.\",\n  \"telefono\": \"3001234567\",\n  \"categoriaId\": 1,\n  \"ciudadId\": 1,\n  \"barrioId\": 1,\n  \"nivelPrecio\": \"MEDIO\"\n}"
 						}
 					}
 				},
@@ -981,7 +1051,7 @@
 								}
 							]
 						},
-						"description": "Solo funciona sobre un negocio RECHAZADO: ejecuta antes «Rechazar un negocio» en la carpeta 5. El dueño corrige y el negocio vuelve a PENDIENTE (B1). Lo rechazado es el negocio, nunca la cuenta."
+						"description": "Solo funciona sobre un negocio RECHAZADO, y el de esta colección no lo está: con su token responde 400 a propósito. Para verlo funcionar, usa el token de `emprendedor37@emprendehub.co` / `demo12345`, dueño de «Casa El Mirador», que los datos de prueba dejan rechazado. El dueño corrige y el negocio vuelve a PENDIENTE (B1). Lo rechazado es el negocio, nunca la cuenta."
 					}
 				},
 				{
@@ -1004,6 +1074,19 @@
 				},
 				{
 					"name": "Subir una foto (B9)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.collectionVariables.set('fotoId', pm.response.json().id);",
+									"}"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1032,12 +1115,17 @@
 					}
 				},
 				{
-					"name": "Borrar una foto",
+					"name": "Reordenar la galería y elegir portada (B9)",
 					"request": {
-						"method": "DELETE",
-						"header": [],
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"url": {
-							"raw": "{{base}}/negocios/mio/fotos/1",
+							"raw": "{{base}}/negocios/mio/fotos/orden",
 							"host": [
 								"{{base}}"
 							],
@@ -1045,10 +1133,35 @@
 								"negocios",
 								"mio",
 								"fotos",
-								"1"
+								"orden"
 							]
 						},
-						"description": "Requiere haber subido una antes: la siembra no trae imágenes porque son ficheros, no filas. Sin fotos responde 404."
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orden\": [{{fotoId}}]\n}"
+						},
+						"description": "La lista entera, en el orden deseado: la primera queda de portada (B9). Lleva la foto que subió «Subir una foto»; con más fotos, hay que poner todos los ids de «Mi galería». Va antes de «Borrar una foto», que la retira."
+					},
+					"response": []
+				},
+				{
+					"name": "Borrar una foto",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/negocios/mio/fotos/{{fotoId}}",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"negocios",
+								"mio",
+								"fotos",
+								"{{fotoId}}"
+							]
+						},
+						"description": "Borra la foto que subió «Subir una foto», guardada en {{fotoId}}. Sin haberla subido antes —hay que elegir el fichero a mano— responde 404."
 					}
 				},
 				{
@@ -1071,6 +1184,19 @@
 				},
 				{
 					"name": "Añadir un producto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.collectionVariables.set('productoId', pm.response.json().id);",
+									"}"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1130,7 +1256,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base}}/negocios/mio/productos/1",
+							"raw": "{{base}}/negocios/mio/productos/{{productoId}}",
 							"host": [
 								"{{base}}"
 							],
@@ -1138,7 +1264,7 @@
 								"negocios",
 								"mio",
 								"productos",
-								"1"
+								"{{productoId}}"
 							]
 						},
 						"body": {
@@ -1153,7 +1279,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/negocios/mio/productos/1/foto",
+							"raw": "{{base}}/negocios/mio/productos/{{productoId}}/foto",
 							"host": [
 								"{{base}}"
 							],
@@ -1161,7 +1287,7 @@
 								"negocios",
 								"mio",
 								"productos",
-								"1",
+								"{{productoId}}",
 								"foto"
 							]
 						},
@@ -1185,7 +1311,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/negocios/mio/productos/1/disponibilidad?disponible=false",
+							"raw": "{{base}}/negocios/mio/productos/{{productoId}}/disponibilidad?disponible=false",
 							"host": [
 								"{{base}}"
 							],
@@ -1193,7 +1319,7 @@
 								"negocios",
 								"mio",
 								"productos",
-								"1",
+								"{{productoId}}",
 								"disponibilidad"
 							],
 							"query": [
@@ -1211,7 +1337,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/negocios/mio/productos/1",
+							"raw": "{{base}}/negocios/mio/productos/{{productoId}}",
 							"host": [
 								"{{base}}"
 							],
@@ -1219,7 +1345,7 @@
 								"negocios",
 								"mio",
 								"productos",
-								"1"
+								"{{productoId}}"
 							]
 						}
 					}
@@ -1255,7 +1381,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/negocios/mio/consultas/1/lectura?leida=true",
+							"raw": "{{base}}/negocios/mio/consultas/{{consultaId}}/lectura?leida=true",
 							"host": [
 								"{{base}}"
 							],
@@ -1263,7 +1389,7 @@
 								"negocios",
 								"mio",
 								"consultas",
-								"1",
+								"{{consultaId}}",
 								"lectura"
 							],
 							"query": [
@@ -1297,6 +1423,20 @@
 				},
 				{
 					"name": "Mis notificaciones sin leer (H2, H3)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const avisos = pm.response.json().content || [];",
+									"if (avisos.length > 0) {",
+									"    pm.collectionVariables.set('notificacionId', avisos[0].id);",
+									"}"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1323,13 +1463,13 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/notificaciones/1/lectura?leida=true",
+							"raw": "{{base}}/notificaciones/{{notificacionId}}/lectura?leida=true",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"notificaciones",
-								"1",
+								"{{notificacionId}}",
 								"lectura"
 							],
 							"query": [
@@ -1357,36 +1497,6 @@
 							]
 						}
 					}
-				},
-				{
-					"name": "Reordenar la galería y elegir portada (B9)",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{base}}/negocios/mio/fotos/orden",
-							"host": [
-								"{{base}}"
-							],
-							"path": [
-								"negocios",
-								"mio",
-								"fotos",
-								"orden"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"orden\": [2, 1, 3]\n}"
-						},
-						"description": "La lista entera, en el orden deseado. La primera queda de portada (B9). Hay que poner los ids reales de «Mi galería»."
-					},
-					"response": []
 				}
 			],
 			"auth": {
@@ -1428,7 +1538,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/negocios/11",
+							"raw": "{{base}}/admin/moderacion/negocios/39",
 							"host": [
 								"{{base}}"
 							],
@@ -1436,7 +1546,7 @@
 								"admin",
 								"moderacion",
 								"negocios",
-								"11"
+								"39"
 							]
 						},
 						"description": "El perfil tal como quedaría publicado, con todas sus fotos —cada una con su estado— y el escaparate. El perfil público de un negocio pendiente responde 404 (B6); esta es la única forma de verlo antes de decidir."
@@ -1448,7 +1558,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/negocios/11/aprobar",
+							"raw": "{{base}}/admin/moderacion/negocios/39/aprobar",
 							"host": [
 								"{{base}}"
 							],
@@ -1456,11 +1566,11 @@
 								"admin",
 								"moderacion",
 								"negocios",
-								"11",
+								"39",
 								"aprobar"
 							]
 						},
-						"description": "La siembra deja **un** negocio pendiente, así que esta petición y «Rechazar un negocio» son excluyentes: la que corras primero consume la cola y la otra devolverá 400 «Solo se pueden resolver negocios pendientes». No es un fallo. Para probar las dos, reinicia con `docker compose down -v`."
+						"description": "Aprueba el negocio 39, «Estudio Arrayán», uno de los dos que los datos de prueba dejan pendientes. «Rechazar un negocio» usa el otro, el 40, así que las dos se pueden ejecutar. Una segunda pasada devuelve 400 «Solo se pueden resolver negocios pendientes»: es la regla. Para volver al estado inicial, `docker compose down -v` y arrancar de nuevo."
 					}
 				},
 				{
@@ -1474,7 +1584,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/negocios/11/rechazar",
+							"raw": "{{base}}/admin/moderacion/negocios/40/rechazar",
 							"host": [
 								"{{base}}"
 							],
@@ -1482,7 +1592,7 @@
 								"admin",
 								"moderacion",
 								"negocios",
-								"11",
+								"40",
 								"rechazar"
 							]
 						},
@@ -1490,7 +1600,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"motivo\": \"La descripción no explica qué vendes.\"\n}"
 						},
-						"description": "Excluyente con «Aprobar un negocio»: hay un solo negocio pendiente en la siembra. Si ya lo aprobaste, esta devuelve 400. Reinicia la base para probar la otra rama."
+						"description": "Rechaza el negocio 40, «Tienda deportiva Mandarina», el otro pendiente de los datos de prueba. Sin motivo responde 400. Una segunda pasada también, porque ya no está pendiente."
 					}
 				},
 				{
@@ -1517,7 +1627,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/negocios/1/cambio/aprobar",
+							"raw": "{{base}}/admin/moderacion/negocios/5/cambio/aprobar",
 							"host": [
 								"{{base}}"
 							],
@@ -1525,12 +1635,12 @@
 								"admin",
 								"moderacion",
 								"negocios",
-								"1",
+								"5",
 								"cambio",
 								"aprobar"
 							]
 						},
-						"description": "Requiere haber ejecutado antes «Proponer cambio» en el panel del emprendedor. Es excluyente con «Rechazar un cambio»: resolver la propuesta la consume."
+						"description": "Aprueba la propuesta del negocio 5, «Academia Aurora», que traen los datos de prueba (una descripción nueva). Resolverla la consume: una segunda pasada responde 404."
 					}
 				},
 				{
@@ -1544,7 +1654,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/negocios/1/cambio/rechazar",
+							"raw": "{{base}}/admin/moderacion/negocios/6/cambio/rechazar",
 							"host": [
 								"{{base}}"
 							],
@@ -1552,7 +1662,7 @@
 								"admin",
 								"moderacion",
 								"negocios",
-								"1",
+								"6",
 								"cambio",
 								"rechazar"
 							]
@@ -1561,7 +1671,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"motivo\": \"La foto no muestra el local.\"\n}"
 						},
-						"description": "Requiere una propuesta viva y es excluyente con «Aprobar un cambio». Sin propuesta responde 404, que es lo correcto."
+						"description": "Rechaza la propuesta del negocio 6, «Fotografía Tierra Viva», que traen los datos de prueba (una foto nueva). Sin propuesta pendiente responde 404, que es lo correcto."
 					}
 				},
 				{
@@ -1617,7 +1727,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/moderacion/denuncias/1/desestimar",
+							"raw": "{{base}}/admin/moderacion/denuncias/2/desestimar",
 							"host": [
 								"{{base}}"
 							],
@@ -1625,7 +1735,7 @@
 								"admin",
 								"moderacion",
 								"denuncias",
-								"1",
+								"2",
 								"desestimar"
 							]
 						}
@@ -1761,6 +1871,19 @@
 				},
 				{
 					"name": "Crear un curso · nace en borrador",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    pm.collectionVariables.set('cursoId', pm.response.json().id);",
+									"}"
+								]
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1796,14 +1919,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{base}}/admin/cursos/1",
+							"raw": "{{base}}/admin/cursos/{{cursoId}}",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"admin",
 								"cursos",
-								"1"
+								"{{cursoId}}"
 							]
 						},
 						"body": {
@@ -1818,14 +1941,14 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/cursos/1/publicar",
+							"raw": "{{base}}/admin/cursos/{{cursoId}}/publicar",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"admin",
 								"cursos",
-								"1",
+								"{{cursoId}}",
 								"publicar"
 							]
 						}
@@ -1837,14 +1960,14 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/cursos/1/borrador",
+							"raw": "{{base}}/admin/cursos/{{cursoId}}/borrador",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"admin",
 								"cursos",
-								"1",
+								"{{cursoId}}",
 								"borrador"
 							]
 						}
@@ -1856,14 +1979,14 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base}}/admin/cursos/1",
+							"raw": "{{base}}/admin/cursos/{{cursoId}}",
 							"host": [
 								"{{base}}"
 							],
 							"path": [
 								"admin",
 								"cursos",
-								"1"
+								"{{cursoId}}"
 							]
 						}
 					}
