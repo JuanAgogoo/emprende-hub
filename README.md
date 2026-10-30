@@ -518,7 +518,7 @@ Las pruebas que necesitan base de datos levantan su propio PostgreSQL con
 Testcontainers, así que Docker tiene que estar corriendo. No usan la base de
 `docker compose`: pasan sin nada escuchando en el 5433.
 
-**511 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**515 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |

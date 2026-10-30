@@ -28,5 +28,9 @@ public record CrearProductoRequest(
         @Size(max = 500, message = "La descripción no puede pasar de 500 caracteres")
         String descripcion,
 
-        boolean disponible) {
+        // Obligatorio y sin valor por defecto: un producto que falta marcar no
+        // se da por disponible ni por agotado. Es Boolean para que llegue nulo y
+        // lo diga la validación, en vez de un error de conversión en inglés.
+        @NotNull(message = "Hay que indicar si el producto está disponible")
+        Boolean disponible) {
 }
