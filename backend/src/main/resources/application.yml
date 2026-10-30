@@ -4,8 +4,11 @@ spring:
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/emprendehub}
-    username: ${DB_USER:emprendehub}
-    password: ${DB_PASSWORD:emprendehub}
+    # Sin valor por defecto a propósito: las credenciales de la base no se
+    # versionan en ningún fichero. Llegan del entorno, y con Docker Compose
+    # salen del `.env` de la raíz, que no está en git (ver `.env.example`).
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:

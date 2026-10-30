@@ -26,12 +26,22 @@ porqué, están en [docs/decisiones-dominio.md](docs/decisiones-dominio.md).
 
 ## Arrancar
 
-Hace falta **solo Docker**. Ni Gradle, ni el JDK 25, ni Node: van dentro de las
-imágenes.
+Para levantarlo hace falta **solo Docker**. Ni Gradle, ni el JDK 25, ni Node: van
+dentro de las imágenes.
+
+Antes, **las credenciales de la base de datos**. No están en el repositorio: se
+eligen en un `.env` en la raíz, que git ignora.
 
 ```bash
+cp .env.example .env     # y rellena DB_USER y DB_PASSWORD con los que quieras
 docker compose up -d
 ```
+
+PostgreSQL crea el usuario con esas credenciales la primera vez que arranca, y el
+backend las usa para conectar. Sin ellas, Compose no arranca y dice cuál falta.
+
+> **Si cambias la contraseña después**, la base ya existe con la anterior y el
+> backend no podrá entrar. `docker compose down -v` la borra y la crea de nuevo.
 
 Eso levanta las cuatro piezas y deja la web en <http://localhost:5173>, la API
 en <http://localhost:8080> y la bandeja de correo de
@@ -60,10 +70,23 @@ host**, no copiado a la imagen:
 Si prefieres el bucle de siempre —`bootRun` y `npm run dev` en el host—, arranca
 solo la base:
 
+En una terminal, la base, el correo y la API (necesita el JDK 25):
+
 ```bash
 docker compose up -d postgres mailpit   # la base en el 5433 y el correo en el 1025
-cd backend && ./gradlew bootRun         # la API en el 8080
-cd frontend && npm install              # solo la primera vez
+cd backend
+set -a && . ../.env && set +a           # el backend lee las credenciales del entorno
+./gradlew bootRun                       # la API en el 8080
+```
+
+Sin el `set -a`, el backend arranca sin credenciales y falla con `password
+authentication failed for user "${DB_USER}"`: Spring no lee el `.env`, Compose sí.
+
+En otra, desde la raíz, la web (necesita Node):
+
+```bash
+cd frontend
+npm install                             # solo la primera vez
 npm run dev                             # la web en el 5173
 ```
 
@@ -505,7 +528,7 @@ por variables de entorno:
 | Variable | Por defecto |
 |---|---|
 | `DB_URL` | `jdbc:postgresql://localhost:5433/emprendehub` |
-| `DB_USER` / `DB_PASSWORD` | `emprendehub` |
+| `DB_USER` / `DB_PASSWORD` | **Sin valor por defecto.** Se eligen en el `.env` (ver [Arrancar](#arrancar)) |
 | `PORT` | `8080` |
 | `JWT_SECRET` | Clave de desarrollo, sustituir en cualquier despliegue |
 | `JWT_EXPIRATION` | `3600000` (una hora) |
