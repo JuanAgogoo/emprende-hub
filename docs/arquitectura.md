@@ -373,6 +373,18 @@ una única clave en `localStorage` y un único módulo que la lee y la escribe. 
 que sale de ahí se comprueba antes de usarse: un formato viejo se descarta en
 vez de romper el arranque.
 
+**Un 401 con token cierra la sesión y lo dice.** Si la API rechaza el token de
+una sesión que el navegador daba por buena —caducó, o dejó de valer—,
+`api/cliente.ts` llama a la acción que le dejó registrada `SesionContext`: borra
+la sesión y pone el aviso «Tu sesión expiró o dejó de ser válida. Vuelve a
+iniciar sesión», que vive en la estructura común, encima de todas las páginas,
+con `role="alert"` y un botón para cerrarlo. En una ruta protegida, la ruta
+devuelve a `/entrar` y el aviso sigue allí; en una pública, se ve en la propia
+página. Solo cuenta la petición que **llevaba** el token: el login no lo lleva, y
+unas credenciales malas siguen diciendo «Correo o contraseña incorrectos». Lo
+exige la rúbrica de la entrega final: «informa al usuario cuando la API responde
+401 Unauthorized».
+
 ### Lo que el navegador hace y no una librería
 
 Lo llamativo de la interfaz es CSS estándar, no un paquete: transiciones entre
