@@ -4317,7 +4317,10 @@
             "maxLength": 300,
             "minLength": 0
           }
-        }
+        },
+        "required": [
+          "calificacion"
+        ]
       },
       "OpinionResponse": {
         "type": "object",
@@ -4464,6 +4467,7 @@
           }
         },
         "required": [
+          "disponible",
           "nombre",
           "precio"
         ]
@@ -4676,7 +4680,10 @@
             "maxLength": 300,
             "minLength": 0
           }
-        }
+        },
+        "required": [
+          "calificacion"
+        ]
       },
       "EnviarConsultaRequest": {
         "type": "object",
@@ -4751,6 +4758,7 @@
           }
         },
         "required": [
+          "disponible",
           "nombre",
           "precio"
         ]
@@ -5913,6 +5921,15 @@
         },
         "description": "Cuerpo de cualquier error. Con validación por campo, cada campo inválido llega como una clave más con su mensaje.",
         "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "El código HTTP"
+          },
+          "path": {
+            "type": "string",
+            "description": "La ruta pedida. Solo en los errores que corta Spring antes del controlador"
+          },
           "error": {
             "type": "string",
             "description": "Su nombre: «Bad Request»…"
@@ -5924,15 +5941,6 @@
           "message": {
             "type": "string",
             "description": "Qué pasó, en español (GlobalExceptionHandler)"
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "description": "El código HTTP"
-          },
-          "path": {
-            "type": "string",
-            "description": "La ruta pedida. Solo en los errores que corta Spring antes del controlador"
           }
         },
         "required": [

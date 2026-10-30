@@ -515,7 +515,7 @@ curl -X POST $A/negocios/mio/productos -H "Authorization: Bearer $T" \
 | `nombre` | 2 a 120 caracteres |
 | `precio` | Obligatorio, no negativo, dos decimales como mucho |
 | `descripcion` | **Opcional** (F2). En blanco se guarda como ausente |
-| `disponible` | El único estado que hay: **no existe inventario** (F3) |
+| `disponible` | **Obligatorio**, `true` o `false`: no se supone ninguno. El único estado que hay: **no existe inventario** (F3) |
 | `foto` | **Obligatoria.** JPG o PNG, 5 MB como mucho, igual que la galería (B9) |
 
 **El alta va en `multipart` y no en JSON** porque la imagen es obligatoria y es

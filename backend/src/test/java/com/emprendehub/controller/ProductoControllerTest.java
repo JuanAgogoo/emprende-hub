@@ -89,6 +89,27 @@ class ProductoControllerTest extends ControllerTestBase {
     }
 
     @Test
+    @DisplayName("POST sin disponible devuelve 400 con su mensaje, sin suponer un valor")
+    void crear_sinDisponible_devuelve400() throws Exception {
+        mockMvc.perform(multipart(RUTA).file(imagen())
+                        .param("nombre", "Croissant")
+                        .param("precio", "12000"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.disponible")
+                        .value("Hay que indicar si el producto está disponible"));
+    }
+
+    @Test
+    @DisplayName("PUT sin disponible devuelve 400 con su mensaje, sin suponer un valor")
+    void actualizar_sinDisponible_devuelve400() throws Exception {
+        mockMvc.perform(put(RUTA + "/3").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Croissant\",\"precio\":12000}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.disponible")
+                        .value("Hay que indicar si el producto está disponible"));
+    }
+
+    @Test
     @DisplayName("GET devuelve el escaparate propio")
     void listar_devuelveElEscaparate() throws Exception {
         when(productoService.listarMios(any())).thenReturn(List.of(productoDePrueba()));
