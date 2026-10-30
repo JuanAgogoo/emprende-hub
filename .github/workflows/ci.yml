@@ -57,7 +57,7 @@ jobs:
           if-no-files-found: warn
 
   frontend:
-    name: Compilar el frontend
+    name: Probar y compilar el frontend
     runs-on: ubuntu-latest
 
     defaults:
@@ -77,6 +77,10 @@ jobs:
 
       - name: Instalar las dependencias
         run: npm ci
+
+      - name: Ejecutar las pruebas
+        # `vitest run`: una sola pasada, sin modo vigilancia.
+        run: npm test
 
       - name: Comprobar el contraste de la paleta
         run: npm run contraste

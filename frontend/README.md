@@ -69,6 +69,7 @@ Los dos modos usan el mismo puerto, así que **no se pueden tener a la vez**.
 | Orden | Qué hace |
 |---|---|
 | `npm run dev` | Servidor de desarrollo con recarga en caliente |
+| `npm test` | Las pruebas, con Vitest y jsdom, en una sola pasada: no se queda vigilando |
 | `npm run build` | Comprueba los tipos y compila. **0 errores y 0 advertencias** |
 | `npm run contraste` | Verifica la paleta contra WCAG 2.2. Falla si algo baja del mínimo |
 | `npm run preview` | Sirve lo compilado, para mirar el resultado real |
@@ -176,6 +177,7 @@ y
 ## Antes de dar un incremento por terminado
 
 ```bash
+npm test                                         # las pruebas, en una pasada
 npm run build                                    # 0 errores, 0 advertencias
 npm run contraste                                # 21 de 21
 grep -rn ': any\|as any' src/                    # vacío
