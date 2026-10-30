@@ -49,12 +49,19 @@ public class CargaInicialCatalogos {
      *
      * <p>Solo Medellín tiene barrios: son los únicos que aparecen en el
      * prototipo. No se inventan los de los demás municipios.
+     *
+     * <p>En un mapa con orden, como las categorías: {@code Map.of} no lo tiene, y
+     * cada arranque guardaba las ciudades en otro orden y con otros
+     * identificadores. Medellín es la 1, y El Poblado y Laureles los barrios 1 y 2.
      */
-    private static final Map<String, List<String>> CIUDADES = Map.of(
-            "Medellín", List.of("El Poblado", "Laureles"),
-            "Envigado", List.of(),
-            "Itagüí", List.of(),
-            "Bello", List.of());
+    private static final Map<String, List<String>> CIUDADES = new java.util.LinkedHashMap<>();
+
+    static {
+        CIUDADES.put("Medellín", List.of("El Poblado", "Laureles"));
+        CIUDADES.put("Envigado", List.of());
+        CIUDADES.put("Itagüí", List.of());
+        CIUDADES.put("Bello", List.of());
+    }
 
     /**
      * @implNote Los catálogos van primero: los negocios de la demostración se cuelgan de
