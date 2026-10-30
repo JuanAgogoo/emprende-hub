@@ -944,9 +944,11 @@ publicado, y el paso de rechazarlo respondería 400. Para seguirlo al pie de la
 letra, arrancar con la base vacía y `SEMILLA_DEMO=false`.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**67 endpoints** en 78 peticiones, agrupadas por quién las usa. Su primera
+**67 endpoints** en 79 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
-negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
+negocio, lo aprueba con el administrador y guarda cada token en su variable; el
+resto de peticiones los heredan. Lo que funciona a la primera y lo que no, a
+propósito, está en el README.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
 403 y 400.
 
