@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EmprendeHubApplicationTests {
+class EmprendeHubApplicationTests extends AplicacionTestBase {
 
     @Test
     @DisplayName("el contexto de Spring arranca sin errores")

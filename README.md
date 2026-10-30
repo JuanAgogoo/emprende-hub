@@ -333,7 +333,6 @@ trabajo, y todo lo que se decide queda escrito:
 | Tras un fallo de puerto, sigue sin ir | El contenedor quedó creado **sin red**: ni publica puertos ni resuelve `postgres` | `docker compose up -d --force-recreate backend`. Un `up -d` a secas solo lo arranca |
 | Todas las fotos rotas | La base apunta a ficheros que no están en `backend/uploads/` | Recuperar el directorio; la base y el disco van por separado |
 | El correo no llega a Mailpit | El backend arrancó sin el servicio de correo delante | `docker compose up -d mailpit` y repetir. La petición sigue devolviendo `200`: el fallo solo está en el log |
-| Caen ~30 pruebas del backend | Se paró el contenedor de la base | `docker compose up -d postgres` y repetir |
 
 ## Probar la API
 
@@ -453,8 +452,9 @@ cd backend
 ./gradlew build               # compila, prueba y verifica la cobertura
 ```
 
-Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
-que Docker tiene que estar corriendo.
+Las pruebas que necesitan base de datos levantan su propio PostgreSQL con
+Testcontainers, así que Docker tiene que estar corriendo. No usan la base de
+`docker compose`: pasan sin nada escuchando en el 5433.
 
 **510 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:

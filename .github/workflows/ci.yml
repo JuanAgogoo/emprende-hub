@@ -21,24 +21,9 @@ jobs:
       run:
         working-directory: backend
 
-    # PostgreSQL real para las pruebas: el enunciado prohíbe bases de datos en
-    # memoria. Se publica en el 5433 para que coincida con application.yml y no
-    # haga falta ninguna variable de entorno.
-    services:
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_DB: emprendehub
-          POSTGRES_USER: emprendehub
-          POSTGRES_PASSWORD: emprendehub
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd "pg_isready -U emprendehub -d emprendehub"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
+    # Sin servicio de base de datos: las pruebas levantan su propio PostgreSQL
+    # con Testcontainers, sobre el Docker que ya trae el runner. Es el mismo
+    # comando que pasa en un clon limpio, sin nada escuchando en el 5433.
     steps:
       - name: Descargar el código
         uses: actions/checkout@v5

@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.emprendehub.AplicacionTestBase;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.UsuarioRepository;
@@ -28,7 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-class SeguridadAccesoTest {
+class SeguridadAccesoTest extends AplicacionTestBase {
 
     @Autowired
     private MockMvc mockMvc;

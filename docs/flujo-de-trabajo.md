@@ -175,10 +175,10 @@ y JDK 25 en lugar de Maven y JDK 17. Dos trabajos:
 - **build**: en cada PR y en `main`. Compila, ejecuta las pruebas y publica como
   artefactos los informes de JaCoCo y de pruebas.
 
-  Levanta PostgreSQL con un *service container* de GitHub Actions, publicado en
-  el 5433 para que coincida con `application.yml` y no haga falta ninguna variable
-  de entorno. Es distinto de Testcontainers, que se usa dentro de las pruebas de
-  `@DataJpaTest`: aquí la base de datos la aporta el runner.
+  No levanta ninguna base de datos: las pruebas que la necesitan arrancan su
+  propio PostgreSQL con Testcontainers, sobre el Docker que ya trae el runner.
+  Hasta la entrega final había un *service container* en el 5433, y por eso las
+  pruebas de `@SpringBootTest` fallaban en un clon limpio sin esa base delante.
 
 - **release**: solo al integrar en `main`, nunca en un PR, y solo si build pasó.
   Ejecuta `semantic-release` con los permisos mínimos (`contents`, `issues`,

@@ -3,6 +3,7 @@ package com.emprendehub.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.emprendehub.AplicacionTestBase;
 import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.UsuarioRepository;
@@ -31,7 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
  * <p>Se usa el cliente HTTP del JDK para no depender de nada más.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class SeguridadHttpRealTest {
+class SeguridadHttpRealTest extends AplicacionTestBase {
 
     @LocalServerPort
     private int puerto;
