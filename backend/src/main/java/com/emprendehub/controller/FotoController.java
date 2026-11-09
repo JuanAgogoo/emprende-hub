@@ -1,9 +1,13 @@
 package com.emprendehub.controller;
 
+import com.emprendehub.config.OpenApiConfig;
 import com.emprendehub.dto.FotoResponse;
 import com.emprendehub.dto.ReordenarFotosRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.FotoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -32,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
  * se gestionan, y siempre las del negocio de quien pregunta.
  */
 @Tag(name = "Fotos del negocio", description = "La galería del dueño: subir, ordenar y quitar (B9)")
+@SecurityRequirement(name = OpenApiConfig.TOKEN)
 @RestController
 @RequestMapping("/api/v1/negocios/mio/fotos")
 public class FotoController {
@@ -43,12 +48,20 @@ public class FotoController {
     }
 
     @GetMapping
+    @Operation(summary = "Ver la galería propia")
+    @ApiResponse(responseCode = "404", description = "La cuenta no tiene negocio")
     public List<FotoResponse> listar(@AuthenticationPrincipal Usuario usuario) {
         return fotoService.listarMias(usuario);
     }
 
     /** Sube una imagen. Nace pendiente de revisión (B2). */
     @PostMapping
+    @Operation(summary = "Subir una foto a la galería")
+    @ApiResponse(responseCode = "201",
+            description = "Foto subida; pendiente de revisión si el negocio ya está publicado (B2)")
+    @ApiResponse(responseCode = "400",
+            description = "Falta la imagen, no es JPG o PNG de hasta 5 MB o la galería está llena")
+    @ApiResponse(responseCode = "404", description = "La cuenta no tiene negocio")
     public ResponseEntity<FotoResponse> subir(@AuthenticationPrincipal Usuario usuario,
                                               @RequestParam("archivo") MultipartFile archivo) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -62,6 +75,10 @@ public class FotoController {
      * cambia una propiedad suya.
      */
     @PatchMapping("/orden")
+    @Operation(summary = "Reordenar la galería; la primera es la portada")
+    @ApiResponse(responseCode = "400",
+            description = "La petición no es válida o la lista no coincide con la galería")
+    @ApiResponse(responseCode = "404", description = "La cuenta no tiene negocio")
     public List<FotoResponse> reordenar(@AuthenticationPrincipal Usuario usuario,
                                         @Valid @RequestBody ReordenarFotosRequest peticion) {
         return fotoService.reordenar(usuario, peticion);
@@ -69,6 +86,11 @@ public class FotoController {
 
     /** Quita una imagen de la galería, al momento. */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Quitar una foto de la galería")
+    @ApiResponse(responseCode = "204", description = "Foto borrada")
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador o un filtro con un valor que no es del tipo esperado")
+    @ApiResponse(responseCode = "404", description = "No es una foto de su negocio")
     public ResponseEntity<Void> eliminar(@AuthenticationPrincipal Usuario usuario,
                                          @PathVariable Long id) {
         fotoService.eliminar(usuario, id);

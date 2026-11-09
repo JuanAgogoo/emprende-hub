@@ -12,15 +12,19 @@ services:
     container_name: emprendehub-db
     environment:
       POSTGRES_DB: emprendehub
-      POSTGRES_USER: emprendehub
-      POSTGRES_PASSWORD: emprendehub
+      # Las credenciales salen del `.env` de la raíz, que no está en git:
+      # `cp .env.example .env` y elegir usuario y contraseña. Si faltan, Compose
+      # se niega a arrancar con este mensaje en vez de crear una base sin ellas.
+      POSTGRES_USER: ${DB_USER:?Falta DB_USER. Copia .env.example a .env y elige un usuario}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD. Copia .env.example a .env y elige una contraseña}
       TZ: America/Bogota
     ports:
       - "${DB_PORT:-5433}:5432"
     volumes:
       - emprendehub-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U emprendehub -d emprendehub"]
+      # `$$` para que lo expanda el contenedor y no Compose.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d emprendehub"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -53,11 +57,17 @@ services:
       # Dentro de la red de compose la base es `postgres:5432`. El 5433 es el
       # puerto que se publica al host, y aquí no pinta nada.
       DB_URL: jdbc:postgresql://postgres:5432/emprendehub
+      # Las mismas del servicio `postgres`, del mismo `.env`.
+      DB_USER: ${DB_USER:?Falta DB_USER. Copia .env.example a .env y elige un usuario}
+      DB_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD. Copia .env.example a .env y elige una contraseña}
       TZ: America/Bogota
       # Dentro de la red de compose el correo es `mailpit:1025`, igual que la
       # base es `postgres:5432`.
       MAIL_HOST: mailpit
       MAIL_PORT: "1025"
+      # Los datos de prueba, que se siembran la primera vez con la base vacía.
+      # `SEMILLA_DEMO=false docker compose up -d` arranca sin ellos.
+      SEMILLA_DEMO: ${SEMILLA_DEMO:-true}
     ports:
       - "${API_PORT:-8080}:8080"
     volumes:
@@ -65,10 +75,10 @@ services:
       # La caché de Gradle sobrevive entre arranques: sin esto se descargarían
       # las dependencias enteras cada vez que se recrea el contenedor.
       - gradle-cache:/gradle
-      # `build/` y `.gradle/` con volumen propio para que las compilaciones del
-      # contenedor y las del host no se pisen dentro del mismo directorio.
-      - backend-build:/app/build
-      - backend-gradle:/app/.gradle
+      # La compilación del contenedor, aparte de la del host y fuera de
+      # `./backend`: ningún volumen se monta dentro del código, porque Docker
+      # crearía su punto de montaje en el disco del host, vacío y de root.
+      - backend-build:/build
 
   frontend:
     build: ./frontend
@@ -90,14 +100,16 @@ services:
     ports:
       - "${WEB_PORT:-5173}:5173"
     volumes:
-      - ./frontend:/app
-      # Los de la imagen, compilados para Alpine. Sin este volumen el montaje de
-      # arriba los taparía con los del host.
-      - frontend-modules:/app/node_modules
+      # Solo lo que se edita a diario, para la recarga en caliente. El resto del
+      # proyecto, con su `node_modules` compilado para Alpine, va dentro de la
+      # imagen: montar `./frontend` entero obligaba a tapar `node_modules` con un
+      # volumen, y su punto de montaje quedaba en el disco del host, vacío y de
+      # root, rompiendo el `npm ci` del host. Un cambio en `package.json` o en
+      # `vite.config.ts` pide `docker compose up -d --build frontend`.
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
 
 volumes:
   emprendehub-data:
   gradle-cache:
   backend-build:
-  backend-gradle:
-  frontend-modules:

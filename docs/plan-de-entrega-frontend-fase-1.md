@@ -845,7 +845,7 @@ pendientes.
 ## Antes de dar cualquier incremento por terminado
 
 **En los once de frontend**, los de
-[pruebas.md](pruebas.md#el-frontend-no-tiene-pruebas-automáticas-y-es-a-propósito),
+[pruebas.md](pruebas.md#las-pruebas-del-frontend),
 sin excepción:
 
 1. `cd frontend && npm run build` con **0 errores y 0 advertencias de tipos**.

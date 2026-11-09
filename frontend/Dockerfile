@@ -1,9 +1,10 @@
 # Imagen de desarrollo: Vite con recarga en caliente.
 #
-# El código va montado desde el host, pero `node_modules` **no**: se instala
-# aquí y docker-compose lo preserva con un volumen. Si se compartiera con el
-# host, los binarios nativos de esbuild y rollup serían los de Linux del host
-# contra los de Alpine del contenedor, y uno de los dos se rompe.
+# El proyecto va **dentro** de la imagen, con su `node_modules` instalado aquí:
+# si se compartiera con el host, los binarios nativos de Vite serían los de
+# Linux del host contra los de Alpine del contenedor, y uno de los dos se rompe.
+# docker-compose monta encima solo `src/` y `public/`, para la recarga en
+# caliente.
 FROM node:24-alpine
 
 WORKDIR /app
@@ -12,6 +13,10 @@ WORKDIR /app
 # dependencias, no cada vez que se toca un componente.
 COPY package.json package-lock.json ./
 RUN npm ci
+
+# El resto del proyecto: configuración de Vite y de TypeScript, `index.html`.
+# `.dockerignore` deja fuera el `node_modules` y el `dist/` del host.
+COPY . .
 
 # El contenedor corre con el usuario del host, que en la imagen de Node es el
 # mismo 1000 que trae el usuario `node`.

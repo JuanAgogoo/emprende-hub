@@ -43,15 +43,17 @@ Relevante para este proyecto:
 
 | Ruta | Contenido |
 |---|---|
-| `2026_2/plataformas/entregas_calificables/entrega_backend.html` | El enunciado de esta entrega |
+| `2026_2/plataformas/entregas_calificables/entrega_backend.html` | El enunciado de la entrega del backend |
+| `2026_2/plataformas/entregas_calificables/entrega_frontend.html` | La rúbrica de la entrega del frontend. Avisa de que las pruebas del frontend se evalúan en la final |
+| `2026_2/plataformas/procode/front/` | El ejercicio guiado y el taller de frontend, en Angular |
 | `2026_2/plataformas/procode/autenticacion/` | Teoría de JWT y taller guiado de Spring Security |
 | `2026_2/plataformas/procode/unitarias/` | Pruebas unitarias: Mockito, `@DataJpaTest`, `@WebMvcTest` |
 | `2026_2/ing_sw/clases_practicas/taller_ci_devops_guiado.html` | CI con GitHub Actions (el ejemplo es en Python) |
 
-**El backend se entregó el martes 25 de agosto de 2026** y se sustentó. Se envió
-el enlace del repositorio a `juan.canoc@upb.edu.co` con asunto
-`Entrega Backend - [Nombre del Proyecto]`. Lo que se construye ahora es el
-frontend, según su plan de entrega.
+**El backend se entregó el martes 25 de agosto de 2026 y el frontend el martes 29
+de septiembre**, y los dos se sustentaron. Después se completó el backlog del
+tablero —catálogo de cursos y panel de administración—, que está entero en
+`main`. Lo pendiente conocido es la entrega final, con pruebas del frontend.
 
 ## Qué va aquí y qué no
 
@@ -59,8 +61,11 @@ frontend, según su plan de entrega.
 |---|---|
 | Decisiones de dominio y su justificación | Instrucciones operativas para agentes de IA |
 | Arquitectura, capas y contratos de API | Convenciones de prompt, plantillas, contexto de sesión |
-| Guía de instalación y ejecución | Notas de trabajo de agentes |
-| Cualquier cosa que el docente deba leer | Nada que deba leer una persona |
+| Guía de instalación y ejecución | Notas de trabajo y herramientas de agentes |
+| Cualquier cosa que el docente deba leer | Material de estudio del equipo, que no se entrega |
+
+La pregunta para decidir: **si el docente clona el repositorio, ¿esto debería
+estar ahí?** Si la respuesta es sí, va aquí.
 
 **Regla:** `docs/` se versiona y se entrega. `agent-docs/` está en `.gitignore`
 y nunca sale de la máquina local.

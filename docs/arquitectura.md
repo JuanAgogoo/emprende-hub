@@ -204,13 +204,23 @@ Tomadas por el equipo de desarrollo. No requieren validación del cliente.
   «una visita por sesión y día» depende de dónde cae la medianoche.
 - **El consentimiento de datos guarda versión de política** (`1.0`). Sin versión,
   la fecha de aceptación no dice a qué se aceptó.
-- **Datos sembrados** como entregable, no como añadido: los 12 negocios y 8 cursos
-  del prototipo, el admin, algunos clientes, opiniones e histórico de visitas. Sin
-  ellos la demo con Postman no demuestra nada y la gráfica de H1 sale vacía.
+- **Datos sembrados** como entregable, no como añadido: los catálogos, la cuenta
+  de administrador, los 8 cursos y, desde la entrega final, **los datos de
+  prueba** (`CargaInicialDemo`). Los negocios se sembraron al principio, se
+  dejaron de sembrar en la fase 1 del frontend —doce generados por un bucle se
+  notaban y la vitrina se quería hecha a mano— y **vuelven porque la rúbrica de la
+  entrega final lo exige**: al arrancar por primera vez tienen que existir los
+  usuarios y los datos que declara el README, para recorrer los flujos sin crear
+  nada antes. Esta vez se generan **a través de los servicios**, con sus reglas y
+  con Bean Validation sobre cada petición, a partir de una semilla fija:
+  cuarenta negocios repartidos por las doce categorías, treinta clientes,
+  opiniones, consultas, tres meses de visitas y algo en cada cola del
+  administrador. Las fotos se dibujan con Java2D al sembrar, porque `uploads/` no
+  está en git. Se apaga con `SEMILLA_DEMO=false`, y las pruebas lo hacen.
 
 ### Decisiones tomadas durante la implementación
 
-Las anteriores se tomaron antes de escribir código. Estas seis salieron de
+Las anteriores se tomaron antes de escribir código. Estas siete salieron de
 construirlo, y son las que más fácil se preguntan en una revisión.
 
 - **El reloj es un bean `Clock`**, publicado en la zona `America/Bogota`. Con
@@ -218,9 +228,9 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   los siete anteriores» dependería del día en que se ejecutara la prueba; con el
   reloj inyectado se le pasa un `Clock.fixed`. La zona no es cosmética: en UTC, el
   día de un negocio de Medellín cortaría a las siete de la tarde.
-- **Los cuatro `CommandLineRunner` llevan `@Order`** (catálogos → admin → cursos →
-  demostración). Spring no garantiza el orden entre ellos, y sin esto la siembra
-  arranca antes que los catálogos y falla buscando una categoría que aún no existe.
+- **Los tres `CommandLineRunner` llevan `@Order`** (catálogos → admin → cursos).
+  Spring no garantiza el orden entre ellos, y sin esto los cursos se cargan antes
+  que los catálogos y la carga falla buscando una categoría que aún no existe.
 - **Unicidad en el esquema para opiniones y denuncias, deliberadamente no para
   visitas.** Una opinión duplicada rompe C2 y hay que impedirla en la base de
   datos, porque el servicio no ve dos peticiones simultáneas. Una visita duplicada
@@ -237,21 +247,44 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   borrado de una opinión por moderación **se delega en `OpinionService`**: allí el
   recálculo del promedio es imposible de saltarse, y es el momento que más fácil
   se olvida porque no lo dispara su autor.
+- **El correo va a un SMTP local y un aviso que no sale no deshace nada.** Con
+  `spring-boot-starter-mail` contra [Mailpit](https://github.com/axllent/mailpit),
+  un servicio más del `docker-compose.yml`: funciona sin internet ni cuenta de
+  correo, y lo enviado se ve llegar en su bandeja web. Hay dos usos con reglas
+  distintas. El enlace de recuperación (I1-bis) es la operación entera, así que
+  su fallo se registra pero la respuesta no cambia, para no delatar qué correos
+  existen. Los avisos de las decisiones del administrador (I1-ter) informan de
+  algo que **ya pasó**: si el servidor de correo no responde, el negocio queda
+  aprobado o la cuenta suspendida igual, y el fallo se anota en el registro.
+  Deshacer la decisión por un aviso perdido sería peor que el aviso perdido. Todo
+  vive en `CorreoService`; ningún otro servicio construye un mensaje.
 
-- **El Swagger se genera, no se escribe.** `springdoc-openapi` publica
-  `/v3/api-docs` y `/swagger-ui.html` a partir de los propios controladores: las
-  rutas, los cuerpos, los códigos y las reglas de Bean Validation de cada DTO
-  salen del código. La alternativa era un `openapi.yaml` a mano, y habría sido un
-  **segundo sitio donde decir lo mismo**: exactamente lo que `scripts/cifras.sh`
-  existe para evitar. Que las 69 operaciones que genera coincidan con los 69
-  endpoints que ese script cuenta en `docs/api.md` es la comprobación de que
-  ninguno de los dos miente. Lo único escrito a mano es la portada, el esquema de
-  seguridad —ningún tipo de Java dice «esto se autentica con un JWT»— y el nombre
-  de cada grupo, con un `@Tag` por controlador; sin él la interfaz los llama
-  `producto-controller`. **Los métodos no llevan ni una anotación de Swagger**:
-  describir en un texto lo que ya dice la firma solo crea algo que se queda atrás.
-  Es la versión 3.x, que es la de Spring Boot 4; la 2.x es de Boot 3 y aquí no
-  arranca.
+- **El Swagger se genera, y se exporta a `openapi.json`.** `springdoc-openapi`
+  publica `/v3/api-docs` y `/swagger-ui.html` a partir de los propios
+  controladores: las rutas, los parámetros, los cuerpos y las reglas de Bean
+  Validation de cada DTO salen del código. La alternativa era un `openapi.yaml` a
+  mano, y habría sido un **segundo sitio donde decir lo mismo**, con 69
+  operaciones que se quedarían atrás. `scripts/exportar-openapi.sh` lo vuelca a
+  `openapi.json`, en la raíz, que es lo que pide la entrega final.
+
+  Hasta la entrega final **los métodos no llevaban ni una anotación de Swagger**,
+  y el documento declaraba `200` en las operaciones y el candado sobre todas,
+  también las públicas. La rúbrica de la final exige otra cosa: cada operación
+  con **todos** sus códigos, los de error incluidos, y la seguridad aplicada en
+  las protegidas. Eso no está en ninguna firma, así que se anota, repartido así:
+
+  | Qué | Dónde |
+  |---|---|
+  | `201`, `204` y los 400, 404 y 410 propios de cada operación | `@ApiResponse` en el método, sacados de su servicio y de `GlobalExceptionHandler` |
+  | El candado | `@SecurityRequirement` en los controladores protegidos; `@SecurityRequirements` vacío en los públicos |
+  | El 401 de toda operación con candado y el 403 de `/admin` | `OpenApiConfig`, que los deduce del candado: es la regla de `SecurityConfig` |
+  | El `200` cuando no hay otro éxito, el cuerpo `Error` de los 4xx y los esquemas que springdoc dejaba en línea | `OpenApiConfig`, un `OpenApiCustomizer` |
+
+  `scripts/comprobar-openapi.py` contrasta el fichero con la API en marcha:
+  ninguna operación responde 404 de ruta inexistente ni 405, las protegidas
+  responden 401 sin token y las públicas no. La primera pasada destapó un 500:
+  subir una foto sin formulario `multipart`, que ahora es un 400. Es la versión
+  3.x de springdoc, la de Spring Boot 4; la 2.x es de Boot 3 y aquí no arranca.
 
 ## Primer vertical
 
@@ -292,7 +325,9 @@ frontend/src/
 ├── estado/      Un contexto por dominio
 ├── componentes/ Piezas reutilizables y bloques de pantalla, con su módulo CSS
 ├── paginas/     Una por ruta
-└── estilos/     tokens.css manda: ningún color se escribe fuera
+├── estilos/     tokens.css manda: ningún color se escribe fuera
+└── *.ts         Módulos sueltos que usa media aplicación: el almacén de la
+                 sesión, el formato de fechas y precios, el título de la pestaña
 ```
 
 **En `componentes/` hay dos clases de cosas**, y conviene saberlo antes de buscar
@@ -307,6 +342,28 @@ por delante el resto de la pantalla.
 Tres reglas que se verifican con `grep` antes de cerrar cada incremento: ninguna
 llamada a `fetch` fuera de `api/`, ningún `any`, y ningún color fuera de
 `tokens.css`.
+
+**Las rutas por rol son una comodidad, no la seguridad.** `RutaDeEmprendedor` y
+`RutaDeAdmin` envuelven sus páginas y devuelven al login, o a la portada, a quien
+no tiene ese rol: así nadie ve una pantalla que no le va a funcionar. Quien llame
+a la API a mano se encuentra igual con el backend, que es donde se comprueba el
+rol de verdad (`/api/v1/admin/**` responde 403 a cualquier otro).
+
+**El panel de administración es una ruta por cola de trabajo**, anidadas bajo
+`/admin`: negocios, cambios, denuncias, usuarios, cursos e historial. Un armazón
+común (`PanelAdmin`) pinta las pestañas y un `<Outlet>`, así que cada cola se
+puede enlazar, recargar y recorrer con el botón de volver. Dos patrones se
+repiten en todas:
+
+- **Decidir pide el motivo en un `<dialog>`** (`DialogoMotivo`), el mismo para
+  rechazar un negocio, rechazar un cambio y borrar una opinión. Es el único
+  componente que se extrajo por la regla de tres: tres usos idénticos.
+- **Lo que se decidió viaja de vuelta en el `state` de la navegación**, como el
+  «cuenta creada» del login, y se lee comprobando su forma: es dato externo, que
+  sobrevive a una recarga.
+
+Aprobar un negocio solo se puede desde su vista previa, no desde la lista: así no
+se publica nada sin haberlo mirado.
 
 ### Las tres decisiones que hay que saber defender
 
@@ -327,6 +384,18 @@ guardando cosas distintas aparecen dos copias que se desincronizan, así que hay
 una única clave en `localStorage` y un único módulo que la lee y la escribe. Lo
 que sale de ahí se comprueba antes de usarse: un formato viejo se descarta en
 vez de romper el arranque.
+
+**Un 401 con token cierra la sesión y lo dice.** Si la API rechaza el token de
+una sesión que el navegador daba por buena —caducó, o dejó de valer—,
+`api/cliente.ts` llama a la acción que le dejó registrada `SesionContext`: borra
+la sesión y pone el aviso «Tu sesión expiró o dejó de ser válida. Vuelve a
+iniciar sesión», que vive en la estructura común, encima de todas las páginas,
+con `role="alert"` y un botón para cerrarlo. En una ruta protegida, la ruta
+devuelve a `/entrar` y el aviso sigue allí; en una pública, se ve en la propia
+página. Solo cuenta la petición que **llevaba** el token: el login no lo lleva, y
+unas credenciales malas siguen diciendo «Correo o contraseña incorrectos». Lo
+exige la rúbrica de la entrega final: «informa al usuario cuando la API responde
+401 Unauthorized».
 
 ### Lo que el navegador hace y no una librería
 
@@ -361,12 +430,12 @@ Además del código, la entrega incluye:
   incluidas. La rúbrica evalúa cada endpoint vía Postman o cURL; sin credenciales
   sembradas y una colección lista, el evaluador prueba a ciegas.
 - **Informe de cobertura de JaCoCo**, acotado a `service/**`, como evidencia del 80%.
-- **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador y
-  cursos. **Los negocios no se siembran**, se crean: doce generados por un bucle
-  se notan, y la vitrina es parte de lo que se enseña.
+- **Carga inicial** por `CommandLineRunner`: catálogos, cuenta de administrador,
+  cursos y los datos de prueba que declara el README (`CargaInicialDemo`), que
+  exige la rúbrica de la entrega final.
 - **`docker-compose.yml`** que levanta el proyecto entero con un solo comando:
-  PostgreSQL, la API y la web, las dos últimas en modo desarrollo y con el código
-  montado desde el host. `docker compose up -d postgres` levanta solo la base,
+  PostgreSQL, la API, la web y Mailpit para el correo; la API y la web en modo
+  desarrollo y con el código montado desde el host. `docker compose up -d postgres` levanta solo la base,
   para quien prefiera `bootRun` y `npm run dev` a mano; los dos modos usan los
   mismos puertos y no pueden convivir.
 - **README** con los pasos para arrancar las dos mitades y verificarlas.

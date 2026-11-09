@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,6 +67,17 @@ class FotoControllerTest extends ControllerTestBase {
         mockMvc.perform(multipart("/api/v1/negocios/mio/fotos").file(imagen("image/gif")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("La imagen tiene que ser JPG o PNG"));
+    }
+
+    @Test
+    @DisplayName("Un POST que no es multipart devuelve 400 con su motivo, no 500")
+    void subir_sinMultipart_devuelve400() throws Exception {
+        //act
+        mockMvc.perform(post("/api/v1/negocios/mio/fotos"))
+                //assert
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("La imagen tiene que llegar en un formulario multipart"));
     }
 
     @Test

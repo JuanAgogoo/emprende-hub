@@ -68,6 +68,37 @@ test(metricas): cubrir la agregación semanal de visitas
 6. Squash and merge. La rama se borra.
 7. `semantic-release` etiqueta la versión en `main` si el commit lo justifica.
 
+## Varias rebanadas seguidas: ramas encadenadas y squash
+
+Cuando una rebanada necesita la anterior —el panel de administración se hizo en
+siete—, cada rama sale de la anterior y no de `main`. Funciona, pero choca con el
+squash: al fusionar la rama N, `main` recibe **un commit nuevo** con su contenido,
+y la rama N+1 sigue arrastrando los commits originales de la N, con otros
+identificadores. GitHub los ve como cambios repetidos sobre los mismos ficheros y
+el PR de la N+1 sale **con conflictos**.
+
+Se resuelve antes de abrir cada PR, no en la interfaz de GitHub:
+
+```bash
+git fetch origin
+git diff origin/main feat/rama-N          # vacío: el squash es idéntico a la rama
+git rebase --onto origin/main feat/rama-N feat/rama-N+1
+git push --force-with-lease               # nunca --force a secas
+```
+
+El `diff` vacío es la condición para seguir: si alguien retocó la rama N al
+fusionarla, el `--onto` perdería ese retoque. Y después hay que **reencadenar las
+ramas de detrás** sobre la N+1 nueva, o la siguiente repetirá el problema.
+
+Dos reglas que lo evitan casi todo:
+
+- **Abrir el PR de la N+1 solo cuando la N ya esté fusionada.** Abierto antes,
+  nace con conflictos o, peor, se lleva dentro la rama N: el #57 (denuncias) se
+  abrió sin que existiera el de cursos, y fusionado así habría metido los cursos
+  dentro del squash de las denuncias.
+- **El autor de un PR es la cuenta que lo abre**, no el correo de los commits. Los
+  commits pueden ir firmados por una persona y el PR aparecer abierto por otra.
+
 ## Abrir un PR sin usar git
 
 No hace falta terminal ni IDE. Desde github.com, con la sesión iniciada:
@@ -139,19 +170,24 @@ que según el plan es el PR 3.
 
 `.github/workflows/ci.yml`, con la misma forma del ejemplo de la semana 1
 (`name`, `on.push.branches`, trabajos encadenados con `needs`), adaptado a Gradle
-y JDK 25 en lugar de Maven y JDK 17. Dos trabajos:
+y JDK 25 en lugar de Maven y JDK 17. Tres trabajos:
 
 - **build**: en cada PR y en `main`. Compila, ejecuta las pruebas y publica como
   artefactos los informes de JaCoCo y de pruebas.
 
-  Levanta PostgreSQL con un *service container* de GitHub Actions, publicado en
-  el 5433 para que coincida con `application.yml` y no haga falta ninguna variable
-  de entorno. Es distinto de Testcontainers, que se usa dentro de las pruebas de
-  `@DataJpaTest`: aquí la base de datos la aporta el runner.
+  No levanta ninguna base de datos: las pruebas que la necesitan arrancan su
+  propio PostgreSQL con Testcontainers, sobre el Docker que ya trae el runner.
+  Hasta la entrega final había un *service container* en el 5433, y por eso las
+  pruebas de `@SpringBootTest` fallaban en un clon limpio sin esa base delante.
 
-- **release**: solo al integrar en `main`, nunca en un PR, y solo si build pasó.
-  Ejecuta `semantic-release` con los permisos mínimos (`contents`, `issues`,
-  `pull-requests`) y `fetch-depth: 0`, que necesita para leer el historial.
+- **frontend**: en cada PR y en `main`. `npm ci`, las pruebas (`npm test`), el
+  contraste de la paleta (`npm run contraste`) y la compilación con sus tipos
+  (`npm run build`).
+
+- **release**: solo al integrar en `main`, nunca en un PR, y solo si los otros
+  dos pasaron. Ejecuta `semantic-release` con los permisos mínimos (`contents`,
+  `issues`, `pull-requests`) y `fetch-depth: 0`, que necesita para leer el
+  historial.
 
 **Cobertura**: JaCoCo genera el informe acotado a `service/**` desde este PR. El
 umbral del 80% se activa en el PR 4, cuando exista lógica de negocio que medir.

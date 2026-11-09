@@ -1,10 +1,15 @@
 package com.emprendehub.controller;
 
+import com.emprendehub.config.OpenApiConfig;
 import com.emprendehub.dto.ActualizarOpinionRequest;
 import com.emprendehub.dto.CrearOpinionRequest;
 import com.emprendehub.dto.OpinionResponse;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.OpinionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -46,6 +51,11 @@ public class OpinionController {
 
     /** Público. Un negocio sin publicar responde 404 (B6). */
     @GetMapping
+    @Operation(summary = "Leer las opiniones de un negocio")
+    @SecurityRequirements // Leerlas es público (C1); escribirlas, no.
+    @ApiResponse(responseCode = "400",
+            description = "Un filtro con un valor no válido, u orden por un campo que no existe")
+    @ApiResponse(responseCode = "404", description = "No existe el negocio o no está publicado")
     public Page<OpinionResponse> listar(
             @PathVariable Long negocioId,
             @PageableDefault(size = 10) Pageable pageable) {
@@ -53,6 +63,12 @@ public class OpinionController {
     }
 
     @PostMapping
+    @Operation(summary = "Opinar sobre un negocio")
+    @SecurityRequirement(name = OpenApiConfig.TOKEN)
+    @ApiResponse(responseCode = "201", description = "Opinión publicada (C4)")
+    @ApiResponse(responseCode = "400",
+            description = "La petición no es válida, es su propio negocio o ya opinó (C2)")
+    @ApiResponse(responseCode = "404", description = "No existe el negocio o no está publicado")
     public ResponseEntity<OpinionResponse> crear(
             @AuthenticationPrincipal Usuario usuario,
             @PathVariable Long negocioId,
@@ -62,12 +78,21 @@ public class OpinionController {
     }
 
     @GetMapping("/mia")
+    @Operation(summary = "Ver la opinión propia sobre un negocio")
+    @SecurityRequirement(name = OpenApiConfig.TOKEN)
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador o un filtro con un valor que no es del tipo esperado")
+    @ApiResponse(responseCode = "404", description = "Todavía no ha opinado sobre ese negocio")
     public OpinionResponse obtenerLaMia(@AuthenticationPrincipal Usuario usuario,
                                         @PathVariable Long negocioId) {
         return opinionService.obtenerLaMia(usuario, negocioId);
     }
 
     @PutMapping("/mia")
+    @Operation(summary = "Editar la opinión propia")
+    @SecurityRequirement(name = OpenApiConfig.TOKEN)
+    @ApiResponse(responseCode = "400", description = "La petición no es válida")
+    @ApiResponse(responseCode = "404", description = "Todavía no ha opinado sobre ese negocio")
     public OpinionResponse actualizar(@AuthenticationPrincipal Usuario usuario,
                                       @PathVariable Long negocioId,
                                       @Valid @RequestBody ActualizarOpinionRequest peticion) {
@@ -75,6 +100,12 @@ public class OpinionController {
     }
 
     @DeleteMapping("/mia")
+    @Operation(summary = "Borrar la opinión propia")
+    @SecurityRequirement(name = OpenApiConfig.TOKEN)
+    @ApiResponse(responseCode = "204", description = "Opinión borrada")
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador o un filtro con un valor que no es del tipo esperado")
+    @ApiResponse(responseCode = "404", description = "Todavía no ha opinado sobre ese negocio")
     public ResponseEntity<Void> eliminar(@AuthenticationPrincipal Usuario usuario,
                                          @PathVariable Long negocioId) {
         opinionService.eliminar(usuario, negocioId);

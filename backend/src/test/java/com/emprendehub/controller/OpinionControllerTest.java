@@ -102,6 +102,24 @@ class OpinionControllerTest extends ControllerTestBase {
     }
 
     @Test
+    @DisplayName("POST sin calificación devuelve 400 con su mensaje")
+    void crear_sinCalificacion_devuelve400() throws Exception {
+        mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"comentario\":\"Excelente\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.calificacion").value("La calificación es obligatoria"));
+    }
+
+    @Test
+    @DisplayName("PUT /mia con la calificación a null devuelve 400 con su mensaje")
+    void actualizar_calificacionNula_devuelve400() throws Exception {
+        mockMvc.perform(put(RUTA + "/mia").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"calificacion\":null}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.calificacion").value("La calificación es obligatoria"));
+    }
+
+    @Test
     @DisplayName("POST con un comentario de más de 300 caracteres devuelve 400")
     void crear_comentarioLargo_devuelve400() throws Exception {
         mockMvc.perform(post(RUTA).contentType(MediaType.APPLICATION_JSON)

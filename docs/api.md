@@ -2,11 +2,17 @@
 
 Todas las rutas cuelgan de `/api/v1`. Los cuerpos son JSON.
 
-> **Con el backend levantado, esto mismo se explora y se prueba** en
-> <http://localhost:8080/swagger-ui.html>, y el documento OpenAPI está en
-> `/v3/api-docs`. Lo genera springdoc desde los controladores, así que no puede
-> contradecir al código; este documento es el que explica **por qué** cada regla
-> es como es, que es lo que un esquema generado no sabe.
+> **La especificación está en [`openapi.json`](../openapi.json)**, en la raíz del
+> repositorio: OpenAPI 3.1, con cada operación, sus parámetros, sus cuerpos y
+> todos sus códigos, los de error incluidos. Con el backend levantado, lo mismo
+> se explora y se prueba en <http://localhost:8080/swagger-ui.html>. Lo genera
+> springdoc desde los controladores, así que no puede contradecir al código; este
+> documento es el que explica **por qué** cada regla es como es, que es lo que un
+> esquema generado no sabe.
+>
+> **Un PR que añade o cambia un endpoint vuelve a exportar `openapi.json`** con
+> `./scripts/exportar-openapi.sh`, y lo comprueba con
+> `python3 scripts/comprobar-openapi.py`, los dos con la API levantada.
 
 Este documento es la fuente de la colección de Postman del PR 14 y el guion para
 explicar el flujo de datos en la sustentación.
@@ -509,7 +515,7 @@ curl -X POST $A/negocios/mio/productos -H "Authorization: Bearer $T" \
 | `nombre` | 2 a 120 caracteres |
 | `precio` | Obligatorio, no negativo, dos decimales como mucho |
 | `descripcion` | **Opcional** (F2). En blanco se guarda como ausente |
-| `disponible` | El único estado que hay: **no existe inventario** (F3) |
+| `disponible` | **Obligatorio**, `true` o `false`: no se supone ninguno. El único estado que hay: **no existe inventario** (F3) |
 | `foto` | **Obligatoria.** JPG o PNG, 5 MB como mucho, igual que la galería (B9) |
 
 **El alta va en `multipart` y no en JSON** porque la imagen es obligatoria y es
@@ -926,18 +932,25 @@ curl -H "Authorization: Bearer $TA" $A/admin/moderacion/log
 
 ## Datos de la demostración
 
-La aplicación arranca solo con lo que no tiene sentido escribir a mano: los
-catálogos, la cuenta de administrador y los 8 cursos. **Los negocios no se
-siembran**, se crean, y por eso el recorrido de arriba empieza por crearlos.
+La primera vez que arranca con la base vacía, la aplicación siembra, además de
+los catálogos, la cuenta de administrador y los 8 cursos, **los datos de prueba**
+de `CargaInicialDemo`: 40 negocios —37 publicados, 2 pendientes y 1 rechazado—,
+31 clientes, opiniones, consultas, tres meses de visitas, dos cambios propuestos
+y dos denuncias abiertas. Las cuentas y las cifras exactas están en el README.
+Se apaga con `SEMILLA_DEMO=false`, y entonces `GET /directorio` devuelve una
+página vacía y `/estadisticas/portada` ceros con `calificacionPromedio` nulo.
 
-Con la base recién levantada, `GET /directorio` devuelve una página vacía y
-`/estadisticas/portada` devuelve ceros con `calificacionPromedio` nulo. Es lo
-correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
+**El recorrido de arriba supone una base sin negocios**: crea el suyo y lo llama
+por el identificador 1. Con los datos de prueba, el 1 es «Café Pergamino», ya
+publicado, y el paso de rechazarlo respondería 400. Para seguirlo al pie de la
+letra, arrancar con la base vacía y `SEMILLA_DEMO=false`.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**69 endpoints** en 80 peticiones, agrupadas por quién las usa. Su primera
+**69 endpoints** en 81 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
-negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
+negocio, lo aprueba con el administrador y guarda cada token en su variable; el
+resto de peticiones los heredan. Lo que funciona a la primera y lo que no, a
+propósito, está en el README.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
 403 y 400.
 

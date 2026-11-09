@@ -21,10 +21,16 @@ import type { RespuestaAuth, Sesion } from '../types/sesion';
  */
 interface ValorSesion {
   readonly sesion: Sesion | null;
+  /**
+   * La API rechazó el token de una sesión que el navegador daba por buena: ha
+   * caducado o ya no vale. Mientras sea `true`, la interfaz enseña el aviso.
+   */
+  readonly sesionCaducada: boolean;
   entrar: (correo: string, contrasena: string) => Promise<Sesion>;
   registrar: (nombre: string, correo: string, contrasena: string) => Promise<void>;
   registrarNegocio: (peticion: RegistroEmprendedor) => Promise<Sesion>;
   salir: () => void;
+  cerrarAvisoDeCaducidad: () => void;
 }
 
 const SesionContext = createContext<ValorSesion | null>(null);
@@ -42,12 +48,14 @@ function deRespuesta(respuesta: RespuestaAuth): Sesion {
 export function SesionProvider({ children }: { readonly children: ReactNode }) {
   // Se lee del almacén al arrancar: recargar la página no echa a nadie.
   const [sesion, setSesion] = useState<Sesion | null>(() => leerSesion());
+  const [sesionCaducada, setSesionCaducada] = useState(false);
 
   const entrar = useCallback(async (correo: string, contrasena: string): Promise<Sesion> => {
     const respuesta = await iniciarSesion(correo, contrasena);
     const nueva = deRespuesta(respuesta);
     guardarSesion(nueva);
     setSesion(nueva);
+    setSesionCaducada(false);
     // Se devuelve para que quien llame pueda derivar según el rol sin esperar
     // a que el estado se haya propagado.
     return nueva;
@@ -77,17 +85,38 @@ export function SesionProvider({ children }: { readonly children: ReactNode }) {
   const salir = useCallback(() => {
     borrarSesion();
     setSesion(null);
+    setSesionCaducada(false);
   }, []);
 
-  // El cliente HTTP no puede usar hooks, así que se le deja aquí el `salir`:
-  // cuando una petición con token reciba un 401, cerrará la sesión por su
-  // cuenta. `RutaDeEmprendedor` se encarga entonces de devolver al login.
+  // Lo mismo que salir, pero sin que nadie lo haya pedido: por eso se avisa.
+  const caducar = useCallback(() => {
+    borrarSesion();
+    setSesion(null);
+    setSesionCaducada(true);
+  }, []);
+
+  const cerrarAvisoDeCaducidad = useCallback(() => setSesionCaducada(false), []);
+
+  // El cliente HTTP no puede usar hooks, así que se le deja aquí `caducar`:
+  // cuando una petición con token reciba un 401, cerrará la sesión y dejará el
+  // aviso puesto. `RutaDeEmprendedor` y `RutaDeAdmin` se encargan entonces de
+  // devolver al login, donde el aviso sigue a la vista.
   useEffect(() => {
-    registrarCaducidadDeSesion(salir);
-  }, [salir]);
+    registrarCaducidadDeSesion(caducar);
+  }, [caducar]);
 
   return (
-    <SesionContext.Provider value={{ sesion, entrar, registrar, registrarNegocio, salir }}>
+    <SesionContext.Provider
+      value={{
+        sesion,
+        sesionCaducada,
+        entrar,
+        registrar,
+        registrarNegocio,
+        salir,
+        cerrarAvisoDeCaducidad,
+      }}
+    >
       {children}
     </SesionContext.Provider>
   );

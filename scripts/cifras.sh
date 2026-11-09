@@ -65,7 +65,10 @@ for fichero in glob.glob('backend/build/reports/jacoco/**/*.xml', recursive=True
     for paquete in ET.parse(fichero).getroot().iter('package'):
         if paquete.get('name', '').endswith('service'):
             for contador in paquete.findall('counter'):
-                if contador.get('type') == 'INSTRUCTION':
+                # Líneas, como el umbral de build.gradle y la rúbrica. Hasta la
+                # entrega final medía instrucciones (98,4 %) y el README hablaba
+                # de un porcentaje que no era el que se exige.
+                if contador.get('type') == 'LINE':
                     cubierto = int(contador.get('covered'))
                     perdido = int(contador.get('missed'))
                     # Con coma decimal, que es como lo escriben los documentos.

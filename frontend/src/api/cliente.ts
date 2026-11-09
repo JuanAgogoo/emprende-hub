@@ -118,7 +118,13 @@ async function peticion<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
     // ha caducado o el backend lo rechaza. Se avisa a quien lleve la sesión
     // para que la cierre, en vez de dejar al usuario en un limbo donde la
     // interfaz dice que está dentro y cada petición le responde que no.
-    if (conSesion && respuesta.status === 401) avisarDeSesionCaducada();
+    //
+    // Se mira la cabecera y no `conSesion`: sin token guardado no hay sesión
+    // que caducar. Y el login nunca lo lleva, así que unas credenciales malas
+    // siguen siendo «Credenciales incorrectas» y no este aviso.
+    if (respuesta.status === 401 && cabeceras.Authorization !== undefined) {
+      avisarDeSesionCaducada();
+    }
 
     // Con el backend caído, el `fetch` no siempre llega a fallar: el proxy de
     // Vite responde 502, y una pasarela delante de la API responde 502, 503 o

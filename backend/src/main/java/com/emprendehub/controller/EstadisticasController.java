@@ -2,6 +2,8 @@ package com.emprendehub.controller;
 
 import com.emprendehub.dto.EstadisticasPortadaResponse;
 import com.emprendehub.service.EstadisticasService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
  * categorías y usuarios registrados. Es público, como la portada.
  */
 @Tag(name = "Estadísticas", description = "Las cuatro cifras de la portada, calculadas (H4)")
+// Público: no pide token (SecurityConfig).
+@SecurityRequirements
 @RestController
 @RequestMapping("/api/v1/estadisticas")
 public class EstadisticasController {
@@ -25,6 +29,7 @@ public class EstadisticasController {
     }
 
     @GetMapping("/portada")
+    @Operation(summary = "Las cifras de la portada (H4)")
     public EstadisticasPortadaResponse portada() {
         return estadisticasService.obtenerPortada();
     }
