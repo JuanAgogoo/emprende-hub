@@ -356,7 +356,7 @@ curl -X POST $A/negocios/mio/fotos -H "Authorization: Bearer $TOKEN" \
 Las imágenes se guardan en `./uploads` —configurable con `FOTOS_DIR`— y se
 descargan de `/fotos/{archivo}`, sin token.
 
-**El contrato completo, con los 67 endpoints y un recorrido de demostración de
+**El contrato completo, con los 69 endpoints y un recorrido de demostración de
 punta a punta, está en [docs/api.md](docs/api.md).**
 
 ## Ver las peticiones según llegan
@@ -384,7 +384,7 @@ Con el backend levantado, la API se explora y se prueba desde el navegador:
 
 | Dirección | Qué es |
 |---|---|
-| <http://localhost:8080/swagger-ui.html> | La interfaz, con los 67 endpoints agrupados |
+| <http://localhost:8080/swagger-ui.html> | La interfaz, con los 69 endpoints agrupados |
 | <http://localhost:8080/v3/api-docs> | El documento OpenAPI en JSON |
 
 Las dos son **públicas**: describen el contrato, que ya es público, y no
@@ -400,8 +400,8 @@ grupo, en `OpenApiConfig` y en un `@Tag` por controlador.
 
 ## Colección de Postman
 
-`backend/postman/EmprendeHub.postman_collection.json`, con **78 peticiones que cubren los
-67 endpoints**.
+`backend/postman/EmprendeHub.postman_collection.json`, con **80 peticiones que cubren los
+69 endpoints**.
 
 1. Importarla en Postman (*Import → File*).
 2. Ejecutar las cuatro primeras peticiones de **1 · Acceso**. Cada una guarda su
@@ -440,7 +440,7 @@ cd backend
 Las pruebas de repositorio levantan un PostgreSQL real con Testcontainers, así
 que Docker tiene que estar corriendo.
 
-**510 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
+**521 pruebas en verde y 98,4% de cobertura sobre `service/**`**, muy por encima
 del 80% que exige la rúbrica. Repartidas en los tres niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |

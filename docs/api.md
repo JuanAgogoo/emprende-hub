@@ -617,9 +617,11 @@ Todo exige sesión. El cliente escribe desde el perfil; el dueño lee en su pane
 
 | Método | Ruta | Acceso | Hace |
 |---|---|---|---|
-| `POST` | `/negocios/{id}/consultas` | Sesión | Escribe al negocio (`201`) |
+| `POST` | `/negocios/{id}/consultas` | Sesión | Escribe al negocio (`201`). **Exige haberlo calificado** (D4), si no `400` |
+| `GET` | `/negocios/{id}/consultas/mias` | Sesión | Lo que quien pide le ha escrito a ese negocio, la más antigua primero: el historial del chat |
 | `GET` | `/negocios/mio/consultas` | Dueño | Su buzón, las más recientes primero |
 | `PATCH` | `/negocios/mio/consultas/{id}/lectura?leida=true` | Dueño | Marca leída o la desmarca |
+| `PATCH` | `/negocios/mio/consultas/{id}/respuesta` | Dueño | Responde la consulta, o corrige la respuesta (D2). Cuerpo `{"respuesta": "…"}`, 500 caracteres como mucho; la deja leída |
 
 | Campo | Regla |
 |---|---|
@@ -933,7 +935,7 @@ Con la base recién levantada, `GET /directorio` devuelve una página vacía y
 correcto: las cifras se calculan (H4) y todavía no hay nada que contar.
 
 La colección de Postman `backend/postman/EmprendeHub.postman_collection.json` cubre los
-**67 endpoints** en 78 peticiones, agrupadas por quién las usa. Su primera
+**69 endpoints** en 80 peticiones, agrupadas por quién las usa. Su primera
 carpeta, **1 · Acceso y datos de partida**, crea la clienta, la emprendedora y su
 negocio, y guarda cada token en su variable; el resto de peticiones los heredan.
 La carpeta **6 · Seguridad** cubre aparte los casos que tienen que fallar: 401,
