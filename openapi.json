@@ -1061,7 +1061,7 @@
             }
           },
           "400": {
-            "description": "La petición no es válida o es su propio negocio",
+            "description": "La petición no es válida, es su propio negocio o aún no lo ha calificado",
             "content": {
               "application/json": {
                 "schema": {
@@ -2305,6 +2305,83 @@
         ]
       }
     },
+    "/api/v1/negocios/mio/consultas/{id}/respuesta": {
+      "patch": {
+        "tags": [
+          "Consultas"
+        ],
+        "summary": "Responder una consulta del buzón propio",
+        "operationId": "responder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResponderConsultaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "La respuesta está vacía o es demasiado larga",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No es una consulta de su buzón",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
     "/api/v1/negocios/mio/consultas/{id}/lectura": {
       "patch": {
         "tags": [
@@ -3194,6 +3271,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PageNotificacionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin token, o con uno caducado o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer-jwt": []
+          }
+        ]
+      }
+    },
+    "/api/v1/negocios/{negocioId}/consultas/mias": {
+      "get": {
+        "tags": [
+          "Consultas"
+        ],
+        "summary": "Ver lo que le he escrito a un negocio",
+        "operationId": "misConsultas",
+        "parameters": [
+          {
+            "name": "negocioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Un identificador con un valor que no es del tipo esperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el negocio o no está publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConsultaResponse"
+                  }
                 }
               }
             }
@@ -4733,6 +4880,13 @@
           "fechaLectura": {
             "type": "string",
             "format": "date-time"
+          },
+          "respuesta": {
+            "type": "string"
+          },
+          "fechaRespuesta": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -5067,6 +5221,19 @@
         },
         "required": [
           "telefono"
+        ]
+      },
+      "ResponderConsultaRequest": {
+        "type": "object",
+        "properties": {
+          "respuesta": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "respuesta"
         ]
       },
       "DecisionRequest": {
@@ -5921,15 +6088,6 @@
         },
         "description": "Cuerpo de cualquier error. Con validación por campo, cada campo inválido llega como una clave más con su mensaje.",
         "properties": {
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "description": "El código HTTP"
-          },
-          "path": {
-            "type": "string",
-            "description": "La ruta pedida. Solo en los errores que corta Spring antes del controlador"
-          },
           "error": {
             "type": "string",
             "description": "Su nombre: «Bad Request»…"
@@ -5941,6 +6099,15 @@
           "message": {
             "type": "string",
             "description": "Qué pasó, en español (GlobalExceptionHandler)"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "El código HTTP"
+          },
+          "path": {
+            "type": "string",
+            "description": "La ruta pedida. Solo en los errores que corta Spring antes del controlador"
           }
         },
         "required": [
