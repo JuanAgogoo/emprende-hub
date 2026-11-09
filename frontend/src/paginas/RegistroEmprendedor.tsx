@@ -509,6 +509,32 @@ export function RegistroEmprendedor() {
       return;
     }
 
+    // Un producto escrito pero sin «Añadir a la lista» no se descarta en
+    // silencio: completo, entra al escaparate; a medias, se dice qué le falta.
+    let escaparate = productos;
+    const borradorEmpezado =
+      borrador.nombre.trim() !== '' ||
+      borrador.precio.trim() !== '' ||
+      borrador.descripcion.trim() !== '' ||
+      borrador.foto !== null;
+    if (borradorEmpezado) {
+      const primero = (['nombre', 'precio', 'descripcion', 'foto'] as const).find(
+        (campo) => erroresBorrador[campo] !== undefined,
+      );
+      const { foto, vistaPrevia } = borrador;
+      if (primero !== undefined || foto === null || vistaPrevia === null) {
+        setProductoIntentado(true);
+        setFallo(
+          'Tienes un producto sin terminar: complétalo y pulsa «Añadir a la lista», o vacía sus campos.',
+        );
+        if (primero !== undefined) enfocar(`producto-${primero}`);
+        return;
+      }
+      escaparate = [...productos, { ...borrador, foto, vistaPrevia, id: siguienteId.current++ }];
+      setProductos(escaparate);
+      setBorrador(PRODUCTO_VACIO);
+    }
+
     setFallo(null);
     setErroresServidor({});
     setEnviando(true);
@@ -524,7 +550,7 @@ export function RegistroEmprendedor() {
       // El escaparate va después y no dentro: cada producto lleva su imagen, y
       // subir binarios exige la sesión que el registro acaba de abrir. De uno en
       // uno, para que el que falle se pueda nombrar.
-      for (const producto of productos) {
+      for (const producto of escaparate) {
         await crearProducto(
           {
             nombre: producto.nombre.trim(),
