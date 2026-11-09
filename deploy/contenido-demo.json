@@ -45,7 +45,7 @@
    "fotos": [
     36618476,
     7991937,
-    20470948
+    22931878
    ],
    "descripcion": "Una tienda pequeña atendida por gente que hace deporte todos los días. Vendemos balones, raquetas y guantes de boxeo para quien empieza y para quien ya compite. Dejamos probar el equipo antes de comprarlo y explicamos con calma qué talla o peso conviene. Abrimos de lunes a sábado de 9:00 a. m. a 7:00 p. m."
   },
@@ -79,7 +79,7 @@
    "nombre": "Oficina contable Ábaco Verde",
    "barrio": null,
    "fotos": [
-    33175667,
+    4056856,
     17065743,
     8408550
    ],
@@ -187,7 +187,7 @@
    "nombre": "Club La Fragua",
    "barrio": "Laureles",
    "fotos": [
-    7991943,
+    9944893,
     3916766,
     4164765,
     36090935
@@ -224,7 +224,7 @@
    "nombre": "Contadores Renglón Azul",
    "barrio": "Laureles",
    "fotos": [
-    33175673,
+    8099485,
     14654951,
     3943727
    ],
@@ -374,7 +374,7 @@
    "nombre": "Asesorías La Esquina",
    "barrio": null,
    "fotos": [
-    33175669,
+    6193131,
     2882580,
     261621
    ],
@@ -493,7 +493,7 @@
   }
  ],
  "productos": {
-  "Pan de masa madre": 36202913,
+  "Pan de masa madre": 35815220,
   "Café de origen 500 g": 14848712,
   "Almuerzo del día": 29450678,
   "Torta de zanahoria": 2612373,
@@ -515,7 +515,7 @@
   "Limpieza facial": 6560312,
   "Manicure tradicional": 3631691,
   "Guantes de boxeo": 6296058,
-  "Raqueta de tenis": 20470948,
+  "Raqueta de tenis": 22931878,
   "Balón de fútbol": 38275739,
   "Mantenimiento de bicicleta": 10016886,
   "Entrenamiento personalizado": 3916766,
@@ -525,7 +525,7 @@
   "Curso de cocina básica": 15611222,
   "Preparación para el ICFES": 12561284,
   "Refuerzo de matemáticas": 5184953,
-  "Curso de Excel para negocios": 33175669,
+  "Curso de Excel para negocios": 6193131,
   "Taller de fotografía con celular": 11189045,
   "Clase de guitarra": 7558112,
   "Mesa de postres": 19976278,
@@ -536,10 +536,10 @@
   "Alquiler de sonido": 37900941,
   "Alquiler de mesas y sillas": 8452759,
   "Taller de finanzas personales": 3943727,
-  "Declaración de renta": 33175667,
+  "Declaración de renta": 4056856,
   "Revisión de crédito": 17065743,
   "Constitución de empresa": 261621,
-  "Asesoría contable mensual": 33175673,
+  "Asesoría contable mensual": 8099485,
   "Facturación electrónica": 7567600,
   "Plan de presupuesto personal": 12955822,
   "Lámpara colgante": 33792074,
@@ -635,7 +635,6 @@
   "7697711": "rdne",
   "7823407": "marina-chocobar-1740112",
   "7991937": "annushka-ahuja",
-  "7991943": "annushka-ahuja",
   "8063803": "roman-odintsov",
   "8386651": "ron-lach",
   "8408550": "sarahdorweiler",
@@ -691,7 +690,6 @@
   "19873680": "arda-kaykisiz-672105204",
   "19976278": "karina-benfica-538943838",
   "20304752": "zh-ru",
-  "20470948": "elchinoportrait",
   "22441297": "dayong-tien-681073045",
   "22938072": "tallitamaynara",
   "23542061": "mladenscekic",
@@ -715,9 +713,6 @@
   "32277863": "warrecreates",
   "32776848": "gerardo-pantoja-826939143",
   "33104578": "nguy-n-ti-n-th-nh-2150376175",
-  "33175667": "bia-limova-1908542654",
-  "33175669": "bia-limova-1908542654",
-  "33175673": "bia-limova-1908542654",
   "33792074": "ali-askar-2154757026",
   "34015711": "shotbysylvesterabigail",
   "34514242": "found-ghi-2156772983",
@@ -727,7 +722,6 @@
   "35884499": "marine-fougere-2159237528",
   "35993313": "nati-87264186",
   "36090935": "paulina-klys-2155606640",
-  "36202913": "eceebrarr",
   "36618476": "bastian-wardana-2160289413",
   "36650154": "valentin-ivantsov-2154772556",
   "36837602": "aiseleer-566178897",
@@ -746,6 +740,12 @@
   "38923401": "damir",
   "39178037": "iohichu",
   "39193816": "andreadevillier",
-  "40371837": "724211268"
+  "40371837": "724211268",
+  "22931878": "mutecevvil",
+  "35815220": "mrgajowy3",
+  "8099485": "ds-stories",
+  "6193131": "ekaterina-bolovtsova",
+  "9944893": "koolshooters",
+  "4056856": "suzyhazelwood"
  }
 }

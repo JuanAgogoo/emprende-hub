@@ -60,6 +60,11 @@ def archivos_negocio(n):
     return [f"demo-n{n['id']:02d}-{i}-{p}.jpg" for i, p in enumerate(n['fotos'], 1)]
 
 
+def deseadas():
+    return sorted({a for n in C['negocios'] for a in archivos_negocio(n)}
+                  | {f'demo-p-{v}.jpg' for v in C['productos'].values()})
+
+
 def construir_sql():
     negocios = C['negocios']
     ids = ','.join(str(n['id']) for n in negocios)
@@ -133,7 +138,10 @@ def main():
         print(f'Borradas {len(nombres)} fotos de letras.')
         return
 
-    jpgs = sorted(p.name for p in FOTOS.glob('demo-*.jpg'))
+    jpgs = deseadas()
+    faltan = [a for a in jpgs if not (FOTOS / a).exists()]
+    if faltan:
+        raise SystemExit(f'Faltan fotos locales; corre preparar-fotos-demo.py: {faltan[:5]}')
     paquete = subprocess.run(['tar', '--owner=1001', '--group=1001', '-C', str(FOTOS), '-cf', '-'] + jpgs,
                              capture_output=True, check=True).stdout
     d.ejecutar(f"{docker} tar -xf - -C /fotos", paquete)
@@ -143,6 +151,12 @@ def main():
     lista.write_text('\n'.join(sorted(previas | set(viejas))) + '\n')
     print(f'Fotos de letras retiradas de la base en esta corrida: {len(viejas)}')
     print(next(l for l in salida.splitlines() if l.startswith('TOTAL|'))[6:])
+    # Solo después de confirmar la base: retira las fotos demo que ya nadie usa.
+    sobran = [n for n in d.ejecutar(f'{docker} ls /fotos').decode().split()
+              if re.fullmatch(r'demo-[a-z0-9-]+\.jpg', n) and n not in set(jpgs)]
+    if sobran:
+        d.ejecutar(f"{docker} sh -c 'cd /fotos && rm -f -- {' '.join(sobran)}'")
+    print(f'Fotos demo reemplazadas y retiradas del disco: {len(sobran)}')
 
 
 if __name__ == '__main__':
