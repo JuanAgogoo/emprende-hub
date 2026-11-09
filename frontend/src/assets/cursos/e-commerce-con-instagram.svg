@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="f" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f97316"/><stop offset=".55" stop-color="#db2777"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#f)"/>
+  <circle cx="90" cy="70" r="60" fill="#fff" opacity=".08"/><circle cx="560" cy="300" r="90" fill="#fff" opacity=".08"/>
+  <rect x="245" y="30" width="150" height="300" rx="26" fill="#111827"/>
+  <rect x="256" y="52" width="128" height="262" rx="12" fill="#ffffff"/>
+  <rect x="300" y="38" width="40" height="6" rx="3" fill="#374151"/>
+  <circle cx="276" cy="72" r="10" fill="#f472b6"/><rect x="292" y="66" width="60" height="6" rx="3" fill="#cbd5e1"/><rect x="292" y="76" width="40" height="5" rx="2.5" fill="#e2e8f0"/>
+  <g>
+    <rect x="264" y="92" width="36" height="36" rx="5" fill="#fde68a"/><rect x="302" y="92" width="36" height="36" rx="5" fill="#fbcfe8"/><rect x="340" y="92" width="36" height="36" rx="5" fill="#bfdbfe"/>
+    <rect x="264" y="130" width="36" height="36" rx="5" fill="#bbf7d0"/><rect x="302" y="130" width="36" height="36" rx="5" fill="#fed7aa"/><rect x="340" y="130" width="36" height="36" rx="5" fill="#ddd6fe"/>
+    <rect x="264" y="168" width="36" height="36" rx="5" fill="#fecaca"/><rect x="302" y="168" width="36" height="36" rx="5" fill="#a5f3fc"/><rect x="340" y="168" width="36" height="36" rx="5" fill="#fef08a"/>
+  </g>
+  <rect x="268" y="220" width="104" height="30" rx="8" fill="#db2777"/>
+  <text x="320" y="240" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#fff">Comprar</text>
+  <rect x="268" y="262" width="80" height="7" rx="3.5" fill="#e2e8f0"/><rect x="268" y="276" width="60" height="7" rx="3.5" fill="#e2e8f0"/>
+  <g transform="translate(110 150)">
+    <path d="M10 40 h100 l-10 110 h-80 z" fill="#ffffff"/><path d="M38 40 v-12 a22 22 0 0 1 44 0 v12" fill="none" stroke="#ffffff" stroke-width="8"/>
+    <circle cx="60" cy="95" r="18" fill="#db2777"/><text x="60" y="101" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700" fill="#fff">$</text>
+  </g>
+  <g transform="translate(450 80)">
+    <rect width="130" height="54" rx="27" fill="#ffffff"/>
+    <path d="M38 38 C14 22 18 8 30 10 c6 1 8 6 8 6 s2 -5 8 -6 c12 -2 16 12 -8 28z" fill="#ef4444"/>
+    <text x="62" y="35" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#111827">+128</text>
+  </g>
+  <g transform="translate(450 160)">
+    <rect width="130" height="54" rx="27" fill="#ffffff"/>
+    <rect x="20" y="16" width="22" height="22" rx="4" fill="#7c3aed"/><path d="M25 27 l4 4 l8 -9" stroke="#fff" stroke-width="3" fill="none"/>
+    <text x="52" y="35" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#111827">Pedido</text>
+  </g>
+</svg>

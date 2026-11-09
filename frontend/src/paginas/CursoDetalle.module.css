@@ -1,0 +1,136 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  padding-block: var(--e-6) var(--e-7);
+}
+
+.volver {
+  align-self: start;
+  font-size: var(--texto-sm);
+  color: var(--color-acento);
+}
+
+/* Mobile first: la portada arriba; desde tableta, al lado del texto. */
+.ficha {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-sm);
+}
+
+@media (min-width: 52rem) {
+  .ficha {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+}
+
+.portada {
+  display: grid;
+  align-self: start;
+  place-items: center;
+  /* La proporción de la ilustración: así se ve entera, sin recortes. */
+  aspect-ratio: 16 / 9;
+  background: var(--color-acento-suave);
+  font-size: var(--texto-3xl);
+}
+
+.portada img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-5);
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.etiquetas span {
+  padding: var(--e-1) var(--e-3);
+  border-radius: var(--radio-full);
+  background: var(--color-lienzo-alt);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+}
+
+.etiquetas .gratis {
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+
+.etiquetas .pago {
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+}
+
+.titulo {
+  font-size: var(--texto-2xl);
+}
+
+.descripcion {
+  color: var(--color-cuerpo);
+}
+
+.subtitulo {
+  margin-bottom: var(--e-3);
+  font-size: var(--texto-lg);
+}
+
+.temario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: 0;
+  list-style: none;
+}
+
+.temario li {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+/* El módulo en curso se marca con borde y fondo, no solo con color. */
+.temario .actual {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+  color: var(--color-tinta);
+  font-weight: 600;
+}
+
+.numero {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: var(--radio-full);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+}
+
+.accion {
+  display: inline-grid;
+  align-self: start;
+  place-items: center;
+  text-decoration: none;
+}

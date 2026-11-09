@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+import { visualDelCurso } from '../cursosVisual';
 import { precio } from '../formato';
 import type { Curso } from '../types/curso';
 import estilos from './TarjetaCurso.module.css';
@@ -12,15 +14,16 @@ interface Props {
 /**
  * La ficha de un curso: lo que hace falta para decidir antes de abrirlo (HU-021).
  *
- * El acceso —gratis o su precio— va arriba y a la vista (HU-023), y el enlace
- * lleva directo al recurso: la plataforma no cobra ni intermedia (E1), así que
- * un curso gratuito se abre sin pasar por ninguna página de pago.
+ * El acceso —gratis o su precio— va arriba y a la vista (HU-023). Un curso
+ * gratuito lleva a su ficha, que pide sesión; uno de pago, a la pantalla de
+ * pago simulado, porque no hay pasarela integrada (E1).
  */
 export function TarjetaCurso({ curso, categoria, nivel }: Props) {
+  const visual = visualDelCurso(curso.titulo);
   return (
     <article className={estilos.tarjeta}>
       <div className={estilos.cabecera} aria-hidden="true">
-        {curso.emoji}
+        {visual !== null ? <img className={estilos.imagen} src={visual.imagen} alt="" /> : curso.emoji}
       </div>
 
       <div className={estilos.cuerpo}>
@@ -48,18 +51,15 @@ export function TarjetaCurso({ curso, categoria, nivel }: Props) {
           </div>
         </dl>
 
-        {/* Un enlace y no un botón: lleva a otra página, no hace una acción.
-            `noopener` impide que la página de fuera controle esta pestaña. */}
-        <a
-          className={estilos.enlace}
-          href={curso.urlRecurso}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {curso.gratuito ? 'Empezar gratis' : 'Ver el curso'}
-          <span className={estilos.oculto}> (se abre en otra pestaña)</span>
-          <span aria-hidden="true"> ↗</span>
-        </a>
+        {curso.gratuito || curso.precio === null ? (
+          <Link className={estilos.enlace} to={`/cursos/${curso.id}`}>
+            Empezar gratis
+          </Link>
+        ) : (
+          <Link className={estilos.enlace} to={`/cursos/${curso.id}/pago`}>
+            Comprar curso
+          </Link>
+        )}
       </div>
     </article>
   );

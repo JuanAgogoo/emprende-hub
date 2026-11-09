@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c1d95"/><stop offset="1" stop-color="#c026d3"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#f)"/>
+  <g transform="translate(150 190) rotate(-14)">
+    <rect x="-40" y="-36" width="50" height="72" rx="10" fill="#fbbf24"/>
+    <path d="M10 -36 L170 -110 L170 110 L10 36 z" fill="#ffffff"/>
+    <path d="M170 -110 L170 110" stroke="#e9d5ff" stroke-width="16" stroke-linecap="round"/>
+    <rect x="-30" y="36" width="34" height="70" rx="10" fill="#f59e0b"/>
+  </g>
+  <g fill="none" stroke="#fde68a" stroke-width="9" stroke-linecap="round">
+    <path d="M370 110 q40 50 0 110"/><path d="M410 80 q60 80 0 170"/><path d="M450 50 q80 110 0 230"/>
+  </g>
+  <g transform="translate(520 80)">
+    <circle r="34" fill="#ffffff"/><text x="0" y="12" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#7c3aed">@</text>
+  </g>
+  <g transform="translate(560 200)">
+    <circle r="30" fill="#ffffff"/>
+    <path d="M0 14 C-22 0 -18 -14 -8 -14 c5 0 8 5 8 5 s3 -5 8 -5 c10 0 14 14 -8 28z" fill="#ef4444"/>
+  </g>
+  <g transform="translate(520 300)">
+    <rect x="-46" y="-22" width="92" height="44" rx="22" fill="#ffffff"/>
+    <path d="M-24 6 v-8 h6 l8 -14 c6 0 7 4 6 9 l-2 7 h12 c5 0 6 4 5 7 l-4 14 c-1 3 -3 4 -6 4 h-25 z" fill="#2563eb" transform="scale(.8)"/>
+    <text x="14" y="7" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#4c1d95">2k</text>
+  </g>
+</svg>
