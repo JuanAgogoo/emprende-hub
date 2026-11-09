@@ -129,6 +129,8 @@ public class CargaInicialDemo implements CommandLineRunner {
     private static final int PRIMER_PENDIENTE = 37;
 
     private final boolean activa;
+    /** Sustituye a las tres contraseñas públicas; vacía, se usan esas. */
+    private final String contrasenaDemo;
     private final String correoAdmin;
     private final Clock reloj;
     private final Validator validador;
@@ -171,6 +173,7 @@ public class CargaInicialDemo implements CommandLineRunner {
     }
 
     public CargaInicialDemo(@Value("${emprendehub.semilla-demo:true}") boolean activa,
+                            @Value("${emprendehub.semilla-demo-contrasena:}") String contrasenaDemo,
                             @Value("${admin.correo:admin@emprendehub.co}") String correoAdmin,
                             Clock reloj, Validator validador, AuthService authService,
                             NegocioService negocioService, FotoService fotoService,
@@ -188,6 +191,7 @@ public class CargaInicialDemo implements CommandLineRunner {
                             DenunciaRepository denunciaRepository,
                             VisitaRepository visitaRepository) {
         this.activa = activa;
+        this.contrasenaDemo = contrasenaDemo;
         this.correoAdmin = correoAdmin;
         this.reloj = reloj;
         this.validador = validador;
@@ -227,11 +231,11 @@ public class CargaInicialDemo implements CommandLineRunner {
                 .orElseThrow(() -> new IllegalStateException(
                         "Falta el administrador, que siembra CargaInicialAdmin"));
 
-        Usuario clienteFijo = registrarCliente("Laura Gómez", CORREO_CLIENTE, CONTRASENA_CLIENTE);
+        Usuario clienteFijo = registrarCliente("Laura Gómez", CORREO_CLIENTE, contrasena(CONTRASENA_CLIENTE));
         List<Usuario> clientes = new ArrayList<>();
         for (int i = 1; i <= CLIENTES; i++) {
             clientes.add(registrarCliente(persona(), "cliente%02d@emprendehub.co".formatted(i),
-                    CONTRASENA_GENERADAS));
+                    contrasena(CONTRASENA_GENERADAS)));
         }
 
         Sembrado cafe = sembrarNegocioFijo(admin);
@@ -255,9 +259,16 @@ public class CargaInicialDemo implements CommandLineRunner {
                 negocioRepository.count(), publicados.size(), clientes.size() + 1,
                 opinionRepository.count(), consultaRepository.count(), visitaRepository.count(),
                 Duration.ofNanos(System.nanoTime() - inicio).toMillis());
-        log.info("Cuentas de prueba: {} / {}, {} / {}; las generadas usan «{}».",
-                CORREO_CLIENTE, CONTRASENA_CLIENTE, CORREO_EMPRENDEDORA, CONTRASENA_EMPRENDEDORA,
-                CONTRASENA_GENERADAS);
+        // Una contraseña propia no se escribe en el log.
+        if (contrasenaDemo.isBlank()) {
+            log.info("Cuentas de prueba: {} / {}, {} / {}; las generadas usan «{}».",
+                    CORREO_CLIENTE, CONTRASENA_CLIENTE, CORREO_EMPRENDEDORA,
+                    CONTRASENA_EMPRENDEDORA, CONTRASENA_GENERADAS);
+        }
+    }
+
+    private String contrasena(String publica) {
+        return contrasenaDemo.isBlank() ? publica : contrasenaDemo;
     }
 
     // ---------- Cuentas y negocios ----------
@@ -273,18 +284,18 @@ public class CargaInicialDemo implements CommandLineRunner {
     /** El negocio de la cuenta fija de emprendedora: el más completo de todos. */
     private Sembrado sembrarNegocioFijo(Usuario admin) {
         Ciudad medellin = ciudad("Medellín");
-        RegistrarNegocioRequest negocio = new RegistrarNegocioRequest("Café Pergamino",
+        RegistrarNegocioRequest negocio = new RegistrarNegocioRequest("Café Alto Nogal",
                 "Café de finca con tueste propio y catación abierta los sábados. Trabajamos con "
                         + "doce caficultores del suroeste de Antioquia y horneamos el pan cada "
                         + "mañana.",
-                "3104567890", categoria("Gastronomía").getId(), medellin.getId(),
+                "3000000001", categoria("Gastronomía").getId(), medellin.getId(),
                 barrio(medellin, "Laureles").getId(), NivelPrecio.MEDIO);
         EditarRedesRequest redes = new EditarRedesRequest(
-                "https://instagram.com/cafepergamino", "");
+                "https://instagram.com/cafealtonogal", "");
 
         List<Articulo> articulos = DatosDemo.RUBROS.get("Gastronomía").articulos().subList(0, 6);
         Instant creado = haceDias(210);
-        return darDeAlta("Lucía Restrepo", CORREO_EMPRENDEDORA, CONTRASENA_EMPRENDEDORA, negocio,
+        return darDeAlta("Lucía Restrepo", CORREO_EMPRENDEDORA, contrasena(CONTRASENA_EMPRENDEDORA), negocio,
                 redes, "Gastronomía", articulos, 4, EstadoNegocio.APROBADO, creado, admin, 4.6, 7);
     }
 
@@ -337,7 +348,7 @@ public class CargaInicialDemo implements CommandLineRunner {
         double calidad = 3.2 + azar.nextDouble() * 1.7;
         double visitasDiarias = 0.3 + azar.nextDouble() * 1.5;
         return darDeAlta(persona(), "emprendedor%02d@emprendehub.co".formatted(posicion + 1),
-                CONTRASENA_GENERADAS, negocio, redes, categoria, articulos, fotos, estado, creado,
+                contrasena(CONTRASENA_GENERADAS), negocio, redes, categoria, articulos, fotos, estado, creado,
                 admin, calidad, visitasDiarias);
     }
 
@@ -448,7 +459,7 @@ public class CargaInicialDemo implements CommandLineRunner {
         moderacionService.desestimarDenuncia(desestimada, admin);
 
         Long eliminada = denunciar(generados.get(11), clientes, 3, "Bien, pero le escribí a la "
-                + "dueña a su celular personal, el 3009876543, y nunca contestó.",
+                + "dueña a su celular personal, el 3000000999, y nunca contestó.",
                 MotivoDenuncia.DATOS_PERSONALES);
         moderacionService.eliminarOpinionDenunciada(eliminada,
                 "Expone el teléfono personal de la dueña", admin);
@@ -543,8 +554,9 @@ public class CargaInicialDemo implements CommandLineRunner {
                 .findFirst().orElseThrow();
         Long id = opinar(cafe, nueva, 5, null);
         opinionRepository.findById(id).orElseThrow().setFechaCreacion(haceDias(1));
-        consultar(cafe, alAzar(clientes), 2);
-        consultar(cafe, alAzar(clientes), 0);
+        // Quien acaba de calificarlo es quien puede escribirle (D4).
+        consultar(cafe, nueva, 2);
+        consultar(cafe, nueva, 0);
     }
 
     // ---------- Visitas ----------
@@ -648,9 +660,11 @@ public class CargaInicialDemo implements CommandLineRunner {
 
     /** Un móvil casi siempre; uno de cada cinco, un fijo de Antioquia (G8). */
     private String telefono() {
+        // Series de relleno y no números al azar: en el perfil hay un botón de
+        // llamar, y un número aleatorio puede ser el de una persona real.
         return azar.nextInt(5) == 0
-                ? "604%07d".formatted(azar.nextInt(10_000_000))
-                : "3%09d".formatted(azar.nextInt(1_000_000_000));
+                ? "6040000%03d".formatted(azar.nextInt(1_000))
+                : "3000000%03d".formatted(azar.nextInt(1_000));
     }
 
     /** El precio del nivel medio, ajustado al nivel del negocio y redondeado a 500. */

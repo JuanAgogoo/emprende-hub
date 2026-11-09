@@ -818,7 +818,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"motivo\": \"LENGUAJE_INAPROPIADO\"\n}"
 						},
-						"description": "Denuncia la opinión 2, una de las de los datos de prueba sobre Café Pergamino, escrita por `cliente06@emprendehub.co`.\n\nDenunciar una opinión propia responde 400: para eso está borrarla. Una segunda pasada también responde 400, porque ya la denunció."
+						"description": "Denuncia la opinión 2, una de las de los datos de prueba sobre Café Alto Nogal, escrita por `cliente06@emprendehub.co`.\n\nDenunciar una opinión propia responde 400: para eso está borrarla. Una segunda pasada también responde 400, porque ya la denunció."
 					}
 				},
 				{

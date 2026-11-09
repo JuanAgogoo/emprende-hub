@@ -941,7 +941,7 @@ Se apaga con `SEMILLA_DEMO=false`, y entonces `GET /directorio` devuelve una
 página vacía y `/estadisticas/portada` ceros con `calificacionPromedio` nulo.
 
 **El recorrido de arriba supone una base sin negocios**: crea el suyo y lo llama
-por el identificador 1. Con los datos de prueba, el 1 es «Café Pergamino», ya
+por el identificador 1. Con los datos de prueba, el 1 es «Café Alto Nogal», ya
 publicado, y el paso de rechazarlo respondería 400. Para seguirlo al pie de la
 letra, arrancar con la base vacía y `SEMILLA_DEMO=false`.
 

@@ -255,7 +255,7 @@ Los que tienen un papel en el recorrido:
 
 | Negocio | Para qué está |
 |---|---|
-| **Café Pergamino** | El de la emprendedora fija: 4 fotos, 6 productos, 10 opiniones, buzón, visitas y avisos sin leer |
+| **Café Alto Nogal** | El de la emprendedora fija: 4 fotos, 6 productos, 10 opiniones, buzón, visitas y avisos sin leer |
 | **Estudio Arrayán** y **Tienda deportiva Mandarina** | Pendientes: hay algo que aprobar en directo (B6) |
 | **Casa El Mirador** | Rechazado, con su motivo a la vista de su dueño |
 | **Academia Aurora** | Propone una descripción nueva (B2-bis) |
@@ -275,8 +275,8 @@ cifras se calculan (H4).
 | Cuenta | Correo | Contraseña | Para qué sirve |
 |---|---|---|---|
 | Administrador | `admin@emprendehub.co` | `admin12345` | El panel: colas de moderación, usuarios, cursos e historial |
-| Clienta | `cliente@emprendehub.co` | `cliente12345` | Opinar, denunciar y escribir a un negocio. Ya opinó en tres, pero no en Café Pergamino |
-| Emprendedora | `emprendedora@emprendehub.co` | `emprende12345` | El panel de Café Pergamino |
+| Clienta | `cliente@emprendehub.co` | `cliente12345` | Opinar, denunciar y escribir a un negocio. Ya opinó en tres, pero no en Café Alto Nogal |
+| Emprendedora | `emprendedora@emprendehub.co` | `emprende12345` | El panel de Café Alto Nogal |
 | Clientes generados | `cliente01@emprendehub.co` … `cliente30@emprendehub.co` | `demo12345` | Autores de las opiniones y las consultas |
 | Emprendedores generados | `emprendedor01@emprendehub.co` … `emprendedor39@emprendehub.co` | `demo12345` | Uno por negocio, en el orden en que se crearon |
 
