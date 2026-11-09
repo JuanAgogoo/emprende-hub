@@ -119,6 +119,7 @@
 
 .secundario,
 .destructivo {
+  min-height: var(--toque-min);
   padding: var(--e-2) var(--e-3);
   border-radius: var(--radio-full);
   font: inherit;

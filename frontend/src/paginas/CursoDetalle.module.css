@@ -6,6 +6,9 @@
 }
 
 .volver {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
   align-self: start;
   font-size: var(--texto-sm);
   color: var(--color-acento);

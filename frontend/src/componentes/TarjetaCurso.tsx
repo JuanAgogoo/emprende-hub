@@ -23,7 +23,7 @@ export function TarjetaCurso({ curso, categoria, nivel }: Props) {
   return (
     <article className={estilos.tarjeta}>
       <div className={estilos.cabecera} aria-hidden="true">
-        {visual !== null ? <img className={estilos.imagen} src={visual.imagen} alt="" /> : curso.emoji}
+        {visual !== null ? <img className={estilos.imagen} src={visual.imagen} alt="" loading="lazy" /> : curso.emoji}
       </div>
 
       <div className={estilos.cuerpo}>
