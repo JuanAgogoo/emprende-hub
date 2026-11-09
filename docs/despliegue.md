@@ -100,6 +100,23 @@ docker run --rm -v emprendehub-prod_fotos:/fotos -v "$PWD/backups":/b:ro alpine:
 $C start backend
 ```
 
+## Fotos y textos de los negocios de demostración
+
+`CargaInicialDemo` crea los negocios con imágenes de una letra. Para sustituirlas
+por fotos reales y completar los textos, sin borrar negocios, cuentas, opiniones
+ni consultas:
+
+```bash
+python3 deploy/preparar-fotos-demo.py                     # deja las fotos en deploy/fotos-demo/
+python3 deploy/aplicar-demo.py --destino produccion       # se puede repetir
+python3 deploy/aplicar-demo.py --destino produccion --limpiar   # al final
+```
+
+Haz antes un backup. Los textos y qué foto va en cada negocio están en
+`deploy/contenido-demo.json`, y los créditos en
+[creditos-fotos.md](creditos-fotos.md). El modelo no tiene campo de horario: va
+al final de la descripción. Los archivos de letras solo se borran con `--limpiar`.
+
 ## Variables de entorno
 
 Van en `/opt/emprendehub/.env` con permisos 600, nunca en git. Tras cambiarlas:
