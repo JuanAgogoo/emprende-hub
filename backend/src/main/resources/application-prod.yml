@@ -1,0 +1,6 @@
+# Perfil de producción: se activa con SPRING_PROFILES_ACTIVE=prod. Lo que se
+# despliega está en docs/despliegue.md; las credenciales llegan del entorno y
+# ValidadorProduccion impide arrancar con las públicas del repositorio.
+server:
+  # Caddy termina el HTTPS: sin esto la aplicación creería que todo llega por http.
+  forward-headers-strategy: framework
