@@ -179,7 +179,10 @@ QR del póster deja de funcionar cuando venza el dominio.
 
 ## Estado final (9 de noviembre de 2026)
 
-**Comprobado en el sitio real, sin iniciar sesión:**
+**Prueba de punta a punta en el sitio real:** `verificar.mjs`, 31 de 31 correctas.
+Sus cuentas y su negocio de prueba se borraron después.
+
+**Comprobado además en el sitio real:**
 
 - HTTP/2 con certificado válido de Let's Encrypt; `http` redirige a `https`.
 - Los puertos 5432, 8080 y 8025 están cerrados desde fuera.
@@ -194,8 +197,8 @@ llave; usuario `deploy` con sudo y Docker.
 **Copias:** `backup.sh` se ejecutó y sus archivos pasan `gzip -t`. La restauración
 se ensayó con estos mismos comandos en una copia local.
 
-**Comprobado en una copia local idéntica:** `verificar.mjs` completo y las
-pantallas con sesión de emprendedor y de administrador.
+**Comprobado en una copia local idéntica:** las pantallas con sesión de
+emprendedor y de administrador, a tamaño de celular.
 
 **Limitaciones conocidas:**
 
