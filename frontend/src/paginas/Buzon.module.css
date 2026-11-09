@@ -1,0 +1,30 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  padding-block: var(--e-6) var(--e-7);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+}
+
+/* El sobre grande que identifica la sección, como el sello de una carta. */
+.sobre {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radio-lg);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+
+.entrada {
+  max-width: var(--ancho-lectura);
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+}

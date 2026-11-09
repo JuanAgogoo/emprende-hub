@@ -11,6 +11,9 @@ import { AdminHistorial } from './paginas/AdminHistorial';
 import { AdminNegocios } from './paginas/AdminNegocios';
 import { AdminRevisarNegocio } from './paginas/AdminRevisarNegocio';
 import { AdminUsuarios } from './paginas/AdminUsuarios';
+import { CursoDetalle } from './paginas/CursoDetalle';
+import { Buzon } from './paginas/Buzon';
+import { ChatNegocio } from './paginas/ChatNegocio';
 import { Cursos } from './paginas/Cursos';
 import { Directorio } from './paginas/Directorio';
 import { InformacionPersonal } from './paginas/InformacionPersonal';
@@ -18,6 +21,7 @@ import { Inicio } from './paginas/Inicio';
 import { Login } from './paginas/Login';
 import { MiNegocio } from './paginas/MiNegocio';
 import { NoEncontrada } from './paginas/NoEncontrada';
+import { PagoCurso } from './paginas/PagoCurso';
 import { PanelAdmin } from './paginas/PanelAdmin';
 import { PerfilNegocio } from './paginas/PerfilNegocio';
 import { RecuperarContrasena } from './paginas/RecuperarContrasena';
@@ -49,7 +53,10 @@ export function App() {
         <Route path="/" element={<Inicio />} />
         <Route path="/directorio" element={<Directorio />} />
         <Route path="/negocios/:id" element={<PerfilNegocio />} />
+        <Route path="/negocios/:id/mensajes" element={<ChatNegocio />} />
         <Route path="/cursos" element={<Cursos />} />
+        <Route path="/cursos/:id" element={<CursoDetalle />} />
+        <Route path="/cursos/:id/pago" element={<PagoCurso />} />
         <Route path="/entrar" element={<Login />} />
         <Route path="/registro" element={<RegistroCliente />} />
         <Route path="/recuperar" element={<RecuperarContrasena />} />
@@ -60,6 +67,14 @@ export function App() {
           element={
             <RutaDeEmprendedor>
               <MiNegocio />
+            </RutaDeEmprendedor>
+          }
+        />
+        <Route
+          path="/buzon"
+          element={
+            <RutaDeEmprendedor>
+              <Buzon />
             </RutaDeEmprendedor>
           }
         />

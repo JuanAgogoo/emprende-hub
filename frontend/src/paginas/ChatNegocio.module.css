@@ -1,0 +1,171 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  max-width: 44rem;
+  padding-block: var(--e-6) var(--e-7);
+}
+
+.volver {
+  align-self: start;
+  font-size: var(--texto-sm);
+  color: var(--color-acento);
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo);
+  box-shadow: var(--sombra-md);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+}
+
+.avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radio-full);
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+  font-weight: 700;
+  object-fit: cover;
+}
+
+.nombre {
+  font-size: var(--texto-lg);
+  color: inherit;
+}
+
+.subtitulo {
+  font-size: var(--texto-xs);
+  opacity: 0.9;
+}
+
+/* El fondo de la conversación, más apagado que las burbujas. */
+.mensajes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  min-height: 18rem;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding: var(--e-4);
+  background: var(--color-lienzo-alt);
+}
+
+.vacio {
+  margin: auto;
+  max-width: 24rem;
+  font-size: var(--texto-sm);
+  color: var(--color-apagado);
+  text-align: center;
+}
+
+/* Lo que escribe quien mira va a la derecha, como en cualquier chat. */
+.burbuja {
+  align-self: end;
+  max-width: 80%;
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--radio-lg) var(--radio-lg) var(--radio-sm) var(--radio-lg);
+  background: var(--color-acento-suave);
+  border: 1px solid color-mix(in srgb, var(--color-acento) 30%, var(--color-borde));
+  color: var(--color-tinta);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.hora {
+  display: block;
+  margin-top: var(--e-1);
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+  text-align: right;
+}
+
+.redactor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-3) var(--e-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+.redactor textarea {
+  width: 100%;
+  min-height: var(--toque-min);
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  font: inherit;
+  resize: vertical;
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--texto-xs);
+  color: var(--color-apagado);
+}
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-4);
+  padding: var(--e-6) var(--e-5);
+  text-align: center;
+  color: var(--color-cuerpo);
+}
+
+.boton {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* La respuesta del negocio va a la izquierda, con otro fondo. */
+.respuesta {
+  align-self: start;
+  max-width: 80%;
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--radio-lg) var(--radio-lg) var(--radio-lg) var(--radio-sm);
+  background: var(--color-lienzo);
+  border: 1px solid var(--color-borde);
+  color: var(--color-tinta);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.autor {
+  display: block;
+  margin-bottom: var(--e-1);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  color: var(--color-acento);
+}
