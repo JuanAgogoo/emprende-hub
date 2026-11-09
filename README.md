@@ -295,7 +295,7 @@ cambios.
 
 | Componente | Comando | Necesita | Resultado medido |
 |---|---|---|---|
-| **Backend** | `cd backend && ./gradlew check` | Docker en marcha y un JDK 17 o superior | **516 pruebas en verde y 98,6% de cobertura** de líneas en `service/**` |
+| **Backend** | `cd backend && ./gradlew check` | Docker en marcha y un JDK 17 o superior | **536 pruebas en verde y 98,7% de cobertura** de líneas en `service/**` |
 | **Frontend** | `cd frontend && npm ci && npm test` | Node 22.22.2+ o 24.15+ y npm | **29 pruebas** en 4 ficheros |
 
 ### Backend
@@ -311,7 +311,7 @@ Testcontainers**, así que Docker tiene que estar en marcha. No usan la base de
 
 **La cobertura de `service/**` tiene que quedarse en el 80% o más**: JaCoCo
 tiene ese umbral sobre las líneas de esa capa, y por debajo `./gradlew check`
-falla. Hoy está en el 98,6% (794 de 805 líneas). Las pruebas siguen los tres
+falla. Hoy está en el 98,7% (809 de 820 líneas). Las pruebas siguen los tres
 niveles del taller:
 
 | Nivel | Herramienta | Qué prueba |

@@ -6,7 +6,7 @@
 #   DEPLOY_DESTINO=deploy@2.24.113.157 ./deploy/deploy.sh
 set -euo pipefail
 
-DESTINO="${DEPLOY_DESTINO:-root@2.24.113.157}"
+DESTINO="${DEPLOY_DESTINO:-deploy@2.24.113.157}"
 LLAVE="${DEPLOY_LLAVE:-$HOME/.ssh/emprendehub_vps}"
 CARPETA="${DEPLOY_CARPETA:-/opt/emprendehub}"
 SSH=(ssh -i "$LLAVE" -o ConnectTimeout=15)
