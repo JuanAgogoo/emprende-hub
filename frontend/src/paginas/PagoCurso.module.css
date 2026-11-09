@@ -1,0 +1,159 @@
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  padding-block: var(--e-6) var(--e-7);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  align-self: start;
+  font-size: var(--texto-sm);
+  color: var(--color-acento);
+}
+
+/* Mobile first: una columna, y el resumen arriba para saber qué se paga. */
+.rejilla {
+  display: grid;
+  gap: var(--e-5);
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .rejilla {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+  }
+}
+
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding: var(--e-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-lienzo-alt);
+}
+
+.emoji {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radio-md);
+  background: var(--color-acento-suave);
+  font-size: var(--texto-2xl);
+}
+
+.portada {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radio-md);
+}
+
+.cursoTitulo {
+  font-size: var(--texto-xl);
+}
+
+.cursoDescripcion {
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--color-borde);
+}
+
+.lineas div {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--texto-sm);
+  color: var(--color-cuerpo);
+}
+
+.lineas dd {
+  margin: 0;
+}
+
+.total {
+  padding-top: var(--e-2);
+  border-top: 1px solid var(--color-borde);
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.total dd {
+  font-size: var(--texto-lg);
+  color: var(--color-acento);
+}
+
+.demo {
+  padding: var(--e-3);
+  border: 1px solid color-mix(in srgb, var(--color-aviso) 45%, var(--color-borde));
+  border-radius: var(--radio-md);
+  background: color-mix(in srgb, var(--color-aviso) 8%, var(--color-lienzo));
+  font-size: var(--texto-xs);
+  color: var(--color-cuerpo);
+}
+
+/* La tarjeta dibujada: proporción real de una tarjeta (85,6 × 54 mm). */
+.plastico {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 85.6 / 54;
+  padding: var(--e-4);
+  border-radius: var(--radio-lg);
+  background: linear-gradient(135deg, var(--color-acento-fuerte), var(--color-acento));
+  color: var(--color-sobre-senal);
+  box-shadow: var(--sombra-md);
+}
+
+.marca {
+  align-self: end;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.numero {
+  font-size: var(--texto-lg);
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.pieTarjeta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-3);
+  font-size: var(--texto-xs);
+  letter-spacing: 0.06em;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-3);
+}
+
+/* Sin esto el ancho mínimo intrínseco del input desborda la columna. */
+.fila > div {
+  min-width: 0;
+}
+
+.fila input {
+  width: 100%;
+}
+
+.botonEnlace {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}

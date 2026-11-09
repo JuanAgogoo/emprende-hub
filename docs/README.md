@@ -24,6 +24,8 @@ el docente y quien sustente. Va versionada en Git y se entrega con el repositori
   Las cifras que estos documentos repiten —endpoints, peticiones, pruebas y
   cobertura— las verifica `./scripts/cifras.sh`, que sale con error si alguna
   se quedó atrás.
+- [despliegue.md](despliegue.md) — Producción: arquitectura, cómo se actualiza,
+  copias de seguridad, variables, correo real y apagado.
 - [plan-de-entrega.md](plan-de-entrega.md) — Los 14 incrementos del backend, uno
   por rama y PR.
 - [plan-de-entrega-frontend-fase-1.md](plan-de-entrega-frontend-fase-1.md) — Los

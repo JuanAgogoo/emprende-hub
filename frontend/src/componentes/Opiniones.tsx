@@ -227,7 +227,7 @@ export function Opiniones({ negocioId, alCambiarOpiniones }: Props) {
   const total = carga.estado === 'EXITO' ? carga.datos.totalElements : 0;
 
   return (
-    <section className={estilos.bloque}>
+    <section id="opiniones" className={estilos.bloque}>
       <h2 className={estilos.titulo}>
         Opiniones
         {total > 0 && (

@@ -818,7 +818,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"motivo\": \"LENGUAJE_INAPROPIADO\"\n}"
 						},
-						"description": "Denuncia la opinión 2, una de las de los datos de prueba sobre Café Pergamino, escrita por `cliente06@emprendehub.co`.\n\nDenunciar una opinión propia responde 400: para eso está borrarla. Una segunda pasada también responde 400, porque ya la denunció."
+						"description": "Denuncia la opinión 2, una de las de los datos de prueba sobre Café Alto Nogal, escrita por `cliente06@emprendehub.co`.\n\nDenunciar una opinión propia responde 400: para eso está borrarla. Una segunda pasada también responde 400, porque ya la denunció."
 					}
 				},
 				{
@@ -858,6 +858,30 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"asunto\": \"Reserva para 4 personas\",\n  \"mensaje\": \"¿Tienen mesa el sábado a las 8 de la noche?\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Mis mensajes a ese negocio · historial del chat (D4)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base}}/negocios/{{negocioId}}/consultas/mias",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"negocios",
+								"{{negocioId}}",
+								"consultas",
+								"mias"
+							]
 						}
 					}
 				},
@@ -1398,6 +1422,40 @@
 									"value": "true"
 								}
 							]
+						}
+					}
+				},
+				{
+					"name": "Responder una consulta (D2)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base}}/negocios/mio/consultas/1/respuesta",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"negocios",
+								"mio",
+								"consultas",
+								"1",
+								"respuesta"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"respuesta\": \"¡Hola! Sí abrimos el domingo de 9 a. m. a 2 p. m.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						}
 					}
 				},

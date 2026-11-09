@@ -1,0 +1,39 @@
+# Proxy inverso y web estática. Todo sale del MISMO ORIGEN porque el backend no
+# tiene CORS. Con un dominio, Caddy saca el certificado solo y redirige http a
+# https. Para probar en local sin certificado: DOMINIO=:80
+{$DOMINIO:emprendehub.tech} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	handle /api/v1/* {
+		reverse_proxy backend:8080
+	}
+
+	# Los nombres de las fotos son UUID: una foto no cambia nunca de contenido.
+	handle /fotos/* {
+		header Cache-Control "public, max-age=604800"
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		root * /srv
+
+		# Vite pone un hash en el nombre: se pueden guardar para siempre.
+		@conHash path /assets/*
+		header @conHash Cache-Control "public, max-age=31536000, immutable"
+		@fuentes path /fuentes/*
+		header @fuentes Cache-Control "public, max-age=2592000"
+		# index.html se revisa siempre, para que un despliegue llegue al momento.
+		@resto not path /assets/* /fuentes/*
+		header @resto Cache-Control "no-cache"
+
+		# Las rutas de React Router no existen como ficheros.
+		try_files {path} /index.html
+		file_server
+	}
+}

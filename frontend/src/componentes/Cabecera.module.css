@@ -19,6 +19,9 @@
 }
 
 .marca {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
   font-size: var(--texto-lg);
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -112,4 +115,9 @@
   .enlace {
     padding-inline: var(--e-3);
   }
+}
+
+/* El buzón lleva su sobre delante del texto. */
+.conIcono {
+  gap: var(--e-1);
 }

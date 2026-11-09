@@ -15,6 +15,9 @@ export interface Consulta {
   /** ISO-8601 con zona, como todas las fechas de la API. */
   readonly fechaEnvio: string;
   readonly fechaLectura: string | null;
+  /** Lo que contestó el dueño (D2); nula mientras no haya respondido. */
+  readonly respuesta: string | null;
+  readonly fechaRespuesta: string | null;
 }
 
 /** Lo que se manda al escribir. El nombre y el correo salen de la sesión. */

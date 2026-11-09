@@ -35,13 +35,21 @@ spring:
     # Para salir al mundo real se cambian estas tres propiedades y nada más.
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
+    # Vacíos en desarrollo. Un proveedor real los pide (ver docs/despliegue.md).
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
           # Mailpit escucha en claro y no pide credenciales.
-          auth: false
+          auth: ${MAIL_AUTH:false}
           starttls:
-            enable: false
+            enable: ${MAIL_STARTTLS:false}
+          # El envío ocurre dentro de la petición: sin estos topes, un servidor
+          # de correo que no contesta deja colgado a quien pulsó el botón.
+          connectiontimeout: ${MAIL_TIMEOUT_MS:3000}
+          timeout: ${MAIL_TIMEOUT_MS:3000}
+          writetimeout: ${MAIL_TIMEOUT_MS:3000}
 
   servlet:
     multipart:
@@ -89,6 +97,9 @@ emprendehub:
   # consultas, visitas y las colas del administrador, sembrados la primera vez
   # que arranca con la base vacía. Las pruebas lo apagan.
   semilla-demo: ${SEMILLA_DEMO:true}
+  # Vacía usa las contraseñas de prueba del README. En producción es obligatoria
+  # si la semilla está activa: el README es público.
+  semilla-demo-contrasena: ${SEMILLA_DEMO_CONTRASENA:}
 
   fotos:
     # Las imágenes se guardan en disco y en la base de datos solo queda el

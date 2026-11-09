@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { obtenerPerfil } from '../api/directorio';
 import { ErrorApi } from '../api/cliente';
-import { Contacto } from '../componentes/Contacto';
 import { Estrellas } from '../componentes/Estrellas';
 import { Galeria } from '../componentes/Galeria';
 import { IconoInstagram } from '../componentes/IconoInstagram';
 import { IconoLinkedIn } from '../componentes/IconoLinkedIn';
+import { IconoMensaje } from '../componentes/IconoMensaje';
 import { Opiniones } from '../componentes/Opiniones';
 import { calificacion, nivelPrecio, numero, precio } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
@@ -187,8 +187,6 @@ function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
             )}
           </section>
 
-          <Contacto negocioId={negocio.id} />
-
           <Opiniones negocioId={negocio.id} alCambiarOpiniones={alCambiarOpiniones} />
         </div>
 
@@ -225,8 +223,16 @@ function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
             </dd>
           </dl>
 
-          {(negocio.instagram !== null || negocio.linkedin !== null) && (
-            <div className={estilos.redes}>
+          {/* El chat va siempre; las redes, solo si el negocio las tiene (B8). */}
+          <div className={estilos.redes}>
+            <Link
+              className={estilos.redIcono}
+              to={`/negocios/${negocio.id}/mensajes`}
+              aria-label={`Escribirle a ${negocio.nombre}`}
+              title="Escribirle al negocio"
+            >
+              <IconoMensaje />
+            </Link>
               {negocio.instagram !== null && (
                 <a
                   className={estilos.redIcono}
@@ -251,8 +257,7 @@ function Contenido({ negocio, alCambiarOpiniones }: PropsContenido) {
                   <IconoLinkedIn />
                 </a>
               )}
-            </div>
-          )}
+          </div>
 
           <a className={estilos.primario} href={`tel:${negocio.telefono}`}>
             Llamar al negocio

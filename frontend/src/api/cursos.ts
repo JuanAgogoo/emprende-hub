@@ -13,6 +13,11 @@ export function buscarCursos(filtros: FiltrosCursos): Promise<Pagina<Curso>> {
   return obtener<Pagina<Curso>>(`/cursos${consulta({ ...filtros })}`);
 }
 
+/** Un curso publicado; un borrador responde `404` como si no existiera. */
+export function obtenerCurso(id: number): Promise<Curso> {
+  return obtener<Curso>(`/cursos/${id}`);
+}
+
 // ---------- Gestión, solo ADMIN (E3) ----------
 
 /** El catálogo del administrador: aquí sí están los borradores. */

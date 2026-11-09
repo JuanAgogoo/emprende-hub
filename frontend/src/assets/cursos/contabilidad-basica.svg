@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ccfbf1"/><stop offset="1" stop-color="#5eead4"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#f)"/>
+  <circle cx="540" cy="70" r="90" fill="#99f6e4" opacity=".6"/>
+  <g transform="rotate(-6 240 190)">
+    <rect x="110" y="70" width="270" height="230" rx="14" fill="#0f766e"/>
+    <rect x="122" y="80" width="250" height="210" rx="8" fill="#ffffff"/>
+    <rect x="122" y="80" width="250" height="38" rx="8" fill="#134e4a"/>
+    <text x="140" y="106" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#ccfbf1">LIBRO DIARIO</text>
+    <g stroke="#cbd5e1" stroke-width="2"><path d="M140 145h215M140 175h215M140 205h215M140 235h215M140 265h215M290 125v160"/></g>
+    <g fill="#0f766e" font-family="Arial, Helvetica, sans-serif" font-size="15">
+      <text x="300" y="140">$ 120</text><text x="300" y="170">$ 450</text><text x="300" y="200">$ 80</text><text x="300" y="230">$ 310</text>
+    </g>
+    <g fill="#94a3b8"><rect x="142" y="130" width="120" height="8" rx="4"/><rect x="142" y="160" width="95" height="8" rx="4"/><rect x="142" y="190" width="130" height="8" rx="4"/><rect x="142" y="220" width="80" height="8" rx="4"/></g>
+    <rect x="296" y="250" width="62" height="24" rx="5" fill="#f59e0b"/>
+    <text x="327" y="267" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#fff">$ 960</text>
+  </g>
+  <g transform="translate(410 120)">
+    <rect width="140" height="190" rx="18" fill="#1e293b"/>
+    <rect x="16" y="16" width="108" height="42" rx="8" fill="#a7f3d0"/>
+    <text x="114" y="46" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#064e3b">1.250</text>
+    <g fill="#475569">
+      <rect x="16" y="72" width="28" height="24" rx="6"/><rect x="56" y="72" width="28" height="24" rx="6"/><rect x="96" y="72" width="28" height="24" rx="6" fill="#f59e0b"/>
+      <rect x="16" y="104" width="28" height="24" rx="6"/><rect x="56" y="104" width="28" height="24" rx="6"/><rect x="96" y="104" width="28" height="24" rx="6" fill="#f59e0b"/>
+      <rect x="16" y="136" width="28" height="24" rx="6"/><rect x="56" y="136" width="28" height="24" rx="6"/><rect x="96" y="136" width="28" height="40" rx="6" fill="#14b8a6"/>
+      <rect x="16" y="168" width="68" height="8" rx="4" fill="#64748b"/>
+    </g>
+  </g>
+  <g transform="translate(560 300)">
+    <ellipse cx="0" cy="12" rx="34" ry="10" fill="#b45309"/><ellipse cx="0" cy="0" rx="34" ry="10" fill="#f59e0b"/>
+    <ellipse cx="0" cy="-12" rx="34" ry="10" fill="#fbbf24"/><text x="0" y="-7" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#92400e">$</text>
+  </g>
+</svg>

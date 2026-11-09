@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { listarMisConsultas, marcarConsultaLeida } from '../api/consultas';
+import { useEffect, useState, type FormEvent } from 'react';
+import { listarMisConsultas, marcarConsultaLeida, responderConsulta } from '../api/consultas';
 import { EsqueletoLista } from './Esqueleto';
 import { Paginacion } from './Paginacion';
 import { fecha, numero } from '../formato';
 import { casoImposible, type EstadoCarga } from '../types/estadoCarga';
-import type { Consulta } from '../types/consulta';
+import { MAXIMO_MENSAJE, type Consulta } from '../types/consulta';
 import type { Pagina } from '../types/pagina';
 import estilos from './BuzonDeConsultas.module.css';
 
@@ -17,10 +17,9 @@ const POR_PAGINA = 5;
  * Es donde se lee lo que el aviso solo anuncia: la notificación dice quién
  * escribió y sobre qué, y el mensaje está aquí.
  *
- * **Trae el correo de quien escribe**, que es la única dirección que la API
- * enseña de otra persona (D2). Sin ella el buzón sería un montón de preguntas
- * sin forma de contestarlas, porque la plataforma no responde desde dentro: por
- * eso cada consulta lleva su enlace para responder por correo.
+ * Cada consulta se **responde desde aquí** (D2) y el cliente lo lee en su chat
+ * con el negocio. El correo de quien escribe sigue a la vista, por si hace
+ * falta seguir la conversación por fuera.
  */
 export function BuzonDeConsultas() {
   const [carga, setCarga] = useState<EstadoCarga<Pagina<Consulta>>>({ estado: 'CARGANDO' });
@@ -66,6 +65,16 @@ export function BuzonDeConsultas() {
     }
   }
 
+  /** Igual que marcar: la consulta respondida sustituye a la anterior. */
+  async function responder(consulta: Consulta, texto: string) {
+    const actualizada = await responderConsulta(consulta.id, texto);
+    setCarga((previo) => {
+      if (previo.estado !== 'EXITO') return previo;
+      const content = previo.datos.content.map((c) => (c.id === actualizada.id ? actualizada : c));
+      return { estado: 'EXITO', datos: { ...previo.datos, content } };
+    });
+  }
+
   const sinLeer =
     carga.estado === 'EXITO' ? carga.datos.content.filter((una) => !una.leida).length : 0;
 
@@ -86,6 +95,7 @@ export function BuzonDeConsultas() {
         carga={carga}
         alPaginar={setPagina}
         alMarcar={marcar}
+        alResponder={responder}
         alReintentar={() => setIntento((valor) => valor + 1)}
       />
     </section>
@@ -96,10 +106,11 @@ interface PropsListado {
   readonly carga: EstadoCarga<Pagina<Consulta>>;
   readonly alPaginar: (pagina: number) => void;
   readonly alMarcar: (consulta: Consulta) => void;
+  readonly alResponder: (consulta: Consulta, texto: string) => Promise<void>;
   readonly alReintentar: () => void;
 }
 
-function Listado({ carga, alPaginar, alMarcar, alReintentar }: PropsListado) {
+function Listado({ carga, alPaginar, alMarcar, alResponder, alReintentar }: PropsListado) {
   switch (carga.estado) {
     case 'CARGANDO':
       return (
@@ -129,7 +140,12 @@ function Listado({ carga, alPaginar, alMarcar, alReintentar }: PropsListado) {
         <>
           <ul className={estilos.lista}>
             {pagina.content.map((consulta) => (
-              <ConsultaRecibida key={consulta.id} consulta={consulta} alMarcar={alMarcar} />
+              <ConsultaRecibida
+                key={consulta.id}
+                consulta={consulta}
+                alMarcar={alMarcar}
+                alResponder={alResponder}
+              />
             ))}
           </ul>
           <Paginacion
@@ -149,9 +165,34 @@ function Listado({ carga, alPaginar, alMarcar, alReintentar }: PropsListado) {
 interface PropsConsulta {
   readonly consulta: Consulta;
   readonly alMarcar: (consulta: Consulta) => void;
+  readonly alResponder: (consulta: Consulta, texto: string) => Promise<void>;
 }
 
-function ConsultaRecibida({ consulta, alMarcar }: PropsConsulta) {
+function ConsultaRecibida({ consulta, alMarcar, alResponder }: PropsConsulta) {
+  const [editando, setEditando] = useState(false);
+  const [texto, setTexto] = useState(consulta.respuesta ?? '');
+  const [enviando, setEnviando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
+  const abierto = consulta.respuesta === null || editando;
+
+  async function enviar(evento: FormEvent) {
+    evento.preventDefault();
+    if (texto.trim() === '') {
+      setFallo('Escribe la respuesta antes de enviarla');
+      return;
+    }
+    setEnviando(true);
+    setFallo(null);
+    try {
+      await alResponder(consulta, texto.trim());
+      setEditando(false);
+    } catch (error: unknown) {
+      setFallo(error instanceof Error ? error.message : 'No se pudo enviar la respuesta');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
   return (
     <li className={consulta.leida ? estilos.consulta : `${estilos.consulta} ${estilos.sinLeer}`}>
       <div className={estilos.cabecera}>
@@ -171,6 +212,48 @@ function ConsultaRecibida({ consulta, alMarcar }: PropsConsulta) {
       </p>
 
       <p className={estilos.mensaje}>{consulta.mensaje}</p>
+
+      {consulta.respuesta !== null && !editando && (
+        <div className={estilos.respuesta}>
+          <p className={estilos.respuestaTitulo}>Tu respuesta</p>
+          <p>{consulta.respuesta}</p>
+        </div>
+      )}
+
+      {abierto ? (
+        <form className={estilos.responder} onSubmit={enviar} noValidate>
+          <label htmlFor={`respuesta-${consulta.id}`}>Responder a {consulta.nombreCliente}</label>
+          <textarea
+            id={`respuesta-${consulta.id}`}
+            rows={2}
+            maxLength={MAXIMO_MENSAJE}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder="Escribe tu respuesta…"
+          />
+          {fallo !== null && (
+            <small className={estilos.errorCampo} role="alert">
+              {fallo}
+            </small>
+          )}
+          <div className={estilos.acciones}>
+            <button type="submit" className={estilos.enviar} disabled={enviando}>
+              {enviando ? 'Enviando…' : 'Responder'}
+            </button>
+            {editando && (
+              <button type="button" className={estilos.marcar} onClick={() => setEditando(false)}>
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
+      ) : (
+        <div className={estilos.acciones}>
+          <button type="button" className={estilos.marcar} onClick={() => setEditando(true)}>
+            Editar respuesta
+          </button>
+        </div>
+      )}
 
       <button type="button" className={estilos.marcar} onClick={() => alMarcar(consulta)}>
         {consulta.leida ? 'Marcar como pendiente' : 'Marcar como leída'}

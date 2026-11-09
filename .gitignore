@@ -38,3 +38,7 @@ uploads/
 # Las credenciales de la base, los puertos y el usuario con que corre
 # docker-compose: son de cada máquina. La plantilla versionada es .env.example.
 .env
+
+# Fotos de demostración: se generan con deploy/preparar-fotos-demo.py
+deploy/fotos-demo/
+deploy/fotos-demo-viejas-*.txt

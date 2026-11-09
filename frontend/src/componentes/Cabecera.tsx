@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSesion } from '../estado/SesionContext';
+import { IconoCarta } from './IconoCarta';
 import estilos from './Cabecera.module.css';
 
 /** Las rutas que existen hoy. Crecerá con cada incremento. */
@@ -70,6 +71,21 @@ export function Cabecera() {
                       }
                     >
                       Mi negocio
+                    </NavLink>
+                  </li>
+                )}
+                {sesion.rol === 'EMPRENDEDOR' && (
+                  <li>
+                    <NavLink
+                      to="/buzon"
+                      className={({ isActive }) =>
+                        isActive
+                          ? `${estilos.enlace} ${estilos.conIcono} ${estilos.enlaceActivo}`
+                          : `${estilos.enlace} ${estilos.conIcono}`
+                      }
+                    >
+                      <IconoCarta />
+                      Buzón
                     </NavLink>
                   </li>
                 )}

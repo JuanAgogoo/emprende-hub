@@ -101,9 +101,14 @@ en el negocio.
 
 - **D1** El mensaje se guarda en un **buzón dentro de la plataforma**, visible desde
   el panel del emprendedor. **Esa pantalla no existe en el prototipo: es nueva.**
-- **D2** El emprendedor **no responde desde la plataforma**. El buzón le muestra el
-  correo del cliente para que responda por fuera.
+- **D2** El emprendedor **responde desde su buzón**, una respuesta por mensaje
+  que puede corregir, y el cliente la lee en su chat con el negocio. El buzón le
+  sigue mostrando el correo del cliente por si quiere continuar por fuera.
+  *(Antes no se respondía desde la plataforma; se cambió a pedido del cliente.)*
 - **D3** Las consultas se marcan como **leídas / no leídas**.
+- **D4** Solo puede escribirle al negocio **quien ya lo calificó**. Así el buzón
+  recibe mensajes de clientes reales. El perfil abre una vista de chat con lo que
+  esa persona ya envió y las respuestas del emprendedor (D2).
 - Contactar exige sesión iniciada.
 - Límite heredado del prototipo: asunto + mensaje de 500 caracteres.
 

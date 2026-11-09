@@ -1,0 +1,11 @@
+# Imagen de PRODUCCIÓN: compila la web y la sirve con Caddy.
+# La de desarrollo es frontend/Dockerfile. El Caddyfile se monta desde deploy/.
+FROM node:24-alpine AS compilacion
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM caddy:2.10-alpine
+COPY --from=compilacion /app/dist /srv

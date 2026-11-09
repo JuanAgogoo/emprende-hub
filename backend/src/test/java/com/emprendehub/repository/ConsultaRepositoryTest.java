@@ -39,6 +39,7 @@ class ConsultaRepositoryTest extends PostgresTestBase {
     private Long idPanaderia;
     private Long idFloristeria;
     private Long idConsultaAjena;
+    private Long idCarlos;
 
     @BeforeEach
     void prepararBuzones() {
@@ -61,6 +62,7 @@ class ConsultaRepositoryTest extends PostgresTestBase {
         idPanaderia = panaderia.getId();
         idFloristeria = floristeria.getId();
         idConsultaAjena = ajena.getId();
+        idCarlos = carlos.getId();
         entityManager.clear();
     }
 
@@ -136,6 +138,18 @@ class ConsultaRepositoryTest extends PostgresTestBase {
 
         assertNotNull(consulta.getCliente().getNombre());
         assertNotNull(consulta.getCliente().getCorreo());
+    }
+
+    @Test
+    @DisplayName("Mis consultas: solo las de esa persona a ese negocio, la más antigua primero")
+    void misConsultas_soloLasPropias_enOrden() {
+        List<String> asuntos = repository
+                .findByNegocioIdAndClienteIdOrderByFechaEnvioAsc(idPanaderia, idCarlos)
+                .stream().map(Consulta::getAsunto).toList();
+
+        assertEquals(List.of("Reserva", "Pedido grande"), asuntos);
+        assertTrue(repository
+                .findByNegocioIdAndClienteIdOrderByFechaEnvioAsc(idFloristeria, idCarlos).isEmpty());
     }
 
     @Test

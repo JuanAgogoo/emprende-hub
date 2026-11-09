@@ -1,0 +1,23 @@
+# Imagen de PRODUCCIÓN. La de desarrollo es backend/Dockerfile.
+# Las pruebas no corren aquí: las corre la CI y se comprueban antes de desplegar.
+FROM eclipse-temurin:25-jdk AS compilacion
+WORKDIR /app
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle gradle
+RUN chmod +x gradlew && ./gradlew --no-daemon dependencies > /dev/null
+COPY src src
+RUN ./gradlew --no-daemon bootJar
+
+FROM eclipse-temurin:25-jre
+RUN groupadd --system --gid 1001 app \
+ && useradd --system --uid 1001 --gid app --no-create-home app \
+ && mkdir -p /data/uploads /app \
+ && chown -R app:app /data
+WORKDIR /app
+COPY --from=compilacion /app/build/libs/*.jar app.jar
+ENV TZ=America/Bogota FOTOS_DIR=/data/uploads
+# Un volumen nuevo hereda este dueño, y por eso el usuario puede escribir en él.
+VOLUME /data/uploads
+USER app
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=60", "-XX:+ExitOnOutOfMemoryError", "-Djava.awt.headless=true", "-jar", "app.jar"]

@@ -122,3 +122,77 @@
   font-size: var(--texto-sm);
   color: var(--color-error);
 }
+
+/* ── Responder desde el buzón (D2) ───────────────────────────────────── */
+
+.respuesta {
+  padding: var(--e-3);
+  border-left: 3px solid var(--color-acento);
+  border-radius: var(--radio-sm);
+  background: var(--color-acento-suave);
+  font-size: var(--texto-sm);
+  color: var(--color-tinta);
+  white-space: pre-wrap;
+}
+
+.respuestaTitulo {
+  margin-bottom: var(--e-1);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  color: var(--color-acento);
+}
+
+.responder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.responder label {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--color-cuerpo);
+}
+
+.responder textarea {
+  width: 100%;
+  min-height: var(--toque-min);
+  padding: var(--e-3);
+  border: 1px solid var(--color-borde-control);
+  border-radius: var(--radio-md);
+  background: var(--color-lienzo);
+  color: var(--color-tinta);
+  font: inherit;
+  resize: vertical;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+.enviar {
+  min-height: var(--toque-min);
+  padding-inline: var(--e-5);
+  border: none;
+  border-radius: var(--radio-md);
+  background: var(--color-acento);
+  color: var(--color-sobre-senal);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.enviar:hover:not(:disabled) {
+  background: var(--color-acento-fuerte);
+}
+
+.enviar:disabled {
+  background: var(--color-apagado);
+  cursor: progress;
+}
+
+.errorCampo {
+  font-size: var(--texto-xs);
+  color: var(--color-error);
+}

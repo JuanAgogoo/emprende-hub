@@ -3,6 +3,7 @@ package com.emprendehub.controller;
 import com.emprendehub.config.OpenApiConfig;
 import com.emprendehub.dto.ConsultaResponse;
 import com.emprendehub.dto.EnviarConsultaRequest;
+import com.emprendehub.dto.ResponderConsultaRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ConsultaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +56,7 @@ public class ConsultaController {
     @Operation(summary = "Escribir a un negocio")
     @ApiResponse(responseCode = "201", description = "Consulta enviada al buzón del negocio")
     @ApiResponse(responseCode = "400",
-            description = "La petición no es válida o es su propio negocio")
+            description = "La petición no es válida, es su propio negocio o aún no lo ha calificado")
     @ApiResponse(responseCode = "404", description = "No existe el negocio o no está publicado")
     public ResponseEntity<ConsultaResponse> enviar(
             @AuthenticationPrincipal Usuario usuario,
@@ -62,6 +64,20 @@ public class ConsultaController {
             @Valid @RequestBody EnviarConsultaRequest peticion) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(consultaService.enviar(usuario, negocioId, peticion));
+    }
+
+    /**
+     * Lo que quien tiene la sesión le ha escrito a ese negocio, de la más
+     * antigua a la más reciente. Es el historial de la vista de chat.
+     */
+    @GetMapping("/{negocioId}/consultas/mias")
+    @Operation(summary = "Ver lo que le he escrito a un negocio")
+    @ApiResponse(responseCode = "400",
+            description = "Un identificador con un valor que no es del tipo esperado")
+    @ApiResponse(responseCode = "404", description = "No existe el negocio o no está publicado")
+    public List<ConsultaResponse> misConsultas(@AuthenticationPrincipal Usuario usuario,
+                                               @PathVariable Long negocioId) {
+        return consultaService.misConsultas(usuario, negocioId);
     }
 
     /**
@@ -78,6 +94,17 @@ public class ConsultaController {
             @RequestParam(required = false) Boolean leida,
             @PageableDefault(size = 20) Pageable pageable) {
         return consultaService.buzon(usuario, leida, pageable);
+    }
+
+    /** Responde una consulta del buzón propio, o corrige la respuesta (D2). */
+    @PatchMapping("/mio/consultas/{id}/respuesta")
+    @Operation(summary = "Responder una consulta del buzón propio")
+    @ApiResponse(responseCode = "400", description = "La respuesta está vacía o es demasiado larga")
+    @ApiResponse(responseCode = "404", description = "No es una consulta de su buzón")
+    public ConsultaResponse responder(@AuthenticationPrincipal Usuario usuario,
+                                      @PathVariable Long id,
+                                      @Valid @RequestBody ResponderConsultaRequest peticion) {
+        return consultaService.responder(usuario, id, peticion);
     }
 
     /** Marca como leída, o la devuelve al montón con {@code ?leida=false} (D3). */

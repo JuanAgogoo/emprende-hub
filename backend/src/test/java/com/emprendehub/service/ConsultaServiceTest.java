@@ -9,12 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.emprendehub.dto.ConsultaResponse;
 import com.emprendehub.dto.EnviarConsultaRequest;
+import com.emprendehub.dto.ResponderConsultaRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.CategoriaNegocio;
@@ -27,6 +29,7 @@ import com.emprendehub.model.Rol;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.ConsultaRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.OpinionRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +54,10 @@ class ConsultaServiceTest {
     /** Una consulta nueva deja aviso en el panel del dueño (H2). */
     @Mock
     private NotificacionService notificacionService;
+
+    /** Solo escribe quien ya calificó el negocio (D4). */
+    @Mock
+    private OpinionRepository opinionRepository;
 
     @InjectMocks
     private ConsultaService service;
@@ -80,6 +87,9 @@ class ConsultaServiceTest {
         Negocio negocio = negocio();
         when(negocioRepository.buscarVisibleEnDirectorio(ID_NEGOCIO))
                 .thenReturn(Optional.of(negocio));
+        // Lenient: el envío al buzón propio se corta antes de mirar la opinión.
+        lenient().when(opinionRepository.existsByNegocioIdAndAutorId(ID_NEGOCIO, 3L))
+                .thenReturn(true);
         return negocio;
     }
 
@@ -101,7 +111,90 @@ class ConsultaServiceTest {
                 "  ¿Tienen mesa el sábado a las 8?  ");
     }
 
-    // ---------- Enviar (D1) ----------
+    // ---------- Enviar (D1, D4) ----------
+
+    @Test
+    @DisplayName("Sin haber calificado el negocio no se le puede escribir (D4)")
+    void enviar_sinCalificar_lanzaReglaDeNegocio() {
+        conNegocioVisible();
+        when(opinionRepository.existsByNegocioIdAndAutorId(ID_NEGOCIO, 3L)).thenReturn(false);
+
+        ReglaDeNegocioException error = assertThrows(ReglaDeNegocioException.class,
+                () -> service.enviar(cliente, ID_NEGOCIO, peticion()));
+
+        assertEquals("Para escribirle al negocio primero tienes que calificarlo",
+                error.getMessage());
+        verify(consultaRepository, never()).save(any());
+        verify(notificacionService, never()).avisar(any(), any(), any());
+    }
+
+    // ---------- Responder (D2) ----------
+
+    @Test
+    @DisplayName("Responder guarda el texto sin espacios y deja la consulta leída")
+    void responder_guardaYMarcaLeida() {
+        Negocio negocio = conNegocioPropio();
+        Consulta consulta = consulta(negocio);
+        when(consultaRepository.findByIdAndNegocioId(9L, ID_NEGOCIO)).thenReturn(Optional.of(consulta));
+        when(consultaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        ConsultaResponse respuesta = service.responder(duena, 9L,
+                new ResponderConsultaRequest("  Sí, a las 8  "));
+
+        assertEquals("Sí, a las 8", respuesta.respuesta());
+        assertNotNull(respuesta.fechaRespuesta());
+        assertTrue(respuesta.leida(), "responder implica haberla leído");
+    }
+
+    @Test
+    @DisplayName("Corregir la respuesta la sustituye")
+    void responder_dosVeces_sustituye() {
+        Negocio negocio = conNegocioPropio();
+        Consulta consulta = consulta(negocio);
+        when(consultaRepository.findByIdAndNegocioId(9L, ID_NEGOCIO)).thenReturn(Optional.of(consulta));
+        when(consultaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        service.responder(duena, 9L, new ResponderConsultaRequest("Sí"));
+        ConsultaResponse respuesta = service.responder(duena, 9L,
+                new ResponderConsultaRequest("Sí, desde las 8"));
+
+        assertEquals("Sí, desde las 8", respuesta.respuesta());
+    }
+
+    @Test
+    @DisplayName("No se responde una consulta de otro buzón")
+    void responder_consultaAjena_lanzaNoEncontrado() {
+        conNegocioPropio();
+        when(consultaRepository.findByIdAndNegocioId(99L, ID_NEGOCIO)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> service.responder(duena, 99L,
+                new ResponderConsultaRequest("Hola")));
+        verify(consultaRepository, never()).save(any());
+    }
+
+    // ---------- Mis consultas: el historial del chat ----------
+
+    @Test
+    @DisplayName("Mis consultas devuelve solo lo que escribió quien pregunta, en orden")
+    void misConsultas_devuelveLasPropias() {
+        Negocio negocio = conNegocioVisible();
+        when(consultaRepository.findByNegocioIdAndClienteIdOrderByFechaEnvioAsc(ID_NEGOCIO, 3L))
+                .thenReturn(List.of(consulta(negocio)));
+
+        List<ConsultaResponse> respuesta = service.misConsultas(cliente, ID_NEGOCIO);
+
+        assertEquals(1, respuesta.size());
+        assertEquals("Reserva para 4 personas", respuesta.get(0).asunto());
+    }
+
+    @Test
+    @DisplayName("Mis consultas de un negocio sin publicar lanza no encontrado (B6)")
+    void misConsultas_negocioNoVisible_lanzaNoEncontrado() {
+        when(negocioRepository.buscarVisibleEnDirectorio(ID_NEGOCIO)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.misConsultas(cliente, ID_NEGOCIO));
+    }
 
     @Test
     @DisplayName("La consulta se guarda en el buzón, sin leer y con su remitente")

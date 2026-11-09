@@ -1,0 +1,751 @@
+{
+ "negocios": [
+  {
+   "id": 1,
+   "antes": "Café Alto Nogal",
+   "nombre": "Café Alto Nogal",
+   "barrio": "Laureles",
+   "fotos": [
+    29833130,
+    894695,
+    15801126,
+    16682442
+   ],
+   "descripcion": "Empezamos tostando café en el patio de la casa y hoy compramos directo a doce familias caficultoras del suroeste antioqueño. Cada lote se tuesta en el local y se puede probar en la barra antes de llevarlo. También servimos almuerzo casero, arepas de chócolo y pan horneado cada mañana. Lo que nos distingue es que siempre le contamos al cliente de qué finca viene su taza. Abrimos de lunes a sábado de 7:00 a. m. a 7:00 p. m. y domingos de 8:00 a. m. a 2:00 p. m."
+  },
+  {
+   "id": 2,
+   "antes": "Tienda Ocho Lunas",
+   "nombre": "Tienda Ocho Lunas",
+   "barrio": "El Poblado",
+   "fotos": [
+    36863705,
+    6611187,
+    6634662
+   ],
+   "descripcion": "Ocho Lunas nació cuando ocho artesanas decidieron vender juntas para no depender de intermediarios. Reunimos mochilas tejidas, tazas de cerámica, velas de soya y cuadros tallados, todos hechos en Antioquia. Cada pieza lleva una tarjeta con el nombre de quien la hizo y el tiempo que tomó. Atendemos de martes a domingo de 10:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 3,
+   "antes": "Barbería El Roble",
+   "nombre": "Barbería Navaja Serena",
+   "barrio": "Laureles",
+   "fotos": [
+    8867166,
+    3992855,
+    7697711
+   ],
+   "descripcion": "Somos una barbería de ambiente tranquilo, con sillas clásicas y turnos sin afán. Hacemos corte, arreglo de barba con toalla caliente, tintes y maquillaje para eventos. Antes de empezar conversamos sobre el tipo de cabello y lo que cada persona puede mantener en casa. Trabajamos con cita para que nadie pierda la tarde esperando. Atendemos de lunes a sábado de 9:00 a. m. a 8:00 p. m."
+  },
+  {
+   "id": 4,
+   "antes": "Tienda deportiva La Candelaria",
+   "nombre": "Tienda deportiva La Candelaria",
+   "barrio": "El Poblado",
+   "fotos": [
+    36618476,
+    7991937,
+    22931878
+   ],
+   "descripcion": "Una tienda pequeña atendida por gente que hace deporte todos los días. Vendemos balones, raquetas y guantes de boxeo para quien empieza y para quien ya compite. Dejamos probar el equipo antes de comprarlo y explicamos con calma qué talla o peso conviene. Abrimos de lunes a sábado de 9:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 5,
+   "antes": "Academia Aurora",
+   "nombre": "Academia Lápiz Naranja",
+   "barrio": "Laureles",
+   "fotos": [
+    36650154,
+    12561284,
+    5124874
+   ],
+   "descripcion": "Dos profesoras abrieron esta academia para acompañar a estudiantes que necesitaban algo más que la clase del colegio. Ofrecemos refuerzo de matemáticas, inglés, preparación para el ICFES y cursos prácticos de Excel, cocina y fotografía con celular. Los grupos son de máximo ocho personas y cada estudiante recibe un plan de avance. Atendemos de lunes a viernes de 2:00 p. m. a 8:00 p. m. y sábados de 8:00 a. m. a 1:00 p. m."
+  },
+  {
+   "id": 6,
+   "antes": "Fotografía Tierra Viva",
+   "nombre": "Fotografía Luz de Guadua",
+   "barrio": null,
+   "fotos": [
+    4441792,
+    8452759,
+    6989087
+   ],
+   "descripcion": "Desde un estudio en Envigado montamos y retratamos celebraciones familiares de principio a fin. Además de las fotos, nos encargamos de la mesa de postres, la decoración con globos, los recordatorios y la animación para niños. Un solo equipo coordina todo, así la familia solo se preocupa por disfrutar. Atendemos con cita de lunes a sábado de 9:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 7,
+   "antes": "Oficina contable El Cedro",
+   "nombre": "Oficina contable Ábaco Verde",
+   "barrio": null,
+   "fotos": [
+    4056856,
+    17065743,
+    8408550
+   ],
+   "descripcion": "Ayudamos a tenderos y pequeños negocios de Bello a tener sus cuentas en orden sin enredos. Llevamos la contabilidad mensual, preparamos la declaración de renta, revisamos créditos y acompañamos la constitución de empresas. Explicamos cada cifra en palabras sencillas y dictamos talleres de finanzas personales. Atendemos de lunes a viernes de 8:00 a. m. a 5:30 p. m."
+  },
+  {
+   "id": 8,
+   "antes": "Café La Aldea",
+   "nombre": "Café Cerro Tostado",
+   "barrio": "Laureles",
+   "fotos": [
+    13926769,
+    22938072,
+    9678715
+   ],
+   "descripcion": "Un café de barrio donde el mismo equipo atiende desde hace años y ya se sabe el pedido de los vecinos. Preparamos café de origen, jugos naturales, pan de masa madre y un almuerzo del día a precio justo. Las galletas se hornean en la tarde y casi siempre salen tibias. Es un buen lugar para trabajar un rato o conversar sin afán. Abrimos todos los días de 7:30 a. m. a 8:00 p. m."
+  },
+  {
+   "id": 9,
+   "antes": "Decoración La Montaña",
+   "nombre": "Decoración Cojín Lunar",
+   "barrio": "Laureles",
+   "fotos": [
+    6758245,
+    9290601,
+    30561628
+   ],
+   "descripcion": "Transformamos salas y habitaciones con cambios sencillos y presupuestos claros. Vamos a la casa, tomamos medidas y proponemos lámparas, cojines, repisas, cortinas y pintura que combinen entre sí. También hacemos la instalación, para que el cliente no tenga que buscar a nadie más. Atendemos con cita de lunes a sábado de 9:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 10,
+   "antes": "Peluquería canina Trapiche",
+   "nombre": "Peluquería canina Trapiche",
+   "barrio": "El Poblado",
+   "fotos": [
+    19145874,
+    19145882,
+    19145877
+   ],
+   "descripcion": "Un espacio tranquilo para perros y gatos que se ponen nerviosos en lugares ruidosos. Ofrecemos guardería por día, vacunación, concentrado y accesorios como collares con placa grabada. Cada mascota tiene su ficha con alergias, cuidados y carácter. Trabajamos con cita y atendemos pocos animales a la vez. Abrimos de lunes a sábado de 8:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 11,
+   "antes": "Tienda Buen Viaje",
+   "nombre": "Tienda Maleta Añil",
+   "barrio": "Laureles",
+   "fotos": [
+    11911863,
+    5418892,
+    7679757
+   ],
+   "descripcion": "Ropa cómoda y bien hecha, pensada para quien pasa de la oficina a la calle sin cambiarse. Seleccionamos jeans, camisas de lino, vestidos estampados y bolsos tejidos de talleres colombianos. Si una prenda no queda perfecta, la ajustamos en el mismo local. Abrimos de lunes a sábado de 10:00 a. m. a 8:00 p. m. y domingos de 11:00 a. m. a 5:00 p. m."
+  },
+  {
+   "id": 12,
+   "antes": "Estudio La Ceiba",
+   "nombre": "Estudio Semilla Clara",
+   "barrio": "El Poblado",
+   "fotos": [
+    15611222,
+    842545,
+    24822021
+   ],
+   "descripcion": "Reunimos en un solo lugar nutrición, fisioterapia, yoga y pilates. La idea surgió de una nutricionista y una fisioterapeuta que veían a sus pacientes saltar de consultorio en consultorio. Hacemos un plan realista según la rutina, el presupuesto y los gustos de cada persona. Hay meditación guiada todas las semanas para quien quiera bajar el ritmo. Atendemos de lunes a viernes de 6:00 a. m. a 8:00 p. m. y sábados de 7:00 a. m. a 1:00 p. m."
+  },
+  {
+   "id": 13,
+   "antes": "Soluciones La Huerta",
+   "nombre": "Soluciones La Huerta",
+   "barrio": "Laureles",
+   "fotos": [
+    31862950,
+    34514242,
+    37489058
+   ],
+   "descripcion": "Reparamos celulares y portátiles con diagnóstico gratuito y explicamos qué falla antes de cobrar. También instalamos redes wifi en casas y locales, y hacemos páginas web sencillas para negocios del barrio. Toda reparación sale con garantía escrita. Abrimos de lunes a sábado de 9:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 14,
+   "antes": "Tienda Las Brisas",
+   "nombre": "Tienda Hilo y Barro",
+   "barrio": "El Poblado",
+   "fotos": [
+    29681893,
+    34667143,
+    18702612
+   ],
+   "descripcion": "Reunimos objetos hechos a mano con fique, barro y plata. Trabajamos con talleres familiares de Antioquia y pagamos cada pieza a un precio acordado con quien la hace. Aquí se consiguen canastos, tazas, mochilas, aretes en filigrana y velas de soya. Hacemos empaques para regalo sin costo adicional. Abrimos de lunes a sábado de 10:00 a. m. a 7:30 p. m."
+  },
+  {
+   "id": 15,
+   "antes": "Salón Alameda",
+   "nombre": "Salón Pétalo Cobrizo",
+   "barrio": null,
+   "fotos": [
+    7823407,
+    19664877,
+    3997347
+   ],
+   "descripcion": "Un salón de belleza de Itagüí atendido por sus dueñas desde hace nueve años. Hacemos corte, tinte completo y limpieza facial, siempre con una prueba previa de color o de piel. Recomendamos solo los productos que el cabello necesita, sin vender de más. Atendemos de martes a sábado de 9:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 16,
+   "antes": "Club La Fragua",
+   "nombre": "Club La Fragua",
+   "barrio": "Laureles",
+   "fotos": [
+    9944893,
+    3916766,
+    4164765,
+    36090935
+   ],
+   "descripcion": "Un club de barrio con boxeo, pesas y entrenamiento personalizado. Empezó en un garaje con cuatro sacos y hoy recibe desde adolescentes hasta adultos mayores. Tenemos una pequeña tienda de implementos y un puesto de mantenimiento de bicicletas para quienes llegan rodando. Cada persona inicia con una valoración antes de entrenar. Abrimos de lunes a viernes de 5:30 a. m. a 9:00 p. m. y sábados de 7:00 a. m. a 2:00 p. m."
+  },
+  {
+   "id": 17,
+   "antes": "Centro de idiomas Buena Vista",
+   "nombre": "Centro de idiomas Puente Lila",
+   "barrio": null,
+   "fotos": [
+    5226070,
+    9780101,
+    37829287
+   ],
+   "descripcion": "Enseñamos inglés con conversación desde la primera clase y grupos pequeños en Bello. Además ofrecemos refuerzo de matemáticas, Excel para negocios y un taller de fotografía con celular. Los horarios están pensados para quien trabaja o estudia durante el día. Atendemos de lunes a viernes de 4:00 p. m. a 9:00 p. m. y sábados de 8:00 a. m. a 3:00 p. m."
+  },
+  {
+   "id": 18,
+   "antes": "Fotografía Bambú",
+   "nombre": "Fotografía Trípode Alegre",
+   "barrio": "El Poblado",
+   "fotos": [
+    39193816,
+    7383648,
+    30332804
+   ],
+   "descripcion": "Fotografiamos matrimonios, grados y primeras comuniones con un estilo natural, sin poses forzadas. Entregamos las fotos editadas en una semana y ofrecemos decoración con globos y recordatorios personalizados para completar la celebración. Antes del evento visitamos el lugar para planear la luz. Atendemos con cita de lunes a sábado de 9:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 19,
+   "antes": "Contadores El Laurel",
+   "nombre": "Contadores Renglón Azul",
+   "barrio": "Laureles",
+   "fotos": [
+    8099485,
+    14654951,
+    3943727
+   ],
+   "descripcion": "Somos un equipo joven de contadores que atiende a emprendedores que están empezando. Implementamos la facturación electrónica, presentamos la declaración de renta y hacemos planes de presupuesto personal. Una vez al mes dictamos un taller abierto para aprender a leer las cuentas del negocio. Atendemos de lunes a viernes de 8:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 20,
+   "antes": "Panadería Guayacán",
+   "nombre": "Panadería Harina y Luna",
+   "barrio": "Laureles",
+   "fotos": [
+    8633662,
+    30350350,
+    30890566,
+    30427448
+   ],
+   "descripcion": "Horneamos de madrugada para que el barrio desayune con pan recién salido. La receta de la casa viene de la abuela de los dueños y se complementa con arepas de chócolo, torta de zanahoria y café de origen. No usamos mezclas industriales y las tortas se hacen por encargo. Abrimos todos los días de 6:00 a. m. a 8:00 p. m."
+  },
+  {
+   "id": 21,
+   "antes": "Decoración Media Luna",
+   "nombre": "Decoración Media Luna",
+   "barrio": "Laureles",
+   "fotos": [
+    4635231,
+    33792074,
+    19109111
+   ],
+   "descripcion": "Nos encargamos de esos arreglos de la casa que siempre quedan para después. Instalamos cortinas y lámparas, pintamos habitaciones, hacemos plomería menor y fabricamos mesas auxiliares en madera. Damos el precio por escrito antes de empezar y dejamos todo limpio al terminar. Atendemos de lunes a sábado de 8:00 a. m. a 5:00 p. m."
+  },
+  {
+   "id": 22,
+   "antes": "Peluquería canina Río Claro",
+   "nombre": "Peluquería canina Río Claro",
+   "barrio": null,
+   "fotos": [
+    23542061,
+    16544122,
+    4432261,
+    8434641
+   ],
+   "descripcion": "Baño, corte y mimos para perros de todos los tamaños en Bello. Usamos champús suaves y secamos sin ruido fuerte para que la visita no sea un susto. También vendemos concentrado, camas y collares, y organizamos jornadas de vacunación. Atendemos de lunes a sábado de 8:00 a. m. a 5:30 p. m."
+  },
+  {
+   "id": 23,
+   "antes": "Taller El Faro",
+   "nombre": "Taller Dedal Urbano",
+   "barrio": "Laureles",
+   "fotos": [
+    36883230,
+    29222239,
+    4621910,
+    9983579
+   ],
+   "descripcion": "Taller de costura donde se diseña, se corta y se cose en el mismo lugar. Hacemos vestidos estampados, camisas de lino y camisetas de algodón en series cortas para no acumular inventario. También arreglamos prendas y damos nueva vida a las que ya no se usan. Cada pieza lleva el nombre de quien la cosió. Atendemos de lunes a viernes de 9:00 a. m. a 6:00 p. m. y sábados hasta la 1:00 p. m."
+  },
+  {
+   "id": 24,
+   "antes": "Fisioterapia El Molino",
+   "nombre": "Fisioterapia El Molino",
+   "barrio": null,
+   "fotos": [
+    17709394,
+    6628520,
+    6560312
+   ],
+   "descripcion": "Consultorio de Envigado para quienes pasan muchas horas sentados o de pie. Empezamos con una valoración postural y luego proponemos masajes, ejercicios y clases de yoga según cada caso. Le enseñamos a cada persona rutinas cortas para hacer en casa. Atendemos de lunes a viernes de 7:00 a. m. a 7:00 p. m. y sábados de 8:00 a. m. a 12:00 m."
+  },
+  {
+   "id": 25,
+   "antes": "Laboratorio Nogal",
+   "nombre": "Laboratorio Tornillo Azul",
+   "barrio": null,
+   "fotos": [
+    37821110,
+    19599849,
+    4218546
+   ],
+   "descripcion": "Laboratorio técnico en Itagüí especializado en portátiles y recuperación de información. Limpiamos, cambiamos piezas y rescatamos archivos de discos dañados con total reserva. También montamos redes wifi y páginas web para pequeños negocios. Entregamos un informe sencillo de lo que se hizo en cada equipo. Abrimos de lunes a viernes de 8:30 a. m. a 6:30 p. m. y sábados hasta la 1:00 p. m."
+  },
+  {
+   "id": 26,
+   "antes": "Taller Altamira",
+   "nombre": "Taller Altamira",
+   "barrio": "Laureles",
+   "fotos": [
+    6611421,
+    8063803,
+    20304752,
+    7375048
+   ],
+   "descripcion": "Un taller de cerámica abierto al público, donde se ve cómo se moldea y se esmalta cada taza. Con el tiempo sumamos a otras artesanas que traen mochilas, aretes en filigrana, velas e individuales tejidos. Los sábados hay demostraciones gratuitas para quienes quieran conocer el oficio. Abrimos de martes a domingo de 10:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 27,
+   "antes": "Spa Colibrí",
+   "nombre": "Spa Agua Lenta",
+   "barrio": null,
+   "fotos": [
+    35884499,
+    6560308,
+    16678264,
+    36837602
+   ],
+   "descripcion": "Un rincón silencioso en Itagüí para descansar un par de horas. Ofrecemos manicure, tinte, maquillaje para eventos y kits de cuidado capilar con ingredientes suaves. Las citas están espaciadas para que nadie se cruce ni sienta afán. Se puede regalar una sesión con bono. Atendemos de martes a domingo de 9:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 28,
+   "antes": "Club La Floresta",
+   "nombre": "Club Raqueta del Alba",
+   "barrio": null,
+   "fotos": [
+    34015711,
+    37988076,
+    19873680
+   ],
+   "descripcion": "Club deportivo de Itagüí con cancha de tenis, gimnasio y clases de natación. Acompañamos a principiantes y a quienes quieren volver al deporte después de años. Hay entrenamiento personalizado, mensualidades flexibles y servicio de mantenimiento de bicicletas. También vendemos raquetas y guantes con asesoría de los entrenadores. Abrimos todos los días de 5:30 a. m. a 9:00 p. m."
+  },
+  {
+   "id": 29,
+   "antes": "Escuela Tres Ríos",
+   "nombre": "Escuela Tres Ríos",
+   "barrio": "Laureles",
+   "fotos": [
+    30281236,
+    256395,
+    7558112
+   ],
+   "descripcion": "Escuela comunitaria con cursos cortos a precios accesibles. Enseñamos inglés, guitarra, cocina básica y fotografía con celular, además de preparar a jóvenes para el ICFES. La mayoría de los profesores son exalumnos que regresaron a enseñar. Atendemos de lunes a sábado de 8:00 a. m. a 8:00 p. m."
+  },
+  {
+   "id": 30,
+   "antes": "Banquetes Amanecer",
+   "nombre": "Banquetes Mantel de Lino",
+   "barrio": "Laureles",
+   "fotos": [
+    16120244,
+    33104578,
+    37900941,
+    19976278
+   ],
+   "descripcion": "Organizamos celebraciones completas para que los anfitriones también puedan disfrutar. Llevamos mesas y sillas, sonido, decoración con globos, animación infantil y fotografía del evento. Cada cliente tiene una sola persona responsable desde la primera cita hasta el último invitado. Atendemos con cita de lunes a sábado de 9:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 31,
+   "antes": "Asesorías La Esquina",
+   "nombre": "Asesorías La Esquina",
+   "barrio": null,
+   "fotos": [
+    6193131,
+    2882580,
+    261621
+   ],
+   "descripcion": "Una oficina en Envigado para resolver dudas contables sin rodeos. Acompañamos la constitución de empresas, llevamos la contabilidad mensual y preparamos declaraciones de renta. La primera conversación es gratis y sale con una lista clara de lo que hay que hacer. Atendemos de lunes a viernes de 8:00 a. m. a 5:00 p. m."
+  },
+  {
+   "id": 32,
+   "antes": "Pastelería Los Andes",
+   "nombre": "Pastelería Merengue Azul",
+   "barrio": "Laureles",
+   "fotos": [
+    11847639,
+    28965344,
+    5594508,
+    10907006
+   ],
+   "descripcion": "La vitrina de esta pastelería se llena cada mañana con recetas familiares. Nuestra torta de zanahoria es la más pedida y también ofrecemos pan de masa madre, jugos naturales, café y un almuerzo del día. Hacemos tortas por encargo con dos días de anticipación. Abrimos de lunes a sábado de 7:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 33,
+   "antes": "Muebles San Lorenzo",
+   "nombre": "Muebles Roble Manso",
+   "barrio": "El Poblado",
+   "fotos": [
+    6830012,
+    6826759,
+    112474,
+    7195559
+   ],
+   "descripcion": "Ebanistería familiar con tres generaciones trabajando la madera. Hacemos mesas auxiliares y repisas a la medida, y completamos cada espacio con lámparas, cojines e instalación de cortinas. Antes de cortar la primera tabla, mostramos un dibujo con medidas. Nuestros muebles tienen garantía de dos años. Atendemos de lunes a sábado de 9:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 34,
+   "antes": "Guardería El Mirador",
+   "nombre": "Guardería Cola Feliz",
+   "barrio": "El Poblado",
+   "fotos": [
+    25695963,
+    32776848,
+    18436643
+   ],
+   "descripcion": "Un lugar con patio y mucho juego para que las mascotas no pasen el día solas. Tenemos consulta veterinaria, además de camas y collares con placa grabada para que siempre vuelvan a casa. Separamos los grupos por tamaño y carácter, y enviamos reportes a las familias durante el día. Abrimos de lunes a sábado de 7:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 35,
+   "antes": "Confecciones Piedra Blanca",
+   "nombre": "Confecciones Piedra Blanca",
+   "barrio": null,
+   "fotos": [
+    8386651,
+    17293343,
+    6764128
+   ],
+   "descripcion": "Confección de Itagüí con varias décadas de oficio y costureras de la misma cuadra. Hacemos camisas de lino y bolsos tejidos, y arreglamos prendas con entrega en pocos días. Vendemos por unidad y también a tiendas pequeñas. Atendemos de lunes a sábado de 8:00 a. m. a 6:00 p. m."
+  },
+  {
+   "id": 36,
+   "antes": "Centro Girasol",
+   "nombre": "Centro Respira Lento",
+   "barrio": null,
+   "fotos": [
+    38470685,
+    7318664,
+    4325462,
+    37573625
+   ],
+   "descripcion": "Centro de bienestar en Itagüí para recuperar el cuerpo después de largas jornadas. Hacemos valoración postural, sesiones de fisioterapia y masajes relajantes en salas tranquilas. Cada proceso termina con ejercicios sencillos para mantener lo logrado. Atendemos de lunes a sábado de 7:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 37,
+   "antes": "Laboratorio El Portal",
+   "nombre": "Laboratorio El Portal",
+   "barrio": "El Poblado",
+   "fotos": [
+    31884550,
+    19658260,
+    39178037
+   ],
+   "descripcion": "Taller técnico y sala de clases en el mismo lugar. Hacemos mantenimiento de portátiles, recuperación de datos y páginas web, y enseñamos computación básica a personas de cualquier edad. Quien nunca ha usado un computador encuentra aquí paciencia y grupos pequeños. Abrimos de lunes a sábado de 9:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 38,
+   "antes": "Casa Siete Cueros",
+   "nombre": "Casa Siete Cueros",
+   "barrio": "El Poblado",
+   "fotos": [
+    5962645,
+    5963186,
+    4452603
+   ],
+   "descripcion": "Casa de artesanos que empezó con un taller de marroquinería y fue sumando otros oficios. Además del trabajo en cuero, se encuentran cuadros en madera tallada, velas, individuales, mochilas y aretes en filigrana. Se puede visitar el taller y pedir piezas con iniciales. Abrimos de martes a domingo de 10:00 a. m. a 7:00 p. m."
+  },
+  {
+   "id": 39,
+   "antes": "Barbería La Palma",
+   "nombre": "Barbería Bigote Alegre",
+   "barrio": "Laureles",
+   "fotos": [
+    9146943,
+    9703068,
+    3993293
+   ],
+   "descripcion": "Barbería y salón para toda la familia, con música suave y café de cortesía. Arreglamos barba, aplicamos tintes, hacemos manicure, limpieza facial y maquillaje para eventos. Enseñamos a cuidar el corte en casa con productos sencillos. Atendemos de lunes a domingo de 9:00 a. m. a 8:00 p. m."
+  },
+  {
+   "id": 40,
+   "antes": "Club Arrayán",
+   "nombre": "Club Arrayán",
+   "barrio": null,
+   "fotos": [
+    38585485,
+    19073612,
+    40371837
+   ],
+   "descripcion": "Club popular de Bello con clases de natación para niños y adultos a precios de barrio. También tiene zona de pesas, tienda de guantes y balones, y un servicio de mantenimiento de bicicletas. Los entrenadores salieron de las escuelas deportivas del municipio. Abrimos de lunes a sábado de 6:00 a. m. a 8:00 p. m."
+  }
+ ],
+ "productos": {
+  "Pan de masa madre": 35815220,
+  "Café de origen 500 g": 14848712,
+  "Almuerzo del día": 29450678,
+  "Torta de zanahoria": 2612373,
+  "Arepa de chócolo con quesito": 29496087,
+  "Jugo natural en agua": 37214597,
+  "Caja de galletas artesanales": 17517609,
+  "Mochila tejida a mano": 32277863,
+  "Vela aromática de soya": 5933780,
+  "Juego de individuales": 35993313,
+  "Taza de cerámica": 6611426,
+  "Canasto en fique": 28617395,
+  "Cuadro en madera tallada": 19208266,
+  "Aretes en filigrana": 5409533,
+  "Tinte completo": 19664877,
+  "Maquillaje para eventos": 7446413,
+  "Arreglo de barba": 7697711,
+  "Kit de cuidado capilar": 8468153,
+  "Corte de cabello": 3993307,
+  "Limpieza facial": 6560312,
+  "Manicure tradicional": 3631691,
+  "Guantes de boxeo": 6296058,
+  "Raqueta de tenis": 22931878,
+  "Balón de fútbol": 38275739,
+  "Mantenimiento de bicicleta": 10016886,
+  "Entrenamiento personalizado": 3916766,
+  "Mensualidad de gimnasio": 40371837,
+  "Clase de natación": 19073612,
+  "Clase de inglés": 5226070,
+  "Curso de cocina básica": 15611222,
+  "Preparación para el ICFES": 12561284,
+  "Refuerzo de matemáticas": 5184953,
+  "Curso de Excel para negocios": 6193131,
+  "Taller de fotografía con celular": 11189045,
+  "Clase de guitarra": 7558112,
+  "Mesa de postres": 19976278,
+  "Decoración con globos": 14457430,
+  "Recordatorios personalizados": 6634662,
+  "Animación infantil": 11282245,
+  "Fotografía de evento": 11189045,
+  "Alquiler de sonido": 37900941,
+  "Alquiler de mesas y sillas": 8452759,
+  "Taller de finanzas personales": 3943727,
+  "Declaración de renta": 4056856,
+  "Revisión de crédito": 17065743,
+  "Constitución de empresa": 261621,
+  "Asesoría contable mensual": 8099485,
+  "Facturación electrónica": 7567600,
+  "Plan de presupuesto personal": 12955822,
+  "Lámpara colgante": 33792074,
+  "Pintura de habitación": 9222200,
+  "Juego de cojines": 4635231,
+  "Instalación de cortinas": 953400,
+  "Repisa flotante": 19109111,
+  "Arreglo de plomería": 12105083,
+  "Mesa auxiliar en madera": 6934264,
+  "Vacuna antirrábica": 38923401,
+  "Concentrado para perro 8 kg": 8434633,
+  "Collar con placa grabada": 12721119,
+  "Guardería por día": 25695963,
+  "Cama para gato": 16385540,
+  "Baño y corte para perro": 19145882,
+  "Consulta veterinaria": 23542061,
+  "Jean de tiro alto": 6764128,
+  "Bolso tejido": 35264364,
+  "Arreglo de prendas": 9983579,
+  "Camisa de lino": 22441297,
+  "Vestido estampado": 8386651,
+  "Camiseta básica de algodón": 17293343,
+  "Sesión de fisioterapia": 17709394,
+  "Plan mensual de pilates": 37573625,
+  "Consulta de nutrición": 842545,
+  "Meditación guiada": 38470685,
+  "Clase de yoga": 7318664,
+  "Masaje relajante": 35884499,
+  "Valoración postural": 6628520,
+  "Mantenimiento de portátil": 37821110,
+  "Cargador universal para portátil": 37489058,
+  "Instalación de red wifi": 4218546,
+  "Cambio de pantalla de celular": 31884550,
+  "Página web para negocio": 34803986,
+  "Recuperación de datos": 19599849,
+  "Clase de computación básica": 39178037
+ },
+ "autores": {
+  "112474": "mali",
+  "256395": "pixabay",
+  "261621": "pixabay",
+  "842545": "valeriya",
+  "894695": "juanpphotoandvideo",
+  "953400": "dominikagregus",
+  "2612373": "chudesabyvaut-1351350",
+  "2882580": "onurccn",
+  "3631691": "suzyhazelwood",
+  "3916766": "olly",
+  "3943727": "cottonbro",
+  "3992855": "cottonbro",
+  "3993293": "cottonbro",
+  "3993307": "cottonbro",
+  "3997347": "cottonbro",
+  "4164765": "ivan-s",
+  "4218546": "verma-harshil",
+  "4325462": "cottonbro",
+  "4432261": "mathew-coulton-2358287",
+  "4441792": "infoniqa-2914389",
+  "4452603": "vlada-karpovich",
+  "4621910": "cottonbro",
+  "4635231": "jonathanborba",
+  "5124874": "cottonbro",
+  "5184953": "cottonbro",
+  "5226070": "ibnulharezmi",
+  "5409533": "visk-clicks-3478024",
+  "5418892": "arina-krasnikova",
+  "5594508": "leeloothefirst",
+  "5933780": "roman-odintsov",
+  "5962645": "anntarazevich",
+  "5963186": "anntarazevich",
+  "6296058": "pavel-danilyuk",
+  "6560308": "anntarazevich",
+  "6560312": "anntarazevich",
+  "6611187": "yankrukov",
+  "6611421": "yankrukov",
+  "6611426": "yankrukov",
+  "6628520": "koolshooters",
+  "6634662": "vlada-karpovich",
+  "6758245": "artbovich",
+  "6764128": "cottonbro",
+  "6826759": "tima-miroshnichenko",
+  "6830012": "tima-miroshnichenko",
+  "6934264": "artbovich",
+  "6989087": "kunnojayson",
+  "7195559": "artbovich",
+  "7318664": "mart-production",
+  "7375048": "esra-kocyigit-42710429",
+  "7383648": "hcdigital",
+  "7446413": "laarkstudio",
+  "7558112": "ravinepz",
+  "7567600": "tima-miroshnichenko",
+  "7679757": "mart-production",
+  "7697711": "rdne",
+  "7823407": "marina-chocobar-1740112",
+  "7991937": "annushka-ahuja",
+  "8063803": "roman-odintsov",
+  "8386651": "ron-lach",
+  "8408550": "sarahdorweiler",
+  "8434633": "mart-production",
+  "8434641": "mart-production",
+  "8452759": "peterfazekas",
+  "8468153": "n-voitkevich",
+  "8633662": "lauren-heaton-76106296",
+  "8867166": "cristian-rojas",
+  "9146943": "gromakova-92378617",
+  "9222200": "cottonbro",
+  "9290601": "alexandra-kollstrem-77751824",
+  "9678715": "iodum",
+  "9703068": "jennifer-latham-111152893",
+  "9780101": "phortizz",
+  "9983579": "88107820",
+  "10016886": "hn_alfikri-103748655",
+  "10907006": "iryna-ivanova",
+  "11189045": "lucaspezeta",
+  "11282245": "vidalbalielojrfotografia",
+  "11847639": "stayhereforu",
+  "11911863": "matreding",
+  "12105083": "nishantaneja",
+  "12561284": "an-tran-31930396",
+  "12721119": "konrads-photo",
+  "12955822": "freestockpro",
+  "13926769": "loquellano",
+  "14457430": "vidalbalielojrfotografia",
+  "14654951": "hikmet-41699399",
+  "14848712": "bariisdn",
+  "15611222": "nadin-sh-78971847",
+  "15801126": "arya-bajra-283675810",
+  "16120244": "bertellifotografia",
+  "16385540": "gammel",
+  "16544122": "kevin-yang-538938021",
+  "16678264": "ou-kei-549196126",
+  "16682442": "navidsohrabi",
+  "17065743": "jakubzerdzicki",
+  "17293343": "nguyendesigner",
+  "17517609": "ali-dashti-506667798",
+  "17709394": "sila-ylmaz-236008191",
+  "18436643": "miami302",
+  "18702612": "thefullonmonet",
+  "19073612": "jan-van-der-wolf-11680885",
+  "19109111": "avery-arwood-713708816",
+  "19145874": "goochie-poochie",
+  "19145877": "goochie-poochie",
+  "19145882": "goochie-poochie",
+  "19208266": "beyzaa-279977530",
+  "19599849": "wwarby",
+  "19658260": "wwarby",
+  "19664877": "kawerodriguess",
+  "19873680": "arda-kaykisiz-672105204",
+  "19976278": "karina-benfica-538943838",
+  "20304752": "zh-ru",
+  "22441297": "dayong-tien-681073045",
+  "22938072": "tallitamaynara",
+  "23542061": "mladenscekic",
+  "24822021": "ahimsa",
+  "25695963": "barnabas-davoti-31615494",
+  "28617395": "rajibgfx",
+  "28965344": "clement-proust",
+  "29222239": "hellram",
+  "29450678": "nano-erdozain-120534369",
+  "29496087": "nano-erdozain-120534369",
+  "29681893": "akoonie",
+  "29833130": "rumpy",
+  "30281236": "oliver-hung-265548590",
+  "30332804": "israyosoy",
+  "30350350": "anthony-rahayel-125801377",
+  "30427448": "kunal-lakhotia",
+  "30561628": "madkourfujifilm",
+  "30890566": "travel-with-lenses-734723610",
+  "31862950": "fotografia-lui-vlad-1445510816",
+  "31884550": "fotografia-lui-vlad-1445510816",
+  "32277863": "warrecreates",
+  "32776848": "gerardo-pantoja-826939143",
+  "33104578": "nguy-n-ti-n-th-nh-2150376175",
+  "33792074": "ali-askar-2154757026",
+  "34015711": "shotbysylvesterabigail",
+  "34514242": "found-ghi-2156772983",
+  "34667143": "sayeedxchowdhury",
+  "34803986": "dkomov",
+  "35264364": "go-home-tomorrow-2151833773",
+  "35884499": "marine-fougere-2159237528",
+  "35993313": "nati-87264186",
+  "36090935": "paulina-klys-2155606640",
+  "36618476": "bastian-wardana-2160289413",
+  "36650154": "valentin-ivantsov-2154772556",
+  "36837602": "aiseleer-566178897",
+  "36863705": "evandro",
+  "36883230": "andranik-paradyan-839754778",
+  "37214597": "murat-bilgin-2160976514",
+  "37489058": "jobelle-meana-2154582150",
+  "37573625": "2161061434",
+  "37821110": "oelnbod",
+  "37829287": "jessica-olivella-555697728",
+  "37900941": "jonathanborba",
+  "37988076": "krissees-2152442428",
+  "38275739": "jomon-kollannoor-337112572",
+  "38470685": "zulema-laborde-2162773830",
+  "38585485": "miguel-guerra-3200843",
+  "38923401": "damir",
+  "39178037": "iohichu",
+  "39193816": "andreadevillier",
+  "40371837": "724211268",
+  "22931878": "mutecevvil",
+  "35815220": "mrgajowy3",
+  "8099485": "ds-stories",
+  "6193131": "ekaterina-bolovtsova",
+  "9944893": "koolshooters",
+  "4056856": "suzyhazelwood"
+ }
+}

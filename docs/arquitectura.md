@@ -263,12 +263,12 @@ construirlo, y son las que más fácil se preguntan en una revisión.
   publica `/v3/api-docs` y `/swagger-ui.html` a partir de los propios
   controladores: las rutas, los parámetros, los cuerpos y las reglas de Bean
   Validation de cada DTO salen del código. La alternativa era un `openapi.yaml` a
-  mano, y habría sido un **segundo sitio donde decir lo mismo**, con 67
+  mano, y habría sido un **segundo sitio donde decir lo mismo**, con 69
   operaciones que se quedarían atrás. `scripts/exportar-openapi.sh` lo vuelca a
   `openapi.json`, en la raíz, que es lo que pide la entrega final.
 
   Hasta la entrega final **los métodos no llevaban ni una anotación de Swagger**,
-  y el documento declaraba `200` en las 67 operaciones y el candado sobre todas,
+  y el documento declaraba `200` en las operaciones y el candado sobre todas,
   también las públicas. La rúbrica de la final exige otra cosa: cada operación
   con **todos** sus códigos, los de error incluidos, y la seguridad aplicada en
   las protegidas. Eso no está en ninguna firma, así que se anota, repartido así:
