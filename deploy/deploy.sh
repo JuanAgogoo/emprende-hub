@@ -24,7 +24,7 @@ fi
 rsync -az --delete -e "${SSH[*]}" \
   --exclude .git --exclude .github --exclude .claude --exclude .gradle \
   --exclude node_modules --exclude build --exclude dist --exclude uploads \
-  --exclude .env --exclude backups \
+  --exclude .env --exclude backups --exclude fotos-demo \
   ./ "$DESTINO:$CARPETA/"
 
 "${SSH[@]}" "$DESTINO" "cd '$CARPETA' && docker compose -f docker-compose.prod.yml up -d --build --remove-orphans && docker compose -f docker-compose.prod.yml ps"
