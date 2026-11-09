@@ -36,7 +36,7 @@ class ConsultaControllerTest extends ControllerTestBase {
         return new ConsultaResponse(9L, "Reserva para 4 personas",
                 "¿Tienen mesa el sábado a las 8?", "Carlos Rueda", "carlos@gmail.com",
                 leida, Instant.parse("2026-08-20T10:00:00Z"),
-                leida ? Instant.parse("2026-08-20T12:00:00Z") : null);
+                leida ? Instant.parse("2026-08-20T12:00:00Z") : null, null, null);
     }
 
     private String cuerpo(String asunto, String mensaje) {
@@ -104,6 +104,62 @@ class ConsultaControllerTest extends ControllerTestBase {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
                         "No tiene sentido escribirte a tu propio buzón"));
+    }
+
+    @Test
+    @DisplayName("POST sin haber calificado el negocio devuelve 400 con su motivo (D4)")
+    void enviar_sinCalificar_devuelve400() throws Exception {
+        when(consultaService.enviar(any(), eq(7L), any())).thenThrow(new ReglaDeNegocioException(
+                "Para escribirle al negocio primero tienes que calificarlo"));
+
+        mockMvc.perform(post("/api/v1/negocios/7/consultas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(cuerpo("Hola", "¿Hacen domicilios?")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(
+                        "Para escribirle al negocio primero tienes que calificarlo"));
+    }
+
+    // ---------- Responder (D2) ----------
+
+    @Test
+    @DisplayName("PATCH de respuesta devuelve la consulta con lo que contestó el dueño")
+    void responder_devuelve200() throws Exception {
+        when(consultaService.responder(any(), eq(9L), any())).thenReturn(new ConsultaResponse(
+                9L, "Reserva", "¿Tienen mesa?", "Carlos Rueda", "carlos@gmail.com", true,
+                Instant.parse("2026-08-20T10:00:00Z"), Instant.parse("2026-08-20T12:00:00Z"),
+                "Sí, a las 8", Instant.parse("2026-08-20T12:00:00Z")));
+
+        mockMvc.perform(patch("/api/v1/negocios/mio/consultas/9/respuesta")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"respuesta\": \"Sí, a las 8\" }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.respuesta").value("Sí, a las 8"))
+                .andExpect(jsonPath("$.leida").value(true));
+    }
+
+    @Test
+    @DisplayName("PATCH de respuesta vacía devuelve 400 con la clave del campo")
+    void responder_vacia_devuelve400() throws Exception {
+        mockMvc.perform(patch("/api/v1/negocios/mio/consultas/9/respuesta")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"respuesta\": \"\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.respuesta").exists());
+    }
+
+    // ---------- Mis consultas ----------
+
+    @Test
+    @DisplayName("GET de mis consultas devuelve la lista del historial del chat")
+    void misConsultas_devuelveLista() throws Exception {
+        when(consultaService.misConsultas(any(), eq(7L)))
+                .thenReturn(List.of(consultaDePrueba(false)));
+
+        mockMvc.perform(get("/api/v1/negocios/7/consultas/mias"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].asunto").value("Reserva para 4 personas"))
+                .andExpect(jsonPath("$.length()").value(1));
     }
 
     // ---------- Leer el buzón ----------

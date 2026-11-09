@@ -1,6 +1,7 @@
 package com.emprendehub.repository;
 
 import com.emprendehub.model.Consulta;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,4 +43,11 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
      */
     @EntityGraph(attributePaths = "cliente")
     Optional<Consulta> findByIdAndNegocioId(Long id, Long negocioId);
+
+    /**
+     * Lo que una persona le ha escrito a un negocio, de la más antigua a la más
+     * reciente: es el orden en que se lee una conversación.
+     */
+    @EntityGraph(attributePaths = "cliente")
+    List<Consulta> findByNegocioIdAndClienteIdOrderByFechaEnvioAsc(Long negocioId, Long clienteId);
 }

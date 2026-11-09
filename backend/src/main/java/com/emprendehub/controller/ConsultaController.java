@@ -2,10 +2,12 @@ package com.emprendehub.controller;
 
 import com.emprendehub.dto.ConsultaResponse;
 import com.emprendehub.dto.EnviarConsultaRequest;
+import com.emprendehub.dto.ResponderConsultaRequest;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.service.ConsultaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -55,6 +57,16 @@ public class ConsultaController {
     }
 
     /**
+     * Lo que quien tiene la sesión le ha escrito a ese negocio, de la más
+     * antigua a la más reciente. Es el historial de la vista de chat.
+     */
+    @GetMapping("/{negocioId}/consultas/mias")
+    public List<ConsultaResponse> misConsultas(@AuthenticationPrincipal Usuario usuario,
+                                               @PathVariable Long negocioId) {
+        return consultaService.misConsultas(usuario, negocioId);
+    }
+
+    /**
      * El buzón propio. Con {@code ?leida=false} llegan solo las pendientes, y
      * el {@code totalElements} de esa página es el aviso del panel.
      */
@@ -64,6 +76,14 @@ public class ConsultaController {
             @RequestParam(required = false) Boolean leida,
             @PageableDefault(size = 20) Pageable pageable) {
         return consultaService.buzon(usuario, leida, pageable);
+    }
+
+    /** Responde una consulta del buzón propio, o corrige la respuesta (D2). */
+    @PatchMapping("/mio/consultas/{id}/respuesta")
+    public ConsultaResponse responder(@AuthenticationPrincipal Usuario usuario,
+                                      @PathVariable Long id,
+                                      @Valid @RequestBody ResponderConsultaRequest peticion) {
+        return consultaService.responder(usuario, id, peticion);
     }
 
     /** Marca como leída, o la devuelve al montón con {@code ?leida=false} (D3). */

@@ -18,12 +18,11 @@ import lombok.Setter;
  * Mensaje de un cliente al dueño de un negocio (D1).
  *
  * <p>Vive en un <strong>buzón dentro de la plataforma</strong>, no en un correo:
- * la aplicación no envía ninguno (I1). El dueño lo lee en su panel y responde
- * por fuera, con la dirección que el buzón le enseña (D2).
+ * la aplicación no envía ninguno (I1). El dueño lo lee en su panel y lo
+ * responde desde ahí (D2); el cliente ve la respuesta en su chat con el negocio.
  *
- * <p>No hay campo de respuesta ni hilo de conversación. Es un buzón de entrada,
- * y esa limitación es deliberada: montar mensajería de ida y vuelta sin correos
- * habría exigido que las dos partes entraran a mirar.
+ * <p>Cada mensaje del cliente tiene como mucho una respuesta del dueño, que puede
+ * corregir. Es una conversación de pregunta y respuesta, no un chat libre.
  *
  * <p><strong>Esta pantalla no existe en el prototipo</strong>, que se limitaba a
  * enseñar un aviso de «mensaje enviado» y no guardaba nada.
@@ -76,6 +75,12 @@ public class Consulta {
     /** Cuándo la abrió el dueño. Vuelve a nulo si la marca como no leída. */
     private Instant fechaLectura;
 
+    /** Lo que contesta el dueño (D2). Nula mientras no haya respondido. */
+    @Column(length = MAXIMO_MENSAJE)
+    private String respuesta;
+
+    private Instant fechaRespuesta;
+
     public Consulta(Negocio negocio, Usuario cliente, String asunto, String mensaje) {
         this.negocio = negocio;
         this.cliente = cliente;
@@ -95,5 +100,17 @@ public class Consulta {
     public void marcarLectura(boolean leida) {
         this.leida = leida;
         this.fechaLectura = leida ? Instant.now() : null;
+    }
+
+    /**
+     * Guarda la respuesta del dueño, o la sustituye si la corrige.
+     *
+     * <p>Responder implica haberla leído: una consulta contestada que siguiera
+     * marcada como pendiente no diría la verdad.
+     */
+    public void responder(String texto) {
+        this.respuesta = texto;
+        this.fechaRespuesta = Instant.now();
+        if (!this.leida) marcarLectura(true);
     }
 }

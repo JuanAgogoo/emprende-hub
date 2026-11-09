@@ -2,6 +2,7 @@ package com.emprendehub.service;
 
 import com.emprendehub.dto.ConsultaResponse;
 import com.emprendehub.dto.EnviarConsultaRequest;
+import com.emprendehub.dto.ResponderConsultaRequest;
 import com.emprendehub.exception.ReglaDeNegocioException;
 import com.emprendehub.exception.ResourceNotFoundException;
 import com.emprendehub.model.Consulta;
@@ -10,6 +11,8 @@ import com.emprendehub.model.TipoNotificacion;
 import com.emprendehub.model.Usuario;
 import com.emprendehub.repository.ConsultaRepository;
 import com.emprendehub.repository.NegocioRepository;
+import com.emprendehub.repository.OpinionRepository;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,10 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>D1</strong> — el mensaje se guarda dentro de la plataforma y el
  *       dueño lo lee en su panel. No sale ningún correo, porque la aplicación no
  *       envía ninguno (I1).</li>
- *   <li><strong>D2</strong> — no se responde desde aquí. El buzón enseña el
- *       correo del cliente y la conversación sigue fuera.</li>
+ *   <li><strong>D2</strong> — el dueño responde desde el buzón y el cliente lo
+ *       lee en su chat. El buzón enseña además el correo del cliente.</li>
  *   <li><strong>D3</strong> — leídas y no leídas, que es lo que convierte el
  *       buzón en una lista de pendientes y no en un archivo.</li>
+ *   <li><strong>D4</strong> — solo escribe quien ya calificó el negocio. Así el
+ *       buzón recibe mensajes de clientes reales y no de cualquiera con cuenta.</li>
  * </ul>
  *
  * <p>Contactar exige sesión, así que quien pregunta siempre tiene nombre y
@@ -39,13 +44,16 @@ public class ConsultaService {
     private final ConsultaRepository consultaRepository;
     private final NegocioRepository negocioRepository;
     private final NotificacionService notificacionService;
+    private final OpinionRepository opinionRepository;
 
     public ConsultaService(ConsultaRepository consultaRepository,
                            NegocioRepository negocioRepository,
-                           NotificacionService notificacionService) {
+                           NotificacionService notificacionService,
+                           OpinionRepository opinionRepository) {
         this.consultaRepository = consultaRepository;
         this.negocioRepository = negocioRepository;
         this.notificacionService = notificacionService;
+        this.opinionRepository = opinionRepository;
     }
 
     /**
@@ -64,6 +72,10 @@ public class ConsultaService {
         if (negocio.getUsuario().getId().equals(cliente.getId())) {
             throw new ReglaDeNegocioException(
                     "No tiene sentido escribirte a tu propio buzón");
+        }
+        if (!opinionRepository.existsByNegocioIdAndAutorId(negocioId, cliente.getId())) {
+            throw new ReglaDeNegocioException(
+                    "Para escribirle al negocio primero tienes que calificarlo");
         }
 
         Consulta consulta = consultaRepository.save(new Consulta(
@@ -110,6 +122,39 @@ public class ConsultaService {
         return aRespuesta(consultaRepository.save(consulta));
     }
 
+    /**
+     * Lo que quien pregunta le ha escrito a un negocio, en orden de conversación.
+     *
+     * <p>Cada persona ve solo lo suyo: el filtro por cliente va en la consulta,
+     * no en un paso posterior que alguien pueda olvidar.
+     */
+    public List<ConsultaResponse> misConsultas(Usuario cliente, Long negocioId) {
+        negocioRepository.buscarVisibleEnDirectorio(negocioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Negocio", negocioId));
+        return consultaRepository
+                .findByNegocioIdAndClienteIdOrderByFechaEnvioAsc(negocioId, cliente.getId())
+                .stream().map(this::aRespuesta).toList();
+    }
+
+    /**
+     * El dueño responde una consulta de su buzón, o corrige su respuesta (D2).
+     *
+     * <p>Solo se encuentra la consulta desde el buzón al que pertenece: nadie
+     * responde por el negocio de otro.
+     */
+    @Transactional
+    public ConsultaResponse responder(Usuario solicitante, Long consultaId,
+                                      ResponderConsultaRequest peticion) {
+        Negocio negocio = buscarElMio(solicitante);
+        Consulta consulta = consultaRepository
+                .findByIdAndNegocioId(consultaId, negocio.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Consulta", consultaId));
+
+        consulta.responder(peticion.respuesta().trim());
+
+        return aRespuesta(consultaRepository.save(consulta));
+    }
+
     // ---------- Apoyo ----------
 
     private Negocio buscarElMio(Usuario solicitante) {
@@ -123,6 +168,7 @@ public class ConsultaService {
         return new ConsultaResponse(consulta.getId(), consulta.getAsunto(),
                 consulta.getMensaje(), consulta.getCliente().getNombre(),
                 consulta.getCliente().getCorreo(), consulta.isLeida(),
-                consulta.getFechaEnvio(), consulta.getFechaLectura());
+                consulta.getFechaEnvio(), consulta.getFechaLectura(),
+                consulta.getRespuesta(), consulta.getFechaRespuesta());
     }
 }
