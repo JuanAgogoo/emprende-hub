@@ -16,14 +16,14 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Barbería Navaja Serena | `demo-n03-3-7697711.jpg` | Pexels | rdne | <https://www.pexels.com/photo/7697711/> |
 | Tienda deportiva La Candelaria | `demo-n04-1-36618476.jpg` | Pexels | bastian-wardana-2160289413 | <https://www.pexels.com/photo/36618476/> |
 | Tienda deportiva La Candelaria | `demo-n04-2-7991937.jpg` | Pexels | annushka-ahuja | <https://www.pexels.com/photo/7991937/> |
-| Tienda deportiva La Candelaria | `demo-n04-3-20470948.jpg` | Pexels | elchinoportrait | <https://www.pexels.com/photo/20470948/> |
+| Tienda deportiva La Candelaria | `demo-n04-3-22931878.jpg` | Pexels | mutecevvil | <https://www.pexels.com/photo/22931878/> |
 | Academia Lápiz Naranja | `demo-n05-1-36650154.jpg` | Pexels | valentin-ivantsov-2154772556 | <https://www.pexels.com/photo/36650154/> |
 | Academia Lápiz Naranja | `demo-n05-2-12561284.jpg` | Pexels | an-tran-31930396 | <https://www.pexels.com/photo/12561284/> |
 | Academia Lápiz Naranja | `demo-n05-3-5124874.jpg` | Pexels | cottonbro | <https://www.pexels.com/photo/5124874/> |
 | Fotografía Luz de Guadua | `demo-n06-1-4441792.jpg` | Pexels | infoniqa-2914389 | <https://www.pexels.com/photo/4441792/> |
 | Fotografía Luz de Guadua | `demo-n06-2-8452759.jpg` | Pexels | peterfazekas | <https://www.pexels.com/photo/8452759/> |
 | Fotografía Luz de Guadua | `demo-n06-3-6989087.jpg` | Pexels | kunnojayson | <https://www.pexels.com/photo/6989087/> |
-| Oficina contable Ábaco Verde | `demo-n07-1-33175667.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175667/> |
+| Oficina contable Ábaco Verde | `demo-n07-1-4056856.jpg` | Pexels | suzyhazelwood | <https://www.pexels.com/photo/4056856/> |
 | Oficina contable Ábaco Verde | `demo-n07-2-17065743.jpg` | Pexels | jakubzerdzicki | <https://www.pexels.com/photo/17065743/> |
 | Oficina contable Ábaco Verde | `demo-n07-3-8408550.jpg` | Pexels | sarahdorweiler | <https://www.pexels.com/photo/8408550/> |
 | Café Cerro Tostado | `demo-n08-1-13926769.jpg` | Pexels | loquellano | <https://www.pexels.com/photo/13926769/> |
@@ -50,7 +50,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Salón Pétalo Cobrizo | `demo-n15-1-7823407.jpg` | Pexels | marina-chocobar-1740112 | <https://www.pexels.com/photo/7823407/> |
 | Salón Pétalo Cobrizo | `demo-n15-2-19664877.jpg` | Pexels | kawerodriguess | <https://www.pexels.com/photo/19664877/> |
 | Salón Pétalo Cobrizo | `demo-n15-3-3997347.jpg` | Pexels | cottonbro | <https://www.pexels.com/photo/3997347/> |
-| Club La Fragua | `demo-n16-1-7991943.jpg` | Pexels | annushka-ahuja | <https://www.pexels.com/photo/7991943/> |
+| Club La Fragua | `demo-n16-1-9944893.jpg` | Pexels | koolshooters | <https://www.pexels.com/photo/9944893/> |
 | Club La Fragua | `demo-n16-2-3916766.jpg` | Pexels | olly | <https://www.pexels.com/photo/3916766/> |
 | Club La Fragua | `demo-n16-3-4164765.jpg` | Pexels | ivan-s | <https://www.pexels.com/photo/4164765/> |
 | Club La Fragua | `demo-n16-4-36090935.jpg` | Pexels | paulina-klys-2155606640 | <https://www.pexels.com/photo/36090935/> |
@@ -60,7 +60,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Fotografía Trípode Alegre | `demo-n18-1-39193816.jpg` | Pexels | andreadevillier | <https://www.pexels.com/photo/39193816/> |
 | Fotografía Trípode Alegre | `demo-n18-2-7383648.jpg` | Pexels | hcdigital | <https://www.pexels.com/photo/7383648/> |
 | Fotografía Trípode Alegre | `demo-n18-3-30332804.jpg` | Pexels | israyosoy | <https://www.pexels.com/photo/30332804/> |
-| Contadores Renglón Azul | `demo-n19-1-33175673.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175673/> |
+| Contadores Renglón Azul | `demo-n19-1-8099485.jpg` | Pexels | ds-stories | <https://www.pexels.com/photo/8099485/> |
 | Contadores Renglón Azul | `demo-n19-2-14654951.jpg` | Pexels | hikmet-41699399 | <https://www.pexels.com/photo/14654951/> |
 | Contadores Renglón Azul | `demo-n19-3-3943727.jpg` | Pexels | cottonbro | <https://www.pexels.com/photo/3943727/> |
 | Panadería Harina y Luna | `demo-n20-1-8633662.jpg` | Pexels | lauren-heaton-76106296 | <https://www.pexels.com/photo/8633662/> |
@@ -102,7 +102,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Banquetes Mantel de Lino | `demo-n30-2-33104578.jpg` | Pexels | nguy-n-ti-n-th-nh-2150376175 | <https://www.pexels.com/photo/33104578/> |
 | Banquetes Mantel de Lino | `demo-n30-3-37900941.jpg` | Pexels | jonathanborba | <https://www.pexels.com/photo/37900941/> |
 | Banquetes Mantel de Lino | `demo-n30-4-19976278.jpg` | Pexels | karina-benfica-538943838 | <https://www.pexels.com/photo/19976278/> |
-| Asesorías La Esquina | `demo-n31-1-33175669.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175669/> |
+| Asesorías La Esquina | `demo-n31-1-6193131.jpg` | Pexels | ekaterina-bolovtsova | <https://www.pexels.com/photo/6193131/> |
 | Asesorías La Esquina | `demo-n31-2-2882580.jpg` | Pexels | onurccn | <https://www.pexels.com/photo/2882580/> |
 | Asesorías La Esquina | `demo-n31-3-261621.jpg` | Pexels | pixabay | <https://www.pexels.com/photo/261621/> |
 | Pastelería Merengue Azul | `demo-n32-1-11847639.jpg` | Pexels | stayhereforu | <https://www.pexels.com/photo/11847639/> |
@@ -135,7 +135,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Club Arrayán | `demo-n40-1-38585485.jpg` | Pexels | miguel-guerra-3200843 | <https://www.pexels.com/photo/38585485/> |
 | Club Arrayán | `demo-n40-2-19073612.jpg` | Pexels | jan-van-der-wolf-11680885 | <https://www.pexels.com/photo/19073612/> |
 | Club Arrayán | `demo-n40-3-40371837.jpg` | Pexels | 724211268 | <https://www.pexels.com/photo/40371837/> |
-| Producto: Pan de masa madre | `demo-p-36202913.jpg` | Pexels | eceebrarr | <https://www.pexels.com/photo/36202913/> |
+| Producto: Pan de masa madre | `demo-p-35815220.jpg` | Pexels | mrgajowy3 | <https://www.pexels.com/photo/35815220/> |
 | Producto: Café de origen 500 g | `demo-p-14848712.jpg` | Pexels | bariisdn | <https://www.pexels.com/photo/14848712/> |
 | Producto: Almuerzo del día | `demo-p-29450678.jpg` | Pexels | nano-erdozain-120534369 | <https://www.pexels.com/photo/29450678/> |
 | Producto: Torta de zanahoria | `demo-p-2612373.jpg` | Pexels | chudesabyvaut-1351350 | <https://www.pexels.com/photo/2612373/> |
@@ -157,7 +157,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Producto: Limpieza facial | `demo-p-6560312.jpg` | Pexels | anntarazevich | <https://www.pexels.com/photo/6560312/> |
 | Producto: Manicure tradicional | `demo-p-3631691.jpg` | Pexels | suzyhazelwood | <https://www.pexels.com/photo/3631691/> |
 | Producto: Guantes de boxeo | `demo-p-6296058.jpg` | Pexels | pavel-danilyuk | <https://www.pexels.com/photo/6296058/> |
-| Producto: Raqueta de tenis | `demo-p-20470948.jpg` | Pexels | elchinoportrait | <https://www.pexels.com/photo/20470948/> |
+| Producto: Raqueta de tenis | `demo-p-22931878.jpg` | Pexels | mutecevvil | <https://www.pexels.com/photo/22931878/> |
 | Producto: Balón de fútbol | `demo-p-38275739.jpg` | Pexels | jomon-kollannoor-337112572 | <https://www.pexels.com/photo/38275739/> |
 | Producto: Mantenimiento de bicicleta | `demo-p-10016886.jpg` | Pexels | hn_alfikri-103748655 | <https://www.pexels.com/photo/10016886/> |
 | Producto: Entrenamiento personalizado | `demo-p-3916766.jpg` | Pexels | olly | <https://www.pexels.com/photo/3916766/> |
@@ -167,7 +167,7 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Producto: Curso de cocina básica | `demo-p-15611222.jpg` | Pexels | nadin-sh-78971847 | <https://www.pexels.com/photo/15611222/> |
 | Producto: Preparación para el ICFES | `demo-p-12561284.jpg` | Pexels | an-tran-31930396 | <https://www.pexels.com/photo/12561284/> |
 | Producto: Refuerzo de matemáticas | `demo-p-5184953.jpg` | Pexels | cottonbro | <https://www.pexels.com/photo/5184953/> |
-| Producto: Curso de Excel para negocios | `demo-p-33175669.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175669/> |
+| Producto: Curso de Excel para negocios | `demo-p-6193131.jpg` | Pexels | ekaterina-bolovtsova | <https://www.pexels.com/photo/6193131/> |
 | Producto: Taller de fotografía con celular | `demo-p-11189045.jpg` | Pexels | lucaspezeta | <https://www.pexels.com/photo/11189045/> |
 | Producto: Clase de guitarra | `demo-p-7558112.jpg` | Pexels | ravinepz | <https://www.pexels.com/photo/7558112/> |
 | Producto: Mesa de postres | `demo-p-19976278.jpg` | Pexels | karina-benfica-538943838 | <https://www.pexels.com/photo/19976278/> |
@@ -178,10 +178,10 @@ Fotos de [Pexels](https://www.pexels.com/license/), de uso libre y sin atribuci�
 | Producto: Alquiler de sonido | `demo-p-37900941.jpg` | Pexels | jonathanborba | <https://www.pexels.com/photo/37900941/> |
 | Producto: Alquiler de mesas y sillas | `demo-p-8452759.jpg` | Pexels | peterfazekas | <https://www.pexels.com/photo/8452759/> |
 | Producto: Taller de finanzas personales | `demo-p-3943727.jpg` | Pexels | cottonbro | <https://www.pexels.com/photo/3943727/> |
-| Producto: Declaración de renta | `demo-p-33175667.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175667/> |
+| Producto: Declaración de renta | `demo-p-4056856.jpg` | Pexels | suzyhazelwood | <https://www.pexels.com/photo/4056856/> |
 | Producto: Revisión de crédito | `demo-p-17065743.jpg` | Pexels | jakubzerdzicki | <https://www.pexels.com/photo/17065743/> |
 | Producto: Constitución de empresa | `demo-p-261621.jpg` | Pexels | pixabay | <https://www.pexels.com/photo/261621/> |
-| Producto: Asesoría contable mensual | `demo-p-33175673.jpg` | Pexels | bia-limova-1908542654 | <https://www.pexels.com/photo/33175673/> |
+| Producto: Asesoría contable mensual | `demo-p-8099485.jpg` | Pexels | ds-stories | <https://www.pexels.com/photo/8099485/> |
 | Producto: Facturación electrónica | `demo-p-7567600.jpg` | Pexels | tima-miroshnichenko | <https://www.pexels.com/photo/7567600/> |
 | Producto: Plan de presupuesto personal | `demo-p-12955822.jpg` | Pexels | freestockpro | <https://www.pexels.com/photo/12955822/> |
 | Producto: Lámpara colgante | `demo-p-33792074.jpg` | Pexels | ali-askar-2154757026 | <https://www.pexels.com/photo/33792074/> |
